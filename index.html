@@ -1,0 +1,263 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Meta Data -->
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Raleway:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+      rel="stylesheet" />
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ"
+      crossorigin="anonymous" />
+    <!-- Prompt Library CSS -->
+    <link rel="stylesheet" href="generator.css" />
+    <title>AI Prompts</title>
+  </head>
+
+  <body>
+    <!-- Nav -->
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark" aria-label="home-navbar">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">AI Prompt Library</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#home-navbar"
+          aria-controls="home-navbar"
+          aria-expanded="false"
+          aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="home-navbar">
+          <ul class="navbar-nav me-auto mb-2 mb-md-0">
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="../../index.html">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="../../library.html">Library</a>
+            </li>
+          </ul>
+          <form role="search">
+            <input class="form-control" type="search" placeholder="Search" aria-label="Search" />
+          </form>
+        </div>
+      </div>
+    </nav>
+    <!-- Prompt Generator-->
+    <div class="background-box border border-dark border-3">
+      <div class="prompt-box">
+        <h1>Pembuat Penilaian</h1>
+        <!-- Explain Button -->
+        <button type="button" class="exp-btn enabled hover" data-bs-toggle="modal" data-bs-target="#">
+          Contoh
+        </button>
+        <!-- Explanation Modal -->
+        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body p-0">
+                <div class="m-0">
+                  <h4 class="text-light fw-bold bg-success py-2 m-0 text-center">Assessment Plan Generator:</h4>
+                  <p class="p-3 bg-dark text-light m-0">
+                    Generate a custom AI prompt tailored to your educational requirements! This form helps you create
+                    prompts for designing various assessments, including quizzes, exit tickets, tests, and more,
+                    specific to your classroom needs.
+                  </p>
+                  <h4 class="text-light fw-bold bg-success py-2 m-0 text-center">Instructions:</h4>
+                  <div class="p-3">
+                    <ol>
+                      <li>Customize the prompt filling out the form</li>
+                      <li>Click "Generate Prompt"</li>
+                      <li>Wait for the unique prompt to generate</li>
+                      <li>Click "Copy Prompt"</li>
+                      <li>Paste the prompt into ChatGPT</li>
+                      <li>See the results!</li>
+                      <li>
+                        Type
+                        <span class="fw-bold text-success">"continue"</span>
+                        into the chat if the AI's answer ends before it is complete
+                      </li>
+                    </ol>
+                  </div>
+                </div>
+                <h4 class="text-light fw-bold bg-success py-2 m-0 text-center">Example AI Result:</h4>
+                <div class="bg-dark p-3 text-light">
+                  <p>
+                    Sure, here are three questions of medium difficulty on the topic of ratios for 7th grade students:
+                  </p>
+                  <ol>
+                    <li>
+                      A recipe calls for a ratio of 2 cups of flour to 3 cups of sugar. If you want to make half of the
+                      recipe, how many cups of sugar do you need? Answer: 1.5 cups of sugar.
+                    </li>
+                    <li>
+                      A school has a ratio of 5 teachers to 150 students. If the school has a total of 30 teachers, how
+                      many students are there in the school? Answer: There are 900 students in the school.
+                    </li>
+                    <li>
+                      The ratio of the number of boys to the number of girls in a class is 2:3. If there are 24 boys in
+                      the class, how many students are there in the class? Answer: There are 40 students in the class.
+                    </li>
+                  </ol>
+                  <p>
+                    Note: For each question, make sure to provide space for students to show their work and justify
+                    their answers.
+                  </p>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-bs-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Prompt Form -->
+        <form id="prompt-form">
+          <label>
+            Kelas:
+            <span class="text-danger">*</span>
+          </label>
+          <br />
+          <textarea class="small-textarea bg-light" type="text" id="grade" placeholder="7,8, atau 9"></textarea>
+          <br />
+          <label>
+            Pelajaran:
+            <span class="text-danger">*</span>
+          </label>
+          <br />
+          <textarea class="small-textarea bg-light" type="text" id="subject" placeholder="Bahasa Inggris"></textarea>
+          <br />
+          <label>
+            Topik Penilaian:
+            <span class="text-danger">*</span>
+            <br />
+          </label>
+          <br />
+          <textarea class="small-textarea bg-light" type="text" id="topic" placeholder="Introducing my self"></textarea>
+          <br />
+          <label>
+            Tujuan Pembelajaran:
+            <span class="text-danger">*</span>
+          </label>
+          <br />
+          <textarea
+            class="large-textarea bg-light"
+            type="text"
+            id="objective"
+            placeholder="mengidentifikasi, mendeskripsikan, dan menyusun personal information"></textarea>
+          <br />
+          <label>
+            Tipe Pertanyaan (Boleh lebih dari satu):
+            <span class="text-danger">*</span>
+          </label>
+          <br />
+          <!-- Checkbox -->
+          <div class="choice-box bg-light">
+            <label for="type1" class="custom-check">
+              Pilihan Ganda
+              <input type="checkbox" id="type1" name="type1" value="pilihan ganda" class="old-check" />
+              <span class="checkmark"></span>
+            </label>
+            <br />
+            <label for="type2" class="custom-check">
+              Isian Singkat
+              <input type="checkbox" id="type2" name="type2" value="isian singkat" class="old-check" />
+              <span class="checkmark"></span>
+            </label>
+            <br />
+            <label for="type4" class="custom-check">
+              Pernyataan Terbuka
+              <input type="checkbox" id="type4" name="type4" value="jawaban panjang" class="old-check" />
+              <span class="checkmark"></span>
+            </label>
+            <br />
+            <label for="type5" class="custom-check">
+              Menjodohkan
+              <input type="checkbox" id="type5" name="type5" value="menjodohkan" class="old-check" />
+              <span class="checkmark"></span>
+            </label>
+            <br />
+            <label for="type6" class="custom-check">
+              Benar atau Salah
+              <input type="checkbox" id="type6" name="type6" value="benar atau salah" class="old-check" />
+              <span class="checkmark"></span>
+            </label>
+          </div>
+          <br />
+          <label>
+            Tingkat Kesulitan:
+            <span class="text-danger">*</span>
+          </label>
+          <br />
+          <!-- Radio -->
+          <div class="choice-box bg-light">
+            <label for="easy" class="custom-check">
+              Mudah
+              <input type="radio" id="easy" name="difficulty" value="mudah" class="old-check" />
+              <span class="radio"></span>
+            </label>
+            <br />
+            <label for="medium" class="custom-check">
+              Sedang
+              <input type="radio" id="medium" name="difficulty" value="sedang" class="old-check" />
+              <span class="radio"></span>
+            </label>
+            <br />
+            <label for="hard" class="custom-check">
+              Sulit
+              <input type="radio" id="hard" name="difficulty" value="sulit" class="old-check" />
+              <span class="radio"></span>
+            </label>
+            <br />
+            <label for="mixed" class="custom-check">
+              Campuran
+              <input type="radio" id="mixed" name="difficulty" value="campuran" class="old-check" />
+              <span class="radio"></span>
+            </label>
+            <br />
+          </div>
+          <br />
+          <label>
+            Jumlah Pertanyaan:
+            <span class="text-danger">*</span>
+          </label>
+          <br />
+          <textarea class="small-textarea bg-light" type="text" id="quantity" placeholder="10"></textarea>
+          <br />
+          <label>Waktu (optional):</label>
+          <br />
+          <textarea class="small-textarea bg-light" type="text" id="time" placeholder="30 minutes"></textarea>
+          <br />
+          <p class="hidden error-msg bg-danger border border-1 border-dark" id="errorMsg">
+            *isian wajib diisi*
+          </p>
+          <button class="hover active" type="submit" id="generate-prompt-button">Generate Prompt</button>
+          <button type="button" id="copy-prompt-button" class="copy-disabled" disabled>Copy Prompt</button>
+        </form>
+        <div>
+          <p id="aiPrompt"></p>
+        </div>
+      </div>
+    </div>
+    <!-- Bootstrap JS -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
+      crossorigin="anonymous"></script>
+    <!-- Prompt Library JS -->
+    <script src="assessments.js"></script>
+  </body>
+</html>
