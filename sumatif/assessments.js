@@ -66,7 +66,7 @@ function handleSubmit(event) {
     topic.value
   }. Tujuan pembelajaran untuk penilaian ini adalah: ${learningObjectives.value}. Buatkan ${
     quantity.value
-  } pertanyaan untuk mengembangkan kemampuan literasi dan numerasi. Sertakan berbagai jenis pertanyaan ini: ${questionTypes.join(
+  } pertanyaan dalam bahasa inggris untuk mengembangkan kemampuan literasi dan numerasi. Sertakan berbagai jenis pertanyaan ini: ${questionTypes.join(
     ", "
   )}. Pastikan pertanyaannya sesuai untuk ${
     grade.value
