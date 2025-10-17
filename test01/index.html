@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kuis Interaktif Fullscreen</title>
+    <title>Kuis Interaktif</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
@@ -11,97 +11,77 @@
             box-sizing: border-box;
         }
         
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        .slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        .bounce-in {
+            animation: bounceIn 0.6s ease-out;
+        }
+        
+        .shake {
+            animation: shake 0.5s ease-in-out;
+        }
+        
+        .pulse-success {
+            animation: pulseSuccess 0.8s ease-in-out;
+        }
+        
+        .pulse-error {
+            animation: pulseError 0.8s ease-in-out;
+        }
+        
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
         
         @keyframes slideIn {
-            from { transform: translateX(-100%); }
-            to { transform: translateX(0); }
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
         
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-10px); }
-            60% { transform: translateY(-5px); }
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
         }
         
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
-            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-            20%, 40%, 60%, 80% { transform: translateX(5px); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+            20%, 40%, 60%, 80% { transform: translateX(10px); }
         }
         
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
+        @keyframes pulseSuccess {
+            0% { background-color: rgb(34, 197, 94); transform: scale(1); }
+            50% { background-color: rgb(22, 163, 74); transform: scale(1.05); }
+            100% { background-color: rgb(34, 197, 94); transform: scale(1); }
         }
         
-        @keyframes glow {
-            0% { box-shadow: 0 0 5px rgba(59, 130, 246, 0.5); }
-            50% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.8); }
-            100% { box-shadow: 0 0 5px rgba(59, 130, 246, 0.5); }
-        }
-        
-        @keyframes correctPulse {
-            0% { transform: scale(1); background: linear-gradient(135deg, #10b981, #059669); }
-            50% { transform: scale(1.1); background: linear-gradient(135deg, #34d399, #10b981); }
-            100% { transform: scale(1); background: linear-gradient(135deg, #10b981, #059669); }
-        }
-        
-        @keyframes wrongShake {
-            0%, 100% { transform: translateX(0) scale(1); }
-            10%, 30%, 50%, 70%, 90% { transform: translateX(-8px) scale(0.98); }
-            20%, 40%, 60%, 80% { transform: translateX(8px) scale(0.98); }
-        }
-        
-        .fade-in { animation: fadeIn 0.5s ease-out; }
-        .slide-in { animation: slideIn 0.5s ease-out; }
-        .bounce { animation: bounce 0.6s ease-out; }
-        .shake { animation: shake 0.5s ease-out; }
-        .pulse { animation: pulse 0.3s ease-out; }
-        .glow { animation: glow 2s infinite; }
-        
-        .correct-answer {
-            animation: correctPulse 0.8s ease-out;
-            background: linear-gradient(135deg, #10b981, #059669) !important;
-            color: white !important;
-            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
-            border: 3px solid #34d399 !important;
-        }
-        
-        .wrong-answer {
-            animation: wrongShake 0.6s ease-out;
-            background: linear-gradient(135deg, #ef4444, #dc2626) !important;
-            color: white !important;
-            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
-            border: 3px solid #f87171 !important;
+        @keyframes pulseError {
+            0% { background-color: rgb(239, 68, 68); transform: scale(1); }
+            50% { background-color: rgb(220, 38, 38); transform: scale(1.05); }
+            100% { background-color: rgb(239, 68, 68); transform: scale(1); }
         }
         
         .progress-bar {
-            transition: width 0.5s ease-out;
+            transition: width 0.3s ease-in-out;
         }
         
-        .timer-warning {
-            animation: pulse 1s infinite;
+        .warning-popup {
+            animation: warningPulse 0.5s ease-in-out;
         }
         
-        .security-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.95);
-            z-index: 9999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 24px;
-            text-align: center;
+        @keyframes warningPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
         }
         
         .no-select {
@@ -111,959 +91,935 @@
             user-select: none;
         }
         
-        .option-button {
-            transition: all 0.3s ease;
-            transform: translateY(0);
+        .timer-warning {
+            animation: timerBlink 1s infinite;
         }
         
-        .option-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-        }
-        
-        .countdown-circle {
-            animation: pulse 1s infinite;
-        }
-        
-        .fullscreen-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            overflow: hidden;
-        }
-        
-        .floating-particles {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            pointer-events: none;
-        }
-        
-        .particle {
-            position: absolute;
-            background: rgba(59, 130, 246, 0.1);
-            border-radius: 50%;
-            animation: float 6s infinite ease-in-out;
-        }
-        
-        @keyframes float {
-            0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0; }
-            50% { transform: translateY(-100px) rotate(180deg); opacity: 1; }
-        }
-        
-        .success-celebration {
-            animation: celebration 1s ease-out;
-        }
-        
-        @keyframes celebration {
-            0% { transform: scale(0.8) rotate(-5deg); }
-            50% { transform: scale(1.1) rotate(5deg); }
-            100% { transform: scale(1) rotate(0deg); }
+        @keyframes timerBlink {
+            0%, 50% { color: rgb(239, 68, 68); }
+            51%, 100% { color: rgb(220, 38, 38); }
         }
     </style>
 </head>
-<body class="h-full bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 no-select fullscreen-container">
-    <!-- Floating Particles Background -->
-    <div class="floating-particles">
-        <div class="particle" style="left: 10%; animation-delay: 0s; width: 4px; height: 4px;"></div>
-        <div class="particle" style="left: 20%; animation-delay: 1s; width: 6px; height: 6px;"></div>
-        <div class="particle" style="left: 30%; animation-delay: 2s; width: 3px; height: 3px;"></div>
-        <div class="particle" style="left: 40%; animation-delay: 3s; width: 5px; height: 5px;"></div>
-        <div class="particle" style="left: 50%; animation-delay: 4s; width: 4px; height: 4px;"></div>
-        <div class="particle" style="left: 60%; animation-delay: 5s; width: 6px; height: 6px;"></div>
-        <div class="particle" style="left: 70%; animation-delay: 0.5s; width: 3px; height: 3px;"></div>
-        <div class="particle" style="left: 80%; animation-delay: 1.5s; width: 5px; height: 5px;"></div>
-        <div class="particle" style="left: 90%; animation-delay: 2.5s; width: 4px; height: 4px;"></div>
-    </div>
-
-    <main class="h-full overflow-auto">
-        <!-- Login Screen -->
-        <div id="loginScreen" class="h-full flex items-center justify-center p-8">
-            <div class="max-w-lg w-full bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl p-10 border border-white/20 fade-in">
-                <div class="text-center mb-10">
-                    <div class="w-24 h-24 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full mx-auto mb-6 flex items-center justify-center text-white text-4xl glow">
-                        🎯
-                    </div>
-                    <h1 class="text-4xl font-bold text-white mb-3">Kuis Interaktif</h1>
-                    <p class="text-blue-200 text-lg">Masuk untuk memulai petualangan belajar</p>
+<body class="h-full bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 font-sans no-select">
+    <!-- Login Screen -->
+    <div id="loginScreen" class="h-full flex items-center justify-center p-4">
+        <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-8 w-full max-w-md shadow-2xl border border-white/20 fade-in">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-white mb-2">🎯 Kuis Interaktif</h1>
+                <p class="text-blue-200">Masuk untuk memulai kuis</p>
+            </div>
+            
+            <form id="loginForm" class="space-y-6">
+                <div>
+                    <label for="username" class="block text-sm font-medium text-white mb-2">Username</label>
+                    <input type="text" id="username" required 
+                           class="w-full px-4 py-3 bg-white/20 border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all">
                 </div>
                 
-                <form id="loginForm" class="space-y-6">
-                    <div>
-                        <label for="username" class="block text-sm font-medium text-blue-200 mb-3">Username</label>
-                        <input type="text" id="username" name="username" required 
-                               class="w-full px-6 py-4 bg-white/10 border border-white/30 rounded-xl text-white placeholder-blue-200 focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all backdrop-blur-sm"
-                               placeholder="Masukkan username Anda">
-                    </div>
-                    
-                    <div>
-                        <label for="password" class="block text-sm font-medium text-blue-200 mb-3">Password</label>
-                        <input type="password" id="password" name="password" required 
-                               class="w-full px-6 py-4 bg-white/10 border border-white/30 rounded-xl text-white placeholder-blue-200 focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all backdrop-blur-sm"
-                               placeholder="Masukkan password Anda">
-                    </div>
-                    
-                    <button type="submit" 
-                            class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-4 px-6 rounded-xl font-semibold text-lg hover:from-blue-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 shadow-lg">
-                        🚀 Masuk Sekarang
-                    </button>
-                </form>
+                <div>
+                    <label for="password" class="block text-sm font-medium text-white mb-2">Password</label>
+                    <input type="password" id="password" required 
+                           class="w-full px-4 py-3 bg-white/20 border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all">
+                </div>
                 
-                <div id="loginError" class="mt-6 p-4 bg-red-500/20 border border-red-400/50 text-red-200 rounded-xl hidden backdrop-blur-sm"></div>
-                <div id="loginLoading" class="mt-6 text-center text-blue-200 hidden">
-                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400"></div>
-                    <span class="ml-3 text-lg">Memuat data...</span>
+                <button type="submit" 
+                        class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-6 rounded-lg font-semibold hover:from-blue-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 shadow-lg">
+                    Masuk
+                </button>
+            </form>
+            
+            <div id="loginError" class="mt-4 text-red-300 text-center hidden"></div>
+        </div>
+    </div>
+
+    <!-- Profile Screen -->
+    <div id="profileScreen" class="h-full flex items-center justify-center p-4 hidden">
+        <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-8 w-full max-w-md shadow-2xl border border-white/20 bounce-in">
+            <div class="text-center mb-8">
+                <div class="w-20 h-20 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full mx-auto mb-4 flex items-center justify-center text-2xl">
+                    👤
+                </div>
+                <h2 class="text-2xl font-bold text-white mb-2">Profil Peserta</h2>
+            </div>
+            
+            <div class="space-y-4 mb-8">
+                <div class="bg-white/10 rounded-lg p-4">
+                    <p class="text-blue-200 text-sm">No. Absen</p>
+                    <p id="profileAbsen" class="text-white font-semibold text-lg"></p>
+                </div>
+                <div class="bg-white/10 rounded-lg p-4">
+                    <p class="text-blue-200 text-sm">Nama Lengkap</p>
+                    <p id="profileNama" class="text-white font-semibold text-lg"></p>
+                </div>
+                <div class="bg-white/10 rounded-lg p-4">
+                    <p class="text-blue-200 text-sm">Kelas</p>
+                    <p id="profileKelas" class="text-white font-semibold text-lg"></p>
+                </div>
+            </div>
+            
+            <button id="startQuizBtn" 
+                    class="w-full bg-gradient-to-r from-green-500 to-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:from-green-600 hover:to-blue-700 transform hover:scale-105 transition-all duration-200 shadow-lg">
+                🚀 Mulai Kuis
+            </button>
+        </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div id="quizScreen" class="h-full flex flex-col hidden">
+        <!-- Header -->
+        <div class="bg-white/10 backdrop-blur-lg border-b border-white/20 p-4">
+            <div class="flex justify-between items-center max-w-6xl mx-auto">
+                <div class="flex items-center space-x-4">
+                    <h1 class="text-xl font-bold text-white">🎯 Kuis Interaktif</h1>
+                    <div class="bg-white/20 rounded-lg px-3 py-1">
+                        <span class="text-white text-sm">Soal <span id="currentQuestion">1</span> dari <span id="totalQuestions">0</span></span>
+                    </div>
+                    <button id="toggleNavBtn" class="bg-white/20 hover:bg-white/30 rounded-lg px-3 py-1 text-white text-sm transition-all">
+                        📋 Menu
+                    </button>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <div class="bg-white/20 rounded-lg px-3 py-1">
+                        <span class="text-white text-sm">Skor: <span id="currentScore">0</span></span>
+                    </div>
+                    <div class="bg-white/20 rounded-lg px-3 py-1">
+                        <span id="timer" class="text-white text-sm font-mono">60:00</span>
+                    </div>
+                    <div class="bg-white/20 rounded-lg px-3 py-1">
+                        <span class="text-white text-sm">Peringatan: <span id="warningCount">0</span>/3</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Progress Bar -->
+            <div class="max-w-6xl mx-auto mt-4">
+                <div class="bg-white/20 rounded-full h-2">
+                    <div id="progressBar" class="bg-gradient-to-r from-green-400 to-blue-500 h-2 rounded-full progress-bar" style="width: 0%"></div>
                 </div>
             </div>
         </div>
 
-        <!-- Profile Screen -->
-        <div id="profileScreen" class="h-full flex items-center justify-center p-8 hidden">
-            <div class="max-w-lg w-full bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl p-10 border border-white/20 fade-in">
-                <div class="text-center mb-10">
-                    <div class="w-24 h-24 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full mx-auto mb-6 flex items-center justify-center text-white text-3xl font-bold glow">
-                        👤
+        <!-- Question Content -->
+        <div class="flex-1 overflow-y-auto p-6">
+            <div class="max-w-6xl mx-auto flex gap-6">
+                <!-- Question Navigation Sidebar -->
+                <div id="navigationSidebar" class="w-64 flex-shrink-0 transition-all duration-300">
+                    <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-4 shadow-2xl border border-white/20 sticky top-0">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-white font-semibold text-center">📋 Navigasi Soal</h3>
+                            <button id="closeNavBtn" class="text-white hover:text-red-300 transition-all">✕</button>
+                        </div>
+                        <div id="questionNavigation" class="grid grid-cols-5 gap-2">
+                            <!-- Question numbers will be inserted here -->
+                        </div>
+                        <div class="mt-4 text-xs text-blue-200 text-center">
+                            <div class="flex items-center justify-center gap-2 mb-1">
+                                <div class="w-3 h-3 bg-green-500 rounded"></div>
+                                <span>Benar</span>
+                            </div>
+                            <div class="flex items-center justify-center gap-2 mb-1">
+                                <div class="w-3 h-3 bg-red-500 rounded"></div>
+                                <span>Salah</span>
+                            </div>
+                            <div class="flex items-center justify-center gap-2">
+                                <div class="w-3 h-3 bg-blue-500 rounded"></div>
+                                <span>Aktif</span>
+                            </div>
+                        </div>
                     </div>
-                    <h2 class="text-3xl font-bold text-white mb-3">Profil Peserta</h2>
                 </div>
-                
-                <div id="profileInfo" class="space-y-6 mb-10">
-                    <!-- Profile info will be populated here -->
+
+                <!-- Main Question Area -->
+                <div class="flex-1">
+                    <div id="questionCard" class="bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-2xl border border-white/20 slide-in">
+                        <div id="questionImage" class="mb-6 hidden">
+                            <img id="questionImg" src="" alt="Gambar Soal" class="w-full max-w-md mx-auto rounded-lg shadow-lg">
+                        </div>
+                        
+                        <h2 id="questionText" class="text-xl font-semibold text-white mb-8 leading-relaxed"></h2>
+                        
+                        <div id="optionsContainer" class="space-y-4">
+                            <!-- Options will be inserted here -->
+                        </div>
+                        
+                        <div id="feedback" class="mt-6 hidden">
+                            <div id="feedbackContent" class="p-4 rounded-lg"></div>
+                        </div>
+                    </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="bg-white/10 backdrop-blur-lg border-t border-white/20 p-4">
+            <div class="max-w-4xl mx-auto flex justify-end">
+                <button id="prevBtn" 
+                        class="bg-gray-600 text-white py-2 px-6 rounded-lg font-semibold hover:bg-gray-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed" style="display: none;">
+                    ← Sebelumnya
+                </button>
                 
-                <div class="bg-yellow-500/20 border border-yellow-400/50 rounded-xl p-6 mb-8 backdrop-blur-sm">
-                    <h3 class="font-bold text-yellow-200 mb-4 text-lg">⚠️ Peraturan Kuis:</h3>
-                    <ul class="text-yellow-100 space-y-2">
-                        <li>• Waktu mengerjakan: 60 menit</li>
-                        <li>• Kuis hanya dapat dikerjakan sekali</li>
-                        <li>• Dilarang screenshot atau berpindah tab</li>
-                        <li>• Maksimal 3 peringatan sebelum kuis dihentikan</li>
-                        <li>• Mode fullscreen akan aktif selama kuis</li>
-                    </ul>
-                </div>
-                
-                <button id="startQuizBtn" 
-                        class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-4 px-6 rounded-xl font-bold text-lg hover:from-green-600 hover:to-emerald-700 transform hover:scale-105 transition-all duration-300 shadow-lg">
-                    🎮 Mulai Kuis Sekarang!
+                <button id="nextBtn" 
+                        class="bg-gradient-to-r from-blue-500 to-purple-600 text-white py-2 px-6 rounded-lg font-semibold hover:from-blue-600 hover:to-purple-700 transition-all duration-200">
+                    Selanjutnya →
                 </button>
             </div>
         </div>
+    </div>
 
-        <!-- Quiz Screen -->
-        <div id="quizScreen" class="h-full p-6 hidden">
-            <!-- Header -->
-            <header class="bg-white/10 backdrop-blur-lg rounded-2xl shadow-xl p-6 mb-6 border border-white/20 fade-in">
-                <div class="flex justify-between items-center mb-6">
-                    <div class="flex items-center space-x-6">
-                        <h1 class="text-2xl font-bold text-white">🎯 Kuis Interaktif</h1>
-                        <div id="warningCount" class="bg-red-500/20 text-red-200 px-4 py-2 rounded-full text-sm font-medium border border-red-400/50">
-                            Peringatan: 0/3
-                        </div>
-                    </div>
-                    <div id="timer" class="text-xl font-bold text-blue-200 bg-blue-500/20 px-6 py-3 rounded-xl border border-blue-400/50">
-                        60:00
-                    </div>
-                </div>
-                
-                <!-- Progress Bar -->
-                <div class="bg-white/20 rounded-full h-4 mb-3">
-                    <div id="progressBar" class="bg-gradient-to-r from-blue-400 to-purple-500 h-4 rounded-full progress-bar glow" style="width: 0%"></div>
-                </div>
-                <div class="flex justify-between text-blue-200">
-                    <span id="questionProgress" class="font-medium">Soal 1 dari 0</span>
-                    <span id="scoreDisplay" class="font-bold">Skor: 0</span>
-                </div>
-            </header>
-
-            <!-- Question Card -->
-            <div id="questionCard" class="bg-white/10 backdrop-blur-lg rounded-2xl shadow-xl p-8 mb-6 border border-white/20 fade-in">
-                <div id="questionImage" class="mb-8 hidden">
-                    <div class="bg-white/10 rounded-xl p-6 border border-white/20 backdrop-blur-sm">
-                        <img id="questionImg" src="" alt="Gambar soal" class="w-full max-w-2xl mx-auto rounded-xl shadow-2xl border border-white/30" style="max-height: 400px; object-fit: contain;">
-                        <div id="imageLoading" class="text-center py-12 hidden">
-                            <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400"></div>
-                            <p class="mt-4 text-blue-200 text-lg">Memuat gambar...</p>
-                        </div>
-                        <div id="imageError" class="text-center py-8 text-red-300 hidden">
-                            <div class="text-4xl mb-4">🖼️</div>
-                            <p class="text-lg">Gambar tidak dapat dimuat</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <h2 id="questionText" class="text-xl font-bold text-white mb-8 leading-relaxed">
-                    <!-- Question will be loaded here -->
-                </h2>
-                
-                <div id="answerOptions" class="space-y-4">
-                    <!-- Answer options will be loaded here -->
-                </div>
-                
-                <div id="feedback" class="mt-8 p-6 rounded-xl hidden backdrop-blur-sm">
-                    <!-- Feedback will be shown here -->
-                </div>
-                
-                <div class="flex justify-between mt-8">
-                    <button id="prevBtn" class="bg-gray-600/50 text-white px-8 py-3 rounded-xl hover:bg-gray-500/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed font-medium backdrop-blur-sm" disabled>
-                        ← Sebelumnya
-                    </button>
-                    <button id="nextBtn" class="bg-blue-600/50 text-white px-8 py-3 rounded-xl hover:bg-blue-500/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed font-medium backdrop-blur-sm" disabled>
-                        Selanjutnya →
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Result Screen -->
-        <div id="resultScreen" class="h-full flex items-center justify-center p-8 hidden">
-            <div class="max-w-lg w-full bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl p-10 border border-white/20 fade-in text-center">
-                <div id="resultIcon" class="text-8xl mb-6">🎉</div>
-                <h2 class="text-4xl font-bold text-white mb-6">Kuis Selesai!</h2>
-                
-                <div id="finalScore" class="text-6xl font-bold text-blue-300 mb-3">0</div>
-                <div id="scorePercentage" class="text-2xl text-blue-200 mb-8">0%</div>
-                
-                <div id="appreciation" class="bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-xl p-6 mb-8 border border-blue-400/30 backdrop-blur-sm">
-                    <p class="text-white font-bold text-lg">Kerja bagus! 👏</p>
-                </div>
-                
-                <div class="text-blue-200 mb-6 text-lg">
-                    ✅ Hasil telah disimpan secara otomatis
-                </div>
-                
-                <div id="backToLogin" class="bg-white/10 rounded-xl p-6 border border-white/20 backdrop-blur-sm">
-                    <div class="text-blue-200 mb-3">Kembali ke menu login dalam:</div>
-                    <div id="loginCountdown" class="text-4xl font-bold text-blue-300 countdown-circle">2</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Security Overlay -->
-        <div id="securityOverlay" class="security-overlay hidden">
+    <!-- Result Screen -->
+    <div id="resultScreen" class="h-full flex items-center justify-center p-4 hidden">
+        <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-8 w-full max-w-2xl shadow-2xl border border-white/20 bounce-in">
             <div class="text-center">
-                <div class="text-8xl mb-6">⚠️</div>
-                <div id="securityMessage" class="text-2xl font-bold mb-4">Peringatan Keamanan</div>
-                <div class="text-xl">Kembali ke kuis dalam <span id="securityCountdown" class="font-bold text-red-400">3</span> detik</div>
+                <div id="resultIcon" class="text-6xl mb-4">🎉</div>
+                <h2 class="text-3xl font-bold text-white mb-4">Kuis Selesai!</h2>
+                
+                <div class="bg-white/10 rounded-xl p-6 mb-6">
+                    <div class="grid grid-cols-2 gap-4 text-center">
+                        <div>
+                            <p class="text-blue-200 text-sm">Skor Akhir</p>
+                            <p id="finalScore" class="text-3xl font-bold text-white"></p>
+                        </div>
+                        <div>
+                            <p class="text-blue-200 text-sm">Persentase</p>
+                            <p id="finalPercentage" class="text-3xl font-bold text-white"></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="scoreMessage" class="text-lg text-white mb-6"></div>
+                
+                <p class="text-blue-200 text-sm">Kembali ke login dalam <span id="countdown">2</span> detik...</p>
             </div>
         </div>
-    </main>
+    </div>
+
+    <!-- Warning Modal -->
+    <div id="warningModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+        <div class="bg-red-600 text-white p-6 rounded-2xl shadow-2xl max-w-md mx-4 warning-popup">
+            <div class="text-center">
+                <div class="text-4xl mb-4">⚠️</div>
+                <h3 class="text-xl font-bold mb-2">Peringatan!</h3>
+                <p id="warningMessage" class="mb-4"></p>
+                <p class="text-sm opacity-90">Peringatan: <span id="warningModalCount">1</span>/3</p>
+                <button id="warningOkBtn" class="mt-4 bg-white text-red-600 px-6 py-2 rounded-lg font-semibold hover:bg-gray-100 transition-all">
+                    Mengerti
+                </button>
+            </div>
+        </div>
+    </div>
 
     <script>
-        // Global variables
-        let currentUser = null;
-        let questions = [];
-        let userAnswers = [];
-        let currentQuestionIndex = 0;
-        let score = 0;
-        let warningCount = 0;
-        let timeLeft = 60 * 60; // 60 minutes in seconds
-        let timerInterval = null;
-        let quizStarted = false;
-        let quizCompleted = false;
-        let completedUsers = new Set();
-
-        // Security features
-        let isTabActive = true;
-        let securityOverlayTimeout = null;
-
-        // Initialize app
-        document.addEventListener('DOMContentLoaded', function() {
-            enterFullscreen();
-            setupSecurityFeatures();
-            setupEventListeners();
-            loadLoginData();
-        });
-
-        // Fullscreen functions
-        function enterFullscreen() {
-            const elem = document.documentElement;
-            if (elem.requestFullscreen) {
-                elem.requestFullscreen();
-            } else if (elem.webkitRequestFullscreen) {
-                elem.webkitRequestFullscreen();
-            } else if (elem.msRequestFullscreen) {
-                elem.msRequestFullscreen();
+        class QuizApp {
+            constructor() {
+                this.currentUser = null;
+                this.questions = [];
+                this.currentQuestionIndex = 0;
+                this.score = 0;
+                this.answers = [];
+                this.timeLeft = 3600; // 60 minutes in seconds
+                this.timer = null;
+                this.warningCount = 0;
+                this.quizCompleted = false;
+                this.isAnswered = false;
+                this.navigationVisible = true;
+                this.quizTaken = false; // Track if user has already taken the quiz
+                
+                this.init();
             }
-        }
-
-        function exitFullscreen() {
-            if (document.exitFullscreen) {
-                document.exitFullscreen();
-            } else if (document.webkitExitFullscreen) {
-                document.webkitExitFullscreen();
-            } else if (document.msExitFullscreen) {
-                document.msExitFullscreen();
+            
+            init() {
+                this.setupEventListeners();
+                this.setupSecurityFeatures();
+                this.enterFullscreen();
             }
-        }
-
-        // Security features setup
-        function setupSecurityFeatures() {
-            // Disable right-click
-            document.addEventListener('contextmenu', function(e) {
-                e.preventDefault();
-                if (quizStarted && !quizCompleted) {
-                    showSecurityWarning('Klik kanan dilarang selama kuis!');
-                }
-            });
-
-            // Disable keyboard shortcuts
-            document.addEventListener('keydown', function(e) {
-                if (quizStarted && !quizCompleted) {
-                    if (e.key === 'F12' || 
-                        (e.ctrlKey && (e.shiftKey && e.key === 'I')) ||
+            
+            setupEventListeners() {
+                document.getElementById('loginForm').addEventListener('submit', (e) => this.handleLogin(e));
+                document.getElementById('startQuizBtn').addEventListener('click', () => this.startQuiz());
+                document.getElementById('nextBtn').addEventListener('click', () => this.nextQuestion());
+                document.getElementById('prevBtn').addEventListener('click', () => this.prevQuestion());
+                document.getElementById('warningOkBtn').addEventListener('click', () => this.closeWarning());
+                document.getElementById('toggleNavBtn').addEventListener('click', () => this.toggleNavigation());
+                document.getElementById('closeNavBtn').addEventListener('click', () => this.hideNavigation());
+            }
+            
+            setupSecurityFeatures() {
+                // Anti screenshot
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'PrintScreen' || 
+                        (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+                        (e.ctrlKey && e.shiftKey && e.key === 'J') ||
                         (e.ctrlKey && e.key === 'u') ||
-                        (e.ctrlKey && e.key === 's') ||
-                        (e.ctrlKey && e.shiftKey && e.key === 'C') ||
-                        e.key === 'PrintScreen' ||
-                        e.key === 'F11' ||
-                        e.key === 'Escape') {
+                        (e.key === 'F12')) {
                         e.preventDefault();
-                        showSecurityWarning('Shortcut keyboard dilarang!');
+                        this.showWarning('Screenshot dan developer tools tidak diizinkan!');
                     }
-                }
-            });
-
-            // Detect tab switching
-            document.addEventListener('visibilitychange', function() {
-                if (quizStarted && !quizCompleted) {
-                    if (document.hidden) {
-                        isTabActive = false;
-                        showSecurityWarning('Dilarang berpindah tab selama kuis!');
-                    } else {
-                        isTabActive = true;
-                    }
-                }
-            });
-
-            // Detect window blur/focus
-            window.addEventListener('blur', function() {
-                if (quizStarted && !quizCompleted) {
-                    showSecurityWarning('Jangan tinggalkan halaman kuis!');
-                }
-            });
-
-            // Detect fullscreen exit
-            document.addEventListener('fullscreenchange', function() {
-                if (quizStarted && !quizCompleted && !document.fullscreenElement) {
-                    showSecurityWarning('Mode fullscreen harus tetap aktif!');
-                    setTimeout(enterFullscreen, 1000);
-                }
-            });
-
-            // Disable text selection and drag
-            document.addEventListener('selectstart', function(e) {
-                if (quizStarted && !quizCompleted) {
+                });
+                
+                // Anti right click
+                document.addEventListener('contextmenu', (e) => {
                     e.preventDefault();
-                }
-            });
-
-            document.addEventListener('dragstart', function(e) {
-                if (quizStarted && !quizCompleted) {
-                    e.preventDefault();
-                }
-            });
-        }
-
-        function showSecurityWarning(message) {
-            warningCount++;
-            updateWarningDisplay();
-            
-            if (warningCount >= 3) {
-                endQuizDueToViolation();
-                return;
-            }
-
-            const overlay = document.getElementById('securityOverlay');
-            const messageEl = document.getElementById('securityMessage');
-            const countdownEl = document.getElementById('securityCountdown');
-            
-            messageEl.textContent = message;
-            overlay.classList.remove('hidden');
-            
-            let countdown = 3;
-            countdownEl.textContent = countdown;
-            
-            const countdownInterval = setInterval(() => {
-                countdown--;
-                countdownEl.textContent = countdown;
+                    this.showWarning('Klik kanan tidak diizinkan!');
+                });
                 
-                if (countdown <= 0) {
-                    clearInterval(countdownInterval);
-                    overlay.classList.add('hidden');
-                }
-            }, 1000);
-        }
-
-        function updateWarningDisplay() {
-            const warningEl = document.getElementById('warningCount');
-            warningEl.textContent = `Peringatan: ${warningCount}/3`;
-            
-            if (warningCount >= 2) {
-                warningEl.classList.add('bg-red-600/30', 'text-red-100', 'border-red-300/50');
-                warningEl.classList.remove('bg-red-500/20', 'text-red-200', 'border-red-400/50');
-            }
-        }
-
-        function endQuizDueToViolation() {
-            const overlay = document.getElementById('securityOverlay');
-            const messageEl = document.getElementById('securityMessage');
-            
-            messageEl.innerHTML = `
-                <div class="text-red-400">
-                    <div class="text-8xl mb-6">🚫</div>
-                    <div class="text-3xl font-bold mb-6">Kuis Dihentikan!</div>
-                    <div class="text-xl mb-4">Anda telah melanggar aturan sebanyak 3 kali.</div>
-                    <div class="text-lg">Silakan hubungi pengawas.</div>
-                </div>
-            `;
-            
-            overlay.classList.remove('hidden');
-            
-            if (timerInterval) {
-                clearInterval(timerInterval);
-            }
-            
-            quizCompleted = true;
-            
-            setTimeout(() => {
-                saveResult(0);
-                showResult(0, 0);
-            }, 3000);
-        }
-
-        // Event listeners setup
-        function setupEventListeners() {
-            document.getElementById('loginForm').addEventListener('submit', handleLogin);
-            document.getElementById('startQuizBtn').addEventListener('click', startQuiz);
-            document.getElementById('prevBtn').addEventListener('click', previousQuestion);
-            document.getElementById('nextBtn').addEventListener('click', nextQuestion);
-        }
-
-        // Load login data from Google Sheets
-        async function loadLoginData() {
-            try {
-                const response = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vSXp8px6BoP8tsTKMbk7hMvX96h9O5MPS52OLnDm3JQ-1WpXWIS7e94-K-eAxtVHvONK_DEmoR_yka0/pub?gid=1934144092&single=true&output=csv');
-                const csvText = await response.text();
-                
-                const lines = csvText.split('\n');
-                window.loginData = [];
-                
-                for (let i = 1; i < lines.length; i++) {
-                    const columns = lines[i].split(',');
-                    if (columns.length >= 5) {
-                        window.loginData.push({
-                            username: columns[0]?.trim(),
-                            password: columns[1]?.trim(),
-                            absen: columns[2]?.trim(),
-                            nama: columns[3]?.trim(),
-                            kelas: columns[4]?.trim()
-                        });
+                // Tab switching detection
+                document.addEventListener('visibilitychange', () => {
+                    if (document.hidden && document.getElementById('quizScreen').style.display !== 'none') {
+                        this.showWarning('Jangan beralih tab selama kuis berlangsung!');
                     }
-                }
-            } catch (error) {
-                console.error('Error loading login data:', error);
-                showLoginError('Gagal memuat data login. Silakan coba lagi.');
-            }
-        }
-
-        // Handle login
-        async function handleLogin(e) {
-            e.preventDefault();
-            
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value.trim();
-            
-            if (!username || !password) {
-                showLoginError('Username dan password harus diisi!');
-                return;
-            }
-
-            showLoginLoading(true);
-            
-            setTimeout(() => {
-                const user = window.loginData?.find(u => 
-                    u.username === username && u.password === password
-                );
+                });
                 
-                if (user) {
-                    if (completedUsers.has(username)) {
-                        showLoginError('Anda sudah menyelesaikan kuis ini!');
-                        showLoginLoading(false);
-                        return;
+                // Window focus detection
+                window.addEventListener('blur', () => {
+                    if (document.getElementById('quizScreen').style.display !== 'none') {
+                        this.showWarning('Jangan beralih aplikasi selama kuis berlangsung!');
                     }
+                });
+            }
+            
+            enterFullscreen() {
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen();
+                }
+            }
+            
+            async handleLogin(e) {
+                e.preventDefault();
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                
+                try {
+                    const response = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vSXp8px6BoP8tsTKMbk7hMvX96h9O5MPS52OLnDm3JQ-1WpXWIS7e94-K-eAxtVHvONK_DEmoR_yka0/pub?gid=1934144092&single=true&output=csv');
+                    const csvData = await response.text();
+                    const users = this.parseCSV(csvData);
                     
-                    currentUser = user;
-                    showProfile();
-                } else {
-                    showLoginError('Username atau password salah!');
+                    const user = users.find(u => u.username === username && u.password === password);
+                    
+                    if (user) {
+                        this.currentUser = user;
+                        // Check if user has already taken the quiz
+                        await this.checkQuizStatus();
+                    } else {
+                        document.getElementById('loginError').textContent = 'Username atau password salah!';
+                        document.getElementById('loginError').classList.remove('hidden');
+                    }
+                } catch (error) {
+                    document.getElementById('loginError').textContent = 'Gagal memuat data login!';
+                    document.getElementById('loginError').classList.remove('hidden');
                 }
-                
-                showLoginLoading(false);
-            }, 1500);
-        }
-
-        function showLoginError(message) {
-            const errorEl = document.getElementById('loginError');
-            errorEl.textContent = message;
-            errorEl.classList.remove('hidden');
-            errorEl.classList.add('shake');
-            
-            setTimeout(() => {
-                errorEl.classList.remove('shake');
-            }, 500);
-        }
-
-        function showLoginLoading(show) {
-            const loadingEl = document.getElementById('loginLoading');
-            if (show) {
-                loadingEl.classList.remove('hidden');
-            } else {
-                loadingEl.classList.add('hidden');
             }
-        }
-
-        // Show profile screen
-        function showProfile() {
-            document.getElementById('loginScreen').classList.add('hidden');
-            document.getElementById('profileScreen').classList.remove('hidden');
             
-            const profileInfo = document.getElementById('profileInfo');
-            profileInfo.innerHTML = `
-                <div class="bg-gradient-to-r from-white/10 to-blue-500/10 rounded-xl p-6 border border-white/20 backdrop-blur-sm">
-                    <div class="grid grid-cols-2 gap-6">
-                        <div class="bg-white/10 rounded-xl p-4 text-center border border-white/20 backdrop-blur-sm">
-                            <span class="text-blue-200 text-sm font-medium">No. Absen</span>
-                            <div class="text-white font-bold text-2xl mt-2">${currentUser.absen}</div>
-                        </div>
-                        <div class="bg-white/10 rounded-xl p-4 text-center border border-white/20 backdrop-blur-sm">
-                            <span class="text-blue-200 text-sm font-medium">Kelas</span>
-                            <div class="text-white font-bold text-2xl mt-2">${currentUser.kelas}</div>
-                        </div>
-                        <div class="col-span-2 bg-white/10 rounded-xl p-4 text-center border border-white/20 backdrop-blur-sm">
-                            <span class="text-blue-200 text-sm font-medium">Nama Lengkap</span>
-                            <div class="text-white font-bold text-xl mt-2">${currentUser.nama}</div>
+            async checkQuizStatus() {
+                try {
+                    // Check if user has already submitted results
+                    const response = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vSXp8px6BoP8tsTKMbk7hMvX96h9O5MPS52OLnDm3JQ-1WpXWIS7e94-K-eAxtVHvONK_DEmoR_yka0/pub?gid=0&single=true&output=csv');
+                    const csvData = await response.text();
+                    const results = this.parseCSV(csvData);
+                    
+                    const existingResult = results.find(r => r.username === this.currentUser.username);
+                    
+                    if (existingResult) {
+                        this.quizTaken = true;
+                        this.showQuizAlreadyTaken(existingResult);
+                    } else {
+                        this.showProfile();
+                    }
+                } catch (error) {
+                    // If can't check, allow to proceed
+                    this.showProfile();
+                }
+            }
+            
+            showQuizAlreadyTaken(result) {
+                document.getElementById('loginScreen').classList.add('hidden');
+                
+                // Create already taken screen
+                const alreadyTakenScreen = document.createElement('div');
+                alreadyTakenScreen.id = 'alreadyTakenScreen';
+                alreadyTakenScreen.className = 'h-full flex items-center justify-center p-4';
+                alreadyTakenScreen.innerHTML = `
+                    <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-8 w-full max-w-md shadow-2xl border border-white/20 bounce-in">
+                        <div class="text-center">
+                            <div class="text-6xl mb-4">⚠️</div>
+                            <h2 class="text-2xl font-bold text-white mb-4">Kuis Sudah Dikerjakan</h2>
+                            
+                            <div class="bg-white/10 rounded-xl p-6 mb-6">
+                                <p class="text-blue-200 text-sm mb-2">Nama: ${this.currentUser.nama}</p>
+                                <p class="text-blue-200 text-sm mb-2">Kelas: ${this.currentUser.kelas}</p>
+                                <p class="text-blue-200 text-sm mb-4">Status: Sudah mengerjakan kuis</p>
+                                <div class="border-t border-white/20 pt-4">
+                                    <p class="text-white font-semibold">Skor Anda: ${result.score || 'Tidak tersedia'}</p>
+                                </div>
+                            </div>
+                            
+                            <p class="text-yellow-200 text-sm mb-6">
+                                Anda sudah mengerjakan kuis ini sebelumnya. Setiap peserta hanya diperbolehkan mengerjakan kuis satu kali.
+                            </p>
+                            
+                            <button onclick="location.reload()" 
+                                    class="w-full bg-gradient-to-r from-gray-500 to-gray-600 text-white py-3 px-6 rounded-lg font-semibold hover:from-gray-600 hover:to-gray-700 transition-all duration-200">
+                                Kembali ke Login
+                            </button>
                         </div>
                     </div>
-                </div>
-            `;
-        }
-
-        // Start quiz
-        async function startQuiz() {
-            document.getElementById('profileScreen').classList.add('hidden');
-            document.getElementById('quizScreen').classList.remove('hidden');
-            
-            quizStarted = true;
-            
-            await loadQuestions();
-            
-            userAnswers = new Array(questions.length).fill(null);
-            currentQuestionIndex = 0;
-            score = 0;
-            warningCount = 0;
-            
-            startTimer();
-            showQuestion();
-            updateProgress();
-        }
-
-        // Load questions from Google Sheets
-        async function loadQuestions() {
-            try {
-                const response = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vS6MUHUUMK-sG6H063aooPSe7p1hol73KsFMfBBmzTLHFGs33oiuoGpMZd66lRQNvNcVSx1l9P8KgIe/pub?gid=0&single=true&output=csv');
-                const csvText = await response.text();
-                
-                const lines = csvText.split('\n');
-                questions = [];
-                
-                for (let i = 1; i < lines.length; i++) {
-                    const columns = lines[i].split(',');
-                    if (columns.length >= 7) {
-                        questions.push({
-                            question: columns[0]?.trim(),
-                            optionA: columns[1]?.trim(),
-                            optionB: columns[2]?.trim(),
-                            optionC: columns[3]?.trim(),
-                            optionD: columns[4]?.trim(),
-                            correctAnswer: columns[5]?.trim(),
-                            explanation: columns[6]?.trim(),
-                            image: columns[7]?.trim()
-                        });
-                    }
-                }
-            } catch (error) {
-                console.error('Error loading questions:', error);
-                questions = [
-                    {
-                        question: "Apa ibu kota Indonesia?",
-                        optionA: "Jakarta",
-                        optionB: "Surabaya", 
-                        optionC: "Bandung",
-                        optionD: "Medan",
-                        correctAnswer: "A",
-                        explanation: "Jakarta adalah ibu kota Indonesia sejak kemerdekaan.",
-                        image: ""
-                    }
-                ];
-            }
-        }
-
-        // Timer functions
-        function startTimer() {
-            timerInterval = setInterval(() => {
-                timeLeft--;
-                updateTimerDisplay();
-                
-                if (timeLeft <= 0) {
-                    endQuiz();
-                }
-            }, 1000);
-        }
-
-        function updateTimerDisplay() {
-            const minutes = Math.floor(timeLeft / 60);
-            const seconds = timeLeft % 60;
-            const timerEl = document.getElementById('timer');
-            
-            timerEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            
-            if (timeLeft <= 300) {
-                timerEl.classList.add('timer-warning', 'text-red-200', 'bg-red-500/30', 'border-red-400/50');
-                timerEl.classList.remove('text-blue-200', 'bg-blue-500/20', 'border-blue-400/50');
-            }
-        }
-
-        // Question display functions
-        function showQuestion() {
-            const question = questions[currentQuestionIndex];
-            
-            document.getElementById('questionText').textContent = question.question;
-            
-            const imageContainer = document.getElementById('questionImage');
-            const imageEl = document.getElementById('questionImg');
-            const imageLoading = document.getElementById('imageLoading');
-            const imageError = document.getElementById('imageError');
-            
-            if (question.image && question.image.trim() !== '' && question.image !== 'undefined') {
-                imageContainer.classList.remove('hidden');
-                imageLoading.classList.remove('hidden');
-                imageError.classList.add('hidden');
-                imageEl.style.display = 'none';
-                
-                const testImg = new Image();
-                
-                testImg.onload = function() {
-                    imageEl.src = question.image;
-                    imageEl.style.display = 'block';
-                    imageEl.classList.add('fade-in');
-                    imageLoading.classList.add('hidden');
-                };
-                
-                testImg.onerror = function() {
-                    imageLoading.classList.add('hidden');
-                    imageError.classList.remove('hidden');
-                };
-                
-                testImg.src = question.image;
-                
-                setTimeout(() => {
-                    if (!testImg.complete) {
-                        imageLoading.classList.add('hidden');
-                        imageError.classList.remove('hidden');
-                    }
-                }, 10000);
-            } else {
-                imageContainer.classList.add('hidden');
-            }
-            
-            const optionsContainer = document.getElementById('answerOptions');
-            optionsContainer.innerHTML = '';
-            
-            const options = [
-                { key: 'A', text: question.optionA },
-                { key: 'B', text: question.optionB },
-                { key: 'C', text: question.optionC },
-                { key: 'D', text: question.optionD }
-            ];
-            
-            options.forEach(option => {
-                const button = document.createElement('button');
-                button.className = 'option-button w-full text-left p-6 border-2 border-white/30 rounded-xl hover:border-blue-400/70 hover:bg-white/10 transition-all duration-300 bg-white/5 backdrop-blur-sm';
-                button.innerHTML = `
-                    <span class="font-bold text-blue-300 mr-4 text-lg">${option.key}.</span>
-                    <span class="text-white text-lg">${option.text}</span>
                 `;
                 
-                button.addEventListener('click', () => selectAnswer(option.key, button));
-                optionsContainer.appendChild(button);
-            });
-            
-            if (userAnswers[currentQuestionIndex]) {
-                const selectedButton = optionsContainer.children[userAnswers[currentQuestionIndex].charCodeAt(0) - 65];
-                selectAnswer(userAnswers[currentQuestionIndex], selectedButton, false);
+                document.body.appendChild(alreadyTakenScreen);
             }
             
-            document.getElementById('feedback').classList.add('hidden');
-            updateNavigationButtons();
-        }
-
-        function selectAnswer(selectedOption, buttonEl, showFeedback = true) {
-            const optionsContainer = document.getElementById('answerOptions');
-            Array.from(optionsContainer.children).forEach(btn => {
-                btn.classList.remove('border-blue-400', 'bg-blue-500/20', 'correct-answer', 'wrong-answer');
-                btn.classList.add('border-white/30');
-            });
-            
-            buttonEl.classList.remove('border-white/30');
-            buttonEl.classList.add('border-blue-400', 'bg-blue-500/20');
-            
-            userAnswers[currentQuestionIndex] = selectedOption;
-            
-            if (showFeedback) {
-                setTimeout(() => {
-                    showAnswerFeedback(selectedOption, buttonEl);
-                }, 300);
-            }
-            
-            document.getElementById('nextBtn').disabled = false;
-        }
-
-        function showAnswerFeedback(selectedOption, selectedButton) {
-            const question = questions[currentQuestionIndex];
-            const isCorrect = selectedOption === question.correctAnswer;
-            const feedbackEl = document.getElementById('feedback');
-            
-            if (isCorrect) {
-                score += 10;
-                updateScoreDisplay();
-                selectedButton.classList.add('correct-answer');
-                selectedButton.classList.add('success-celebration');
+            showProfile() {
+                document.getElementById('profileAbsen').textContent = this.currentUser.absen;
+                document.getElementById('profileNama').textContent = this.currentUser.nama;
+                document.getElementById('profileKelas').textContent = this.currentUser.kelas;
                 
-                // Trigger mini confetti for correct answer
-                confetti({
-                    particleCount: 50,
-                    spread: 60,
-                    origin: { y: 0.8 }
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('profileScreen').classList.remove('hidden');
+            }
+            
+            async startQuiz() {
+                // Double check if quiz was already taken
+                if (this.quizTaken) {
+                    alert('Anda sudah mengerjakan kuis ini sebelumnya!');
+                    return;
+                }
+                
+                try {
+                    const response = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vS6MUHUUMK-sG6H063aooPSe7p1hol73KsFMfBBmzTLHFGs33oiuoGpMZd66lRQNvNcVSx1l9P8KgIe/pub?gid=0&single=true&output=csv');
+                    const csvData = await response.text();
+                    this.questions = this.parseQuestions(csvData);
+                    
+                    // Mark that quiz is being taken
+                    this.quizTaken = true;
+                    
+                    document.getElementById('profileScreen').classList.add('hidden');
+                    document.getElementById('quizScreen').classList.remove('hidden');
+                    
+                    document.getElementById('totalQuestions').textContent = this.questions.length;
+                    this.createQuestionNavigation();
+                    this.startTimer();
+                    this.showQuestion();
+                } catch (error) {
+                    alert('Gagal memuat soal kuis!');
+                }
+            }
+            
+            parseCSV(csvData) {
+                const lines = csvData.split('\n');
+                const result = [];
+                
+                for (let i = 1; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (line) {
+                        const columns = this.parseCSVLine(line);
+                        if (columns.length >= 4) {
+                            result.push({
+                                username: columns[0],
+                                password: columns[1],
+                                absen: columns[2],
+                                nama: columns[3],
+                                kelas: columns[4] || ''
+                            });
+                        }
+                    }
+                }
+                
+                return result;
+            }
+            
+            parseQuestions(csvData) {
+                const lines = csvData.split('\n');
+                const result = [];
+                
+                for (let i = 1; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (line) {
+                        const columns = this.parseCSVLine(line);
+                        if (columns.length >= 7) {
+                            result.push({
+                                question: columns[0],
+                                optionA: columns[1],
+                                optionB: columns[2],
+                                optionC: columns[3],
+                                optionD: columns[4],
+                                correctAnswer: columns[5],
+                                explanation: columns[6],
+                                image: columns[7] || ''
+                            });
+                        }
+                    }
+                }
+                
+                return result;
+            }
+            
+            parseCSVLine(line) {
+                const result = [];
+                let current = '';
+                let inQuotes = false;
+                
+                for (let i = 0; i < line.length; i++) {
+                    const char = line[i];
+                    
+                    if (char === '"') {
+                        inQuotes = !inQuotes;
+                    } else if (char === ',' && !inQuotes) {
+                        result.push(current.trim());
+                        current = '';
+                    } else {
+                        current += char;
+                    }
+                }
+                
+                result.push(current.trim());
+                return result;
+            }
+            
+            createQuestionNavigation() {
+                const navigationContainer = document.getElementById('questionNavigation');
+                navigationContainer.innerHTML = '';
+                
+                for (let i = 0; i < this.questions.length; i++) {
+                    const button = document.createElement('button');
+                    button.className = 'w-8 h-8 rounded text-xs font-semibold transition-all duration-200 hover:scale-110';
+                    button.textContent = i + 1;
+                    button.addEventListener('click', () => this.goToQuestion(i));
+                    navigationContainer.appendChild(button);
+                }
+                
+                this.updateQuestionNavigation();
+            }
+            
+            updateQuestionNavigation() {
+                const buttons = document.querySelectorAll('#questionNavigation button');
+                
+                buttons.forEach((button, index) => {
+                    // Reset classes
+                    button.className = 'w-8 h-8 rounded text-xs font-semibold transition-all duration-200 hover:scale-110';
+                    
+                    if (index === this.currentQuestionIndex) {
+                        // Current question - blue
+                        button.classList.add('bg-blue-500', 'text-white', 'ring-2', 'ring-blue-300');
+                    } else if (this.answers[index]) {
+                        // Answered question
+                        if (this.answers[index].correct) {
+                            // Correct answer - green
+                            button.classList.add('bg-green-500', 'text-white');
+                        } else {
+                            // Wrong answer - red
+                            button.classList.add('bg-red-500', 'text-white');
+                        }
+                    } else {
+                        // Unanswered question - gray
+                        button.classList.add('bg-white/20', 'text-white', 'hover:bg-white/30');
+                    }
                 });
-            } else {
-                selectedButton.classList.add('wrong-answer');
+            }
+            
+            goToQuestion(questionIndex) {
+                if (questionIndex >= 0 && questionIndex < this.questions.length) {
+                    this.currentQuestionIndex = questionIndex;
+                    this.showQuestion();
+                }
+            }
+
+            showQuestion() {
+                const question = this.questions[this.currentQuestionIndex];
+                this.isAnswered = this.answers[this.currentQuestionIndex] ? true : false;
                 
-                const correctIndex = question.correctAnswer.charCodeAt(0) - 65;
-                const correctButton = document.getElementById('answerOptions').children[correctIndex];
-                correctButton.classList.add('correct-answer');
-                correctButton.classList.remove('border-white/30');
-            }
-            
-            feedbackEl.innerHTML = `
-                <div class="flex items-start space-x-4">
-                    <div class="text-4xl">
-                        ${isCorrect ? '✅' : '❌'}
-                    </div>
-                    <div class="flex-1">
-                        <div class="font-bold text-xl ${isCorrect ? 'text-green-300' : 'text-red-300'} mb-3">
-                            ${isCorrect ? 'Benar! Hebat! 🎉' : 'Salah! Jangan menyerah! 😔'}
-                        </div>
-                        ${!isCorrect ? `<div class="text-blue-200 mb-3">Jawaban yang benar: <strong class="text-green-300 text-lg">${question.correctAnswer}</strong></div>` : ''}
-                        <div class="text-blue-100 bg-white/10 p-4 rounded-lg border border-white/20 backdrop-blur-sm">
-                            <strong class="text-blue-200">Penjelasan:</strong> ${question.explanation}
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            feedbackEl.className = `mt-8 p-6 rounded-xl border-2 ${isCorrect ? 'bg-green-500/20 border-green-400/50' : 'bg-red-500/20 border-red-400/50'} backdrop-blur-sm`;
-            feedbackEl.classList.remove('hidden');
-            feedbackEl.classList.add('fade-in');
-        }
-
-        function updateScoreDisplay() {
-            document.getElementById('scoreDisplay').textContent = `Skor: ${score}`;
-        }
-
-        function updateProgress() {
-            const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
-            document.getElementById('progressBar').style.width = `${progress}%`;
-            document.getElementById('questionProgress').textContent = `Soal ${currentQuestionIndex + 1} dari ${questions.length}`;
-        }
-
-        function updateNavigationButtons() {
-            const prevBtn = document.getElementById('prevBtn');
-            const nextBtn = document.getElementById('nextBtn');
-            
-            prevBtn.disabled = currentQuestionIndex === 0;
-            nextBtn.disabled = !userAnswers[currentQuestionIndex];
-            
-            if (currentQuestionIndex === questions.length - 1) {
-                nextBtn.textContent = '🏁 Selesai';
-            } else {
-                nextBtn.textContent = 'Selanjutnya →';
-            }
-        }
-
-        function previousQuestion() {
-            if (currentQuestionIndex > 0) {
-                currentQuestionIndex--;
-                showQuestion();
-                updateProgress();
-            }
-        }
-
-        function nextQuestion() {
-            if (currentQuestionIndex < questions.length - 1) {
-                currentQuestionIndex++;
-                showQuestion();
-                updateProgress();
-            } else {
-                endQuiz();
-            }
-        }
-
-        function endQuiz() {
-            if (timerInterval) {
-                clearInterval(timerInterval);
-            }
-            
-            quizCompleted = true;
-            completedUsers.add(currentUser.username);
-            
-            const finalScore = score;
-            const maxScore = questions.length * 10;
-            const percentage = Math.round((finalScore / maxScore) * 100);
-            
-            saveResult(finalScore);
-            showResult(finalScore, percentage);
-        }
-
-        function showResult(finalScore = score, percentage = Math.round((score / (questions.length * 10)) * 100)) {
-            document.getElementById('quizScreen').classList.add('hidden');
-            document.getElementById('resultScreen').classList.remove('hidden');
-            
-            document.getElementById('finalScore').textContent = finalScore;
-            document.getElementById('scorePercentage').textContent = `${percentage}%`;
-            
-            const resultIcon = document.getElementById('resultIcon');
-            const appreciation = document.getElementById('appreciation');
-            
-            let iconText = '🎉';
-            let appreciationText = 'Kerja bagus! 👏';
-            let appreciationClass = 'bg-gradient-to-r from-blue-500/20 to-purple-500/20 border-blue-400/30';
-            
-            if (percentage >= 90) {
-                iconText = '🏆';
-                appreciationText = 'Luar biasa! Nilai sempurna! 🌟';
-                appreciationClass = 'bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border-yellow-400/30';
+                document.getElementById('currentQuestion').textContent = this.currentQuestionIndex + 1;
+                document.getElementById('questionText').textContent = question.question;
                 
-                // Major confetti celebration
-                const duration = 4000;
-                const end = Date.now() + duration;
-
-                (function frame() {
+                // Show image if available
+                if (question.image && question.image.trim()) {
+                    document.getElementById('questionImg').src = question.image;
+                    document.getElementById('questionImage').classList.remove('hidden');
+                } else {
+                    document.getElementById('questionImage').classList.add('hidden');
+                }
+                
+                // Create options
+                const optionsContainer = document.getElementById('optionsContainer');
+                optionsContainer.innerHTML = '';
+                
+                const options = [
+                    { key: 'A', text: question.optionA },
+                    { key: 'B', text: question.optionB },
+                    { key: 'C', text: question.optionC },
+                    { key: 'D', text: question.optionD }
+                ];
+                
+                options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.className = 'w-full text-left p-4 bg-white/10 hover:bg-white/20 border border-white/30 rounded-lg text-white transition-all duration-200 hover:scale-105';
+                    button.innerHTML = `<span class="font-semibold">${option.key}.</span> ${option.text}`;
+                    
+                    // If this question was already answered, show the previous selection
+                    if (this.answers[this.currentQuestionIndex]) {
+                        const answer = this.answers[this.currentQuestionIndex];
+                        if (answer.selected === option.key) {
+                            button.style.backgroundColor = answer.correct ? 'rgb(34, 197, 94)' : 'rgb(239, 68, 68)';
+                        } else if (option.key === question.correctAnswer && !answer.correct) {
+                            button.style.backgroundColor = 'rgb(34, 197, 94)';
+                        }
+                        button.style.pointerEvents = 'none'; // Disable clicking on answered questions
+                    } else {
+                        button.addEventListener('click', () => this.selectAnswer(option.key, button));
+                    }
+                    
+                    optionsContainer.appendChild(button);
+                });
+                
+                // Show/hide feedback based on whether question was answered
+                if (this.answers[this.currentQuestionIndex]) {
+                    this.showPreviousFeedback();
+                } else {
+                    document.getElementById('feedback').classList.add('hidden');
+                }
+                
+                // Update progress
+                const progress = ((this.currentQuestionIndex + 1) / this.questions.length) * 100;
+                document.getElementById('progressBar').style.width = progress + '%';
+                
+                // Update navigation buttons
+                const prevBtn = document.getElementById('prevBtn');
+                const nextBtn = document.getElementById('nextBtn');
+                
+                // Sembunyikan tombol sebelumnya
+                prevBtn.style.display = 'none';
+                
+                nextBtn.textContent = this.currentQuestionIndex === this.questions.length - 1 ? 'Selesai' : 'Selanjutnya →';
+                
+                // Update question navigation
+                this.updateQuestionNavigation();
+            }
+            
+            showPreviousFeedback() {
+                const question = this.questions[this.currentQuestionIndex];
+                const answer = this.answers[this.currentQuestionIndex];
+                const feedback = document.getElementById('feedback');
+                const feedbackContent = document.getElementById('feedbackContent');
+                
+                feedbackContent.className = `p-4 rounded-lg ${answer.correct ? 'bg-green-600' : 'bg-red-600'}`;
+                feedbackContent.innerHTML = `
+                    <div class="flex items-center mb-2">
+                        <span class="text-2xl mr-2">${answer.correct ? '✅' : '❌'}</span>
+                        <span class="font-semibold">${answer.correct ? 'Benar!' : 'Salah!'}</span>
+                    </div>
+                    ${!answer.correct ? `<p class="mb-2"><strong>Jawaban yang benar:</strong> ${question.correctAnswer}</p>` : ''}
+                    <p><strong>Penjelasan:</strong> ${question.explanation}</p>
+                `;
+                
+                feedback.classList.remove('hidden');
+            }
+            
+            selectAnswer(selectedKey, buttonElement) {
+                if (this.isAnswered) return;
+                
+                this.isAnswered = true;
+                const question = this.questions[this.currentQuestionIndex];
+                const isCorrect = selectedKey === question.correctAnswer;
+                
+                // Store answer
+                this.answers[this.currentQuestionIndex] = {
+                    selected: selectedKey,
+                    correct: isCorrect
+                };
+                
+                // Update score
+                if (isCorrect) {
+                    this.score += 10;
+                    document.getElementById('currentScore').textContent = this.score;
+                }
+                
+                // Show feedback with animation
+                this.showFeedback(isCorrect, question, buttonElement);
+            }
+            
+            showFeedback(isCorrect, question, selectedButton) {
+                const feedback = document.getElementById('feedback');
+                const feedbackContent = document.getElementById('feedbackContent');
+                
+                // Animate selected button
+                if (isCorrect) {
+                    selectedButton.classList.add('pulse-success');
+                    selectedButton.style.backgroundColor = 'rgb(34, 197, 94)';
+                    this.showSuccessAnimation();
+                } else {
+                    selectedButton.classList.add('pulse-error', 'shake');
+                    selectedButton.style.backgroundColor = 'rgb(239, 68, 68)';
+                    
+                    // Highlight correct answer
+                    const options = document.querySelectorAll('#optionsContainer button');
+                    options.forEach(btn => {
+                        if (btn.textContent.startsWith(question.correctAnswer + '.')) {
+                            btn.style.backgroundColor = 'rgb(34, 197, 94)';
+                            btn.classList.add('pulse-success');
+                        }
+                    });
+                }
+                
+                // Show feedback message
+                feedbackContent.className = `p-4 rounded-lg ${isCorrect ? 'bg-green-600' : 'bg-red-600'}`;
+                feedbackContent.innerHTML = `
+                    <div class="flex items-center mb-2">
+                        <span class="text-2xl mr-2">${isCorrect ? '✅' : '❌'}</span>
+                        <span class="font-semibold">${isCorrect ? 'Benar!' : 'Salah!'}</span>
+                    </div>
+                    ${!isCorrect ? `<p class="mb-2"><strong>Jawaban yang benar:</strong> ${question.correctAnswer}</p>` : ''}
+                    <p><strong>Penjelasan:</strong> ${question.explanation}</p>
+                `;
+                
+                feedback.classList.remove('hidden');
+                feedback.classList.add('slide-in');
+                
+                // Update navigation immediately after answering
+                this.updateQuestionNavigation();
+                
+                // Auto advance after 3 seconds
+                setTimeout(() => {
+                    if (this.currentQuestionIndex < this.questions.length - 1) {
+                        this.nextQuestion();
+                    }
+                }, 3000);
+            }
+            
+            showSuccessAnimation() {
+                // Create floating success indicator
+                const indicator = document.createElement('div');
+                indicator.textContent = '+10';
+                indicator.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-4xl font-bold text-green-400 pointer-events-none z-50';
+                indicator.style.animation = 'fadeIn 0.5s ease-in-out, slideIn 0.5s ease-out';
+                document.body.appendChild(indicator);
+                
+                setTimeout(() => {
+                    indicator.remove();
+                }, 1000);
+            }
+            
+            nextQuestion() {
+                if (this.currentQuestionIndex < this.questions.length - 1) {
+                    this.currentQuestionIndex++;
+                    this.showQuestion();
+                } else {
+                    this.finishQuiz();
+                }
+            }
+            
+            prevQuestion() {
+                // Tombol sebelumnya dinonaktifkan untuk mencegah kembali ke soal sebelumnya
+                return;
+            }
+            
+            async finishQuiz() {
+                this.quizCompleted = true;
+                clearInterval(this.timer);
+                
+                const totalQuestions = this.questions.length;
+                const correctAnswers = this.answers.filter(a => a && a.correct).length;
+                const percentage = Math.round((correctAnswers / totalQuestions) * 100);
+                
+                // Save results
+                await this.saveResults(this.score);
+                
+                // Show results
+                document.getElementById('quizScreen').classList.add('hidden');
+                document.getElementById('resultScreen').classList.remove('hidden');
+                
+                document.getElementById('finalScore').textContent = this.score;
+                document.getElementById('finalPercentage').textContent = percentage + '%';
+                
+                // Show appropriate message and animation
+                this.showResultMessage(percentage);
+                
+                // Countdown to return to login
+                this.startReturnCountdown();
+            }
+            
+            showResultMessage(percentage) {
+                const messageEl = document.getElementById('scoreMessage');
+                const iconEl = document.getElementById('resultIcon');
+                
+                if (percentage >= 90) {
+                    messageEl.textContent = '🌟 Luar biasa! Nilai sempurna!';
+                    iconEl.textContent = '🏆';
+                    this.showConfetti();
+                } else if (percentage >= 80) {
+                    messageEl.textContent = '👏 Bagus sekali! Pertahankan!';
+                    iconEl.textContent = '🎉';
+                } else if (percentage >= 70) {
+                    messageEl.textContent = '👍 Cukup baik, terus belajar!';
+                    iconEl.textContent = '😊';
+                } else if (percentage >= 60) {
+                    messageEl.textContent = '📚 Perlu belajar lebih giat lagi!';
+                    iconEl.textContent = '😐';
+                } else {
+                    messageEl.textContent = '💪 Jangan menyerah, terus berlatih!';
+                    iconEl.textContent = '😔';
+                }
+            }
+            
+            showConfetti() {
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+                
+                setTimeout(() => {
                     confetti({
                         particleCount: 50,
                         angle: 60,
                         spread: 55,
                         origin: { x: 0 }
                     });
+                }, 250);
+                
+                setTimeout(() => {
                     confetti({
                         particleCount: 50,
                         angle: 120,
                         spread: 55,
                         origin: { x: 1 }
                     });
-
-                    if (Date.now() < end) {
-                        requestAnimationFrame(frame);
-                    }
-                }());
-            } else if (percentage >= 80) {
-                iconText = '🎖️';
-                appreciationText = 'Sangat baik! Pertahankan! 💪';
-                appreciationClass = 'bg-gradient-to-r from-green-500/20 to-emerald-500/20 border-green-400/30';
-                
-                confetti({
-                    particleCount: 100,
-                    spread: 70,
-                    origin: { y: 0.6 }
-                });
-            } else if (percentage >= 70) {
-                iconText = '👍';
-                appreciationText = 'Baik! Terus belajar ya! 📚';
-                appreciationClass = 'bg-gradient-to-r from-blue-500/20 to-indigo-500/20 border-blue-400/30';
-            } else if (percentage >= 60) {
-                iconText = '😊';
-                appreciationText = 'Cukup baik, tingkatkan lagi! 💡';
-                appreciationClass = 'bg-gradient-to-r from-yellow-500/20 to-amber-500/20 border-yellow-400/30';
-            } else {
-                iconText = '💪';
-                appreciationText = 'Jangan menyerah, terus belajar! 🚀';
-                appreciationClass = 'bg-gradient-to-r from-red-500/20 to-pink-500/20 border-red-400/30';
+                }, 400);
             }
             
-            resultIcon.textContent = iconText;
-            appreciation.innerHTML = `<p class="text-white font-bold text-lg">${appreciationText}</p>`;
-            appreciation.className = `${appreciationClass} rounded-xl p-6 mb-8 border backdrop-blur-sm`;
-            
-            startLoginCountdown();
-        }
-
-        function startLoginCountdown() {
-            let countdown = 2;
-            const countdownEl = document.getElementById('loginCountdown');
-            
-            const countdownInterval = setInterval(() => {
-                countdownEl.textContent = countdown;
-                countdown--;
-                
-                if (countdown < 0) {
-                    clearInterval(countdownInterval);
-                    backToLogin();
+            async saveResults(score) {
+                try {
+                    const formData = new FormData();
+                    formData.append('NIS', this.currentUser.username);
+                    formData.append('Absen', this.currentUser.absen);
+                    formData.append('NamaLengkap', this.currentUser.nama);
+                    formData.append('Kelas', this.currentUser.kelas);
+                    formData.append('HasilNilai', score);
+                    
+                    await fetch('https://script.google.com/macros/s/AKfycbyy0FYm7Djd8RoyCjGKgXqCAJtO2qpmT4EI7CoiToseDfF-M45TlgG1yng7cJH-7G8pgw/exec', {
+                        method: 'POST',
+                        body: formData
+                    });
+                } catch (error) {
+                    console.error('Gagal menyimpan hasil:', error);
                 }
-            }, 1000);
-        }
-
-        function backToLogin() {
-            exitFullscreen();
+            }
             
-            currentUser = null;
-            questions = [];
-            userAnswers = [];
-            currentQuestionIndex = 0;
-            score = 0;
-            warningCount = 0;
-            timeLeft = 60 * 60;
-            quizStarted = false;
-            quizCompleted = false;
-            
-            document.getElementById('loginForm').reset();
-            document.getElementById('loginError').classList.add('hidden');
-            
-            document.getElementById('resultScreen').classList.add('hidden');
-            document.getElementById('loginScreen').classList.remove('hidden');
-        }
-
-        async function saveResult(finalScore) {
-            try {
-                const formData = new FormData();
-                formData.append('NIS', currentUser.username);
-                formData.append('Absen', currentUser.absen);
-                formData.append('NamaLengkap', currentUser.nama);
-                formData.append('Kelas', currentUser.kelas);
-                formData.append('HasilNilai', finalScore);
+            startReturnCountdown() {
+                let countdown = 2;
+                const countdownEl = document.getElementById('countdown');
                 
-                const response = await fetch('https://script.google.com/macros/s/AKfycbyy0FYm7Djd8RoyCjGKgXqCAJtO2qpmT4EI7CoiToseDfF-M45TlgG1yng7cJH-7G8pgw/exec', {
-                    method: 'POST',
-                    body: formData
-                });
+                const interval = setInterval(() => {
+                    countdown--;
+                    countdownEl.textContent = countdown;
+                    
+                    if (countdown <= 0) {
+                        clearInterval(interval);
+                        this.returnToLogin();
+                    }
+                }, 1000);
+            }
+            
+            returnToLogin() {
+                // Reset all data
+                this.currentUser = null;
+                this.questions = [];
+                this.currentQuestionIndex = 0;
+                this.score = 0;
+                this.answers = [];
+                this.timeLeft = 3600;
+                this.warningCount = 0;
+                this.quizCompleted = false;
+                this.navigationVisible = true;
+                this.quizTaken = false;
                 
-                const result = await response.text();
-                console.log('Result saved:', result);
-            } catch (error) {
-                console.error('Error saving result:', error);
+                // Reset UI
+                document.getElementById('resultScreen').classList.add('hidden');
+                document.getElementById('loginScreen').classList.remove('hidden');
+                document.getElementById('loginForm').reset();
+                document.getElementById('loginError').classList.add('hidden');
+                document.getElementById('currentScore').textContent = '0';
+                document.getElementById('warningCount').textContent = '0';
+                
+                // Remove already taken screen if exists
+                const alreadyTakenScreen = document.getElementById('alreadyTakenScreen');
+                if (alreadyTakenScreen) {
+                    alreadyTakenScreen.remove();
+                }
+            }
+            
+            startTimer() {
+                this.timer = setInterval(() => {
+                    this.timeLeft--;
+                    
+                    const minutes = Math.floor(this.timeLeft / 60);
+                    const seconds = this.timeLeft % 60;
+                    const timerEl = document.getElementById('timer');
+                    
+                    timerEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                    
+                    // Warning when time is running out
+                    if (this.timeLeft <= 300) { // 5 minutes
+                        timerEl.classList.add('timer-warning');
+                    }
+                    
+                    if (this.timeLeft <= 0) {
+                        this.finishQuiz();
+                    }
+                }, 1000);
+            }
+            
+            showWarning(message) {
+                if (this.quizCompleted) return;
+                
+                this.warningCount++;
+                document.getElementById('warningCount').textContent = this.warningCount;
+                document.getElementById('warningMessage').textContent = message;
+                document.getElementById('warningModalCount').textContent = this.warningCount;
+                document.getElementById('warningModal').classList.remove('hidden');
+                
+                if (this.warningCount >= 3) {
+                    setTimeout(() => {
+                        alert('Kuis dihentikan karena terlalu banyak pelanggaran!');
+                        this.finishQuiz();
+                    }, 2000);
+                }
+            }
+            
+            closeWarning() {
+                document.getElementById('warningModal').classList.add('hidden');
+            }
+            
+            toggleNavigation() {
+                if (this.navigationVisible) {
+                    this.hideNavigation();
+                } else {
+                    this.showNavigation();
+                }
+            }
+            
+            hideNavigation() {
+                const sidebar = document.getElementById('navigationSidebar');
+                sidebar.style.width = '0';
+                sidebar.style.overflow = 'hidden';
+                sidebar.style.opacity = '0';
+                this.navigationVisible = false;
+                
+                document.getElementById('toggleNavBtn').textContent = '📋 Tampilkan Menu';
+            }
+            
+            showNavigation() {
+                const sidebar = document.getElementById('navigationSidebar');
+                sidebar.style.width = '16rem'; // w-64 = 16rem
+                sidebar.style.overflow = 'visible';
+                sidebar.style.opacity = '1';
+                this.navigationVisible = true;
+                
+                document.getElementById('toggleNavBtn').textContent = '📋 Menu';
             }
         }
+        
+        // Initialize the quiz app
+        const quizApp = new QuizApp();
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9900ecb8c2c8fdbb',t:'MTc2MDcxNTk0NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99012041a1160d7e',t:'MTc2MDcxODA1NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
