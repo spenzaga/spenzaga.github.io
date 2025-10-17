@@ -139,9 +139,39 @@
                 </div>
             </div>
             
-            <button id="startQuizBtn" 
-                    class="w-full bg-gradient-to-r from-green-500 to-blue-600 text-white py-3 rounded-lg font-semibold hover:from-green-600 hover:to-blue-700 transform hover:scale-105 transition-all duration-200 shadow-lg">
-                🚀 Mulai Kuis
+            <div class="space-y-3">
+                <button id="startQuizBtn" 
+                        class="w-full bg-gradient-to-r from-green-500 to-blue-600 text-white py-3 rounded-lg font-semibold hover:from-green-600 hover:to-blue-700 transform hover:scale-105 transition-all duration-200 shadow-lg">
+                    🚀 Mulai Kuis
+                </button>
+                
+                <button id="backToLoginBtn" 
+                        class="w-full bg-gradient-to-r from-gray-500 to-gray-600 text-white py-3 rounded-lg font-semibold hover:from-gray-600 hover:to-gray-700 transform hover:scale-105 transition-all duration-200 shadow-lg">
+                    ← Kembali ke Login
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Already Completed Screen -->
+    <div id="alreadyCompletedScreen" class="h-full flex items-center justify-center hidden">
+        <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-8 w-96 shadow-2xl border border-white/20 slide-in text-center">
+            <div class="text-6xl mb-4">⚠️</div>
+            <h2 class="text-3xl font-bold text-white mb-4">Kuis Sudah Dikerjakan!</h2>
+            
+            <div class="bg-red-500/20 border border-red-500 rounded-lg p-6 mb-6">
+                <p class="text-white text-lg">Anda sudah mengerjakan kuis ini sebelumnya.</p>
+                <p class="text-red-200 mt-2">Setiap peserta hanya dapat mengerjakan kuis satu kali.</p>
+            </div>
+            
+            <div id="previousScoreInfo" class="bg-white/10 rounded-lg p-4 mb-6 hidden">
+                <div class="text-blue-200 text-sm mb-1">Nilai Sebelumnya:</div>
+                <div id="previousScore" class="text-2xl font-bold text-white"></div>
+            </div>
+            
+            <button id="backToLoginFromCompleted" 
+                    class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 rounded-lg font-semibold hover:from-blue-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 shadow-lg">
+                ← Kembali ke Login
             </button>
         </div>
     </div>
@@ -269,6 +299,14 @@
                     this.startQuiz();
                 });
                 
+                document.getElementById('backToLoginBtn').addEventListener('click', () => {
+                    this.backToLogin();
+                });
+                
+                document.getElementById('backToLoginFromCompleted').addEventListener('click', () => {
+                    this.backToLogin();
+                });
+                
                 document.getElementById('navToggle').addEventListener('click', () => {
                     this.toggleNavigation();
                 });
@@ -326,6 +364,43 @@
                 }
             }
             
+            async loadCompletedResults() {
+                try {
+                    // Load hasil kuis dari sheet "Hasil" untuk cek duplikasi
+                    // Menggunakan gid yang berbeda untuk sheet Hasil
+                    const response = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vSXp8px6BoP8tsTKMbk7hMvX96h9O5MPS52OLnDm3JQ-1WpXWIS7e94-K-eAxtVHvONK_DEmoR_yka0/pub?gid=1234567890&single=true&output=csv');
+                    const csvText = await response.text();
+                    this.completedResults = this.parseCSV(csvText);
+                } catch (error) {
+                    console.error('Error loading completed results:', error);
+                    this.completedResults = [];
+                }
+            }
+            
+            checkIfAlreadyCompleted(username) {
+                if (!this.completedResults) return false;
+                
+                const existingResult = this.completedResults.find(row => 
+                    row[0] === username // NIS/Username di kolom pertama
+                );
+                
+                return existingResult ? {
+                    completed: true,
+                    score: existingResult[4] || 0 // Nilai di kolom ke-5
+                } : { completed: false };
+            }
+            
+            backToLogin() {
+                // Reset form dan kembali ke login
+                document.getElementById('loginForm').reset();
+                document.getElementById('profileScreen').classList.add('hidden');
+                document.getElementById('alreadyCompletedScreen').classList.add('hidden');
+                document.getElementById('loginScreen').classList.remove('hidden');
+                
+                // Reset user data
+                this.currentUser = null;
+            }
+            
             async loadQuestions() {
                 try {
                     const response = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vS6MUHUUMK-sG6H063aooPSe7p1hol73KsFMfBBmzTLHFGs33oiuoGpMZd66lRQNvNcVSx1l9P8KgIe/pub?gid=0&single=true&output=csv');
@@ -372,7 +447,7 @@
                 });
             }
             
-            handleLogin() {
+            async handleLogin() {
                 const username = document.getElementById('username').value;
                 const password = document.getElementById('password').value;
                 
@@ -381,6 +456,24 @@
                 );
                 
                 if (user) {
+                    // Load hasil kuis untuk cek duplikasi
+                    await this.loadCompletedResults();
+                    
+                    // Cek apakah user sudah mengerjakan kuis
+                    const completionStatus = this.checkIfAlreadyCompleted(username);
+                    
+                    if (completionStatus.completed) {
+                        this.currentUser = {
+                            username: user[0],
+                            password: user[1],
+                            absen: user[2] || '',
+                            nama: user[3] || '',
+                            kelas: user[4] || ''
+                        };
+                        this.showAlreadyCompleted(completionStatus.score);
+                        return;
+                    }
+                    
                     this.currentUser = {
                         username: user[0],
                         password: user[1],
@@ -409,6 +502,16 @@
                 
                 document.getElementById('loginScreen').classList.add('hidden');
                 document.getElementById('profileScreen').classList.remove('hidden');
+            }
+            
+            showAlreadyCompleted(previousScore) {
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('alreadyCompletedScreen').classList.remove('hidden');
+                
+                if (previousScore && previousScore > 0) {
+                    document.getElementById('previousScore').textContent = previousScore;
+                    document.getElementById('previousScoreInfo').classList.remove('hidden');
+                }
             }
             
             async startQuiz() {
@@ -791,5 +894,5 @@
         document.documentElement.webkitRequestFullscreen?.() || 
         document.documentElement.msRequestFullscreen?.();
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99015d39b3774e24',t:'MTc2MDcyMDU1Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99016b6b447ade12',t:'MTc2MDcyMTEzMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
