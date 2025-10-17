@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis Interaktif</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            box-sizing: border-box;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .pulse-correct {
+            animation: pulseCorrect 0.6s ease-in-out;
+        }
+        @keyframes pulseCorrect {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); background-color: #10b981; }
+            100% { transform: scale(1); }
+        }
+        .shake-wrong {
+            animation: shakeWrong 0.6s ease-in-out;
+        }
+        @keyframes shakeWrong {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+    </style>
+</head>
+<body class="h-full bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-700 font-sans">
+    <div class="min-h-full flex items-center justify-center p-4">
+        <div class="w-full max-w-2xl">
+            <!-- Loading Screen -->
+            <div id="loadingScreen" class="bg-white rounded-2xl shadow-2xl p-8 text-center">
+                <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-purple-600 mx-auto mb-4"></div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">Memuat Kuis...</h2>
+                <p class="text-gray-600">Mengambil data dari Google Sheet</p>
+            </div>
+
+            <!-- Welcome Screen -->
+            <div id="welcomeScreen" class="bg-white rounded-2xl shadow-2xl p-8 text-center hidden">
+                <div class="mb-6">
+                    <div class="w-20 h-20 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-3xl">🧠</span>
+                    </div>
+                    <h1 class="text-3xl font-bold text-gray-800 mb-2">Kuis Interaktif</h1>
+                    <p class="text-gray-600">Uji pengetahuan Anda dengan kuis yang menarik!</p>
+                </div>
+                <div class="bg-gray-50 rounded-xl p-4 mb-6">
+                    <p class="text-sm text-gray-700 mb-2">📊 <span id="totalQuestions" class="font-semibold">0</span> pertanyaan tersedia</p>
+                    <p class="text-sm text-gray-700">⏱️ Tidak ada batas waktu</p>
+                </div>
+                <button id="startQuiz" class="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-3 px-8 rounded-xl transition-all duration-300 transform hover:scale-105">
+                    Mulai Kuis
+                </button>
+            </div>
+
+            <!-- Quiz Screen -->
+            <div id="quizScreen" class="bg-white rounded-2xl shadow-2xl p-8 hidden">
+                <div class="mb-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="text-sm font-medium text-gray-500">Pertanyaan <span id="currentQuestion">1</span> dari <span id="totalQuestionsQuiz">0</span></span>
+                        <span class="text-sm font-medium text-purple-600">Skor: <span id="currentScore">0</span></span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div id="progressBar" class="bg-gradient-to-r from-purple-600 to-blue-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="mb-8">
+                    <h2 id="questionText" class="text-xl font-bold text-gray-800 mb-6 leading-relaxed"></h2>
+                    <div id="optionsContainer" class="space-y-3">
+                        <!-- Options will be inserted here -->
+                    </div>
+                </div>
+
+                <div class="flex justify-between">
+                    <button id="prevButton" class="bg-gray-300 hover:bg-gray-400 text-gray-700 font-medium py-2 px-6 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                        ← Sebelumnya
+                    </button>
+                    <button id="nextButton" class="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                        Selanjutnya →
+                    </button>
+                </div>
+            </div>
+
+            <!-- Results Screen -->
+            <div id="resultsScreen" class="bg-white rounded-2xl shadow-2xl p-8 text-center hidden">
+                <div class="mb-6">
+                    <div id="resultIcon" class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-4xl" id="resultEmoji">🎉</span>
+                    </div>
+                    <h2 class="text-3xl font-bold text-gray-800 mb-2">Kuis Selesai!</h2>
+                    <p id="resultMessage" class="text-gray-600 mb-4"></p>
+                </div>
+
+                <div class="bg-gray-50 rounded-xl p-6 mb-6">
+                    <div class="grid grid-cols-3 gap-4 text-center">
+                        <div>
+                            <div class="text-2xl font-bold text-green-600" id="correctAnswers">0</div>
+                            <div class="text-sm text-gray-600">Benar</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold text-red-600" id="wrongAnswers">0</div>
+                            <div class="text-sm text-gray-600">Salah</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold text-purple-600" id="finalScore">0%</div>
+                            <div class="text-sm text-gray-600">Skor</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <button id="restartQuiz" class="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300">
+                        Ulangi Kuis
+                    </button>
+                    <button id="reviewAnswers" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-3 px-6 rounded-xl transition-colors duration-200">
+                        Lihat Pembahasan
+                    </button>
+                </div>
+            </div>
+
+            <!-- Review Screen -->
+            <div id="reviewScreen" class="bg-white rounded-2xl shadow-2xl p-8 hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Pembahasan Jawaban</h2>
+                    <p class="text-gray-600">Lihat jawaban yang benar dan penjelasannya</p>
+                </div>
+                <div id="reviewContainer" class="space-y-6 mb-6">
+                    <!-- Review items will be inserted here -->
+                </div>
+                <button id="backToResults" class="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-all duration-200">
+                    ← Kembali ke Hasil
+                </button>
+            </div>
+
+            <!-- Error Screen -->
+            <div id="errorScreen" class="bg-white rounded-2xl shadow-2xl p-8 text-center hidden">
+                <div class="mb-6">
+                    <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-3xl">❌</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Terjadi Kesalahan</h2>
+                    <p class="text-gray-600 mb-4">Tidak dapat memuat data kuis dari Google Sheet</p>
+                    <p class="text-sm text-gray-500">Pastikan link Google Sheet dapat diakses publik</p>
+                </div>
+                <button id="retryLoad" class="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300">
+                    Coba Lagi
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class QuizApp {
+            constructor() {
+                this.questions = [];
+                this.currentQuestionIndex = 0;
+                this.userAnswers = [];
+                this.score = 0;
+                this.csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSXp8px6BoP8tsTKMbk7hMvX96h9O5MPS52OLnDm3JQ-1WpXWIS7e94-K-eAxtVHvONK_DEmoR_yka0/pub?gid=0&single=true&output=csv';
+                
+                this.initializeEventListeners();
+                this.loadQuizData();
+            }
+
+            initializeEventListeners() {
+                document.getElementById('startQuiz').addEventListener('click', () => this.startQuiz());
+                document.getElementById('nextButton').addEventListener('click', () => this.nextQuestion());
+                document.getElementById('prevButton').addEventListener('click', () => this.prevQuestion());
+                document.getElementById('restartQuiz').addEventListener('click', () => this.restartQuiz());
+                document.getElementById('reviewAnswers').addEventListener('click', () => this.showReview());
+                document.getElementById('backToResults').addEventListener('click', () => this.showResults());
+                document.getElementById('retryLoad').addEventListener('click', () => this.loadQuizData());
+            }
+
+            async loadQuizData() {
+                this.showScreen('loadingScreen');
+                
+                try {
+                    const response = await fetch(this.csvUrl);
+                    if (!response.ok) throw new Error('Failed to fetch data');
+                    
+                    const csvText = await response.text();
+                    this.parseCSV(csvText);
+                    
+                    if (this.questions.length === 0) {
+                        throw new Error('No questions found');
+                    }
+                    
+                    this.showWelcomeScreen();
+                } catch (error) {
+                    console.error('Error loading quiz data:', error);
+                    this.showScreen('errorScreen');
+                }
+            }
+
+            parseCSV(csvText) {
+                const lines = csvText.trim().split('\n');
+                const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, '').toLowerCase());
+                
+                // Find column indices
+                const questionIndex = headers.findIndex(h => h.includes('pertanyaan') || h.includes('soal') || h.includes('question'));
+                const optionAIndex = headers.findIndex(h => h.includes('a') && (h.includes('pilihan') || h.includes('option')));
+                const optionBIndex = headers.findIndex(h => h.includes('b') && (h.includes('pilihan') || h.includes('option')));
+                const optionCIndex = headers.findIndex(h => h.includes('c') && (h.includes('pilihan') || h.includes('option')));
+                const optionDIndex = headers.findIndex(h => h.includes('d') && (h.includes('pilihan') || h.includes('option')));
+                const keyIndex = headers.findIndex(h => h.includes('kunci') || h.includes('jawaban') || h.includes('key'));
+                const explanationIndex = headers.findIndex(h => h.includes('penjelasan') || h.includes('pembahasan') || h.includes('explanation'));
+                
+                // Fallback to column positions if headers not found
+                const questionCol = questionIndex >= 0 ? questionIndex : 0;
+                const optionACol = optionAIndex >= 0 ? optionAIndex : 1;
+                const optionBCol = optionBIndex >= 0 ? optionBIndex : 2;
+                const optionCCol = optionCIndex >= 0 ? optionCIndex : 3;
+                const optionDCol = optionDIndex >= 0 ? optionDIndex : 4;
+                const keyCol = keyIndex >= 0 ? keyIndex : 5;
+                const explanationCol = explanationIndex >= 0 ? explanationIndex : 6;
+                
+                this.questions = [];
+                
+                for (let i = 1; i < lines.length; i++) {
+                    const values = this.parseCSVLine(lines[i]);
+                    if (values.length > Math.max(questionCol, optionACol, optionBCol, optionCCol, optionDCol, keyCol)) {
+                        const question = {
+                            question: values[questionCol] || '',
+                            optionA: values[optionACol] || '',
+                            optionB: values[optionBCol] || '',
+                            optionC: values[optionCCol] || '',
+                            optionD: values[optionDCol] || '',
+                            correctAnswer: (values[keyCol] || '').toUpperCase().trim(),
+                            explanation: values[explanationCol] || 'Tidak ada penjelasan tersedia.'
+                        };
+                        
+                        if (question.question && question.correctAnswer) {
+                            this.questions.push(question);
+                        }
+                    }
+                }
+            }
+
+            parseCSVLine(line) {
+                const result = [];
+                let current = '';
+                let inQuotes = false;
+                
+                for (let i = 0; i < line.length; i++) {
+                    const char = line[i];
+                    
+                    if (char === '"') {
+                        inQuotes = !inQuotes;
+                    } else if (char === ',' && !inQuotes) {
+                        result.push(current.trim());
+                        current = '';
+                    } else {
+                        current += char;
+                    }
+                }
+                
+                result.push(current.trim());
+                return result.map(item => item.replace(/^"|"$/g, ''));
+            }
+
+            showWelcomeScreen() {
+                document.getElementById('totalQuestions').textContent = this.questions.length;
+                this.showScreen('welcomeScreen');
+            }
+
+            startQuiz() {
+                this.currentQuestionIndex = 0;
+                this.userAnswers = new Array(this.questions.length).fill(null);
+                this.score = 0;
+                this.showQuestion();
+                this.showScreen('quizScreen');
+            }
+
+            showQuestion() {
+                const question = this.questions[this.currentQuestionIndex];
+                
+                // Remove any existing feedback
+                const existingFeedback = document.getElementById('answerFeedback');
+                if (existingFeedback) {
+                    existingFeedback.remove();
+                }
+                
+                document.getElementById('currentQuestion').textContent = this.currentQuestionIndex + 1;
+                document.getElementById('totalQuestionsQuiz').textContent = this.questions.length;
+                document.getElementById('currentScore').textContent = this.score;
+                document.getElementById('questionText').textContent = question.question;
+                
+                const progress = ((this.currentQuestionIndex + 1) / this.questions.length) * 100;
+                document.getElementById('progressBar').style.width = progress + '%';
+                
+                this.renderOptions();
+                this.updateNavigationButtons();
+            }
+
+            renderOptions() {
+                const question = this.questions[this.currentQuestionIndex];
+                const container = document.getElementById('optionsContainer');
+                const options = ['A', 'B', 'C', 'D'];
+                const optionTexts = [question.optionA, question.optionB, question.optionC, question.optionD];
+                
+                container.innerHTML = '';
+                
+                options.forEach((option, index) => {
+                    if (optionTexts[index]) {
+                        const button = document.createElement('button');
+                        button.className = 'w-full text-left p-4 rounded-lg border-2 border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500';
+                        button.innerHTML = `
+                            <span class="font-medium text-purple-600 mr-3">${option}.</span>
+                            <span class="text-gray-800">${optionTexts[index]}</span>
+                        `;
+                        
+                        // Check if this question was already answered
+                        const wasAnswered = this.userAnswers[this.currentQuestionIndex] !== null;
+                        
+                        if (wasAnswered) {
+                            // Disable button and show result styling
+                            button.disabled = true;
+                            button.classList.remove('hover:border-purple-300', 'hover:bg-purple-50');
+                            
+                            if (option === question.correctAnswer) {
+                                button.classList.add('border-green-500', 'bg-green-100');
+                            } else if (option === this.userAnswers[this.currentQuestionIndex]) {
+                                button.classList.add('border-red-500', 'bg-red-100');
+                            } else {
+                                button.classList.add('border-gray-300', 'bg-gray-50');
+                            }
+                        } else {
+                            // Enable interaction for unanswered questions
+                            button.addEventListener('click', () => this.selectAnswer(option, button));
+                        }
+                        
+                        container.appendChild(button);
+                    }
+                });
+                
+                // Show feedback if question was already answered
+                if (this.userAnswers[this.currentQuestionIndex] !== null) {
+                    const isCorrect = this.userAnswers[this.currentQuestionIndex] === question.correctAnswer;
+                    this.showAnswerFeedback(isCorrect, question);
+                }
+            }
+
+            selectAnswer(selectedOption, buttonElement) {
+                const question = this.questions[this.currentQuestionIndex];
+                const isCorrect = selectedOption === question.correctAnswer;
+                
+                // Disable all buttons to prevent multiple selections
+                const allButtons = document.querySelectorAll('#optionsContainer button');
+                allButtons.forEach(btn => {
+                    btn.disabled = true;
+                    btn.classList.remove('border-purple-500', 'bg-purple-100', 'hover:border-purple-300', 'hover:bg-purple-50');
+                });
+                
+                // Show correct answer styling
+                allButtons.forEach(btn => {
+                    const buttonText = btn.textContent.trim();
+                    const buttonOption = buttonText.charAt(0); // Get A, B, C, or D
+                    
+                    if (buttonOption === question.correctAnswer) {
+                        // Correct answer - green
+                        btn.classList.add('border-green-500', 'bg-green-100');
+                        btn.classList.add('pulse-correct');
+                    } else if (buttonOption === selectedOption && !isCorrect) {
+                        // Wrong selected answer - red
+                        btn.classList.add('border-red-500', 'bg-red-100');
+                        btn.classList.add('shake-wrong');
+                    } else {
+                        // Other options - gray
+                        btn.classList.add('border-gray-300', 'bg-gray-50');
+                    }
+                });
+                
+                // Store the answer
+                this.userAnswers[this.currentQuestionIndex] = selectedOption;
+                
+                // Show feedback message
+                this.showAnswerFeedback(isCorrect, question);
+                
+                // Enable next button after a short delay
+                setTimeout(() => {
+                    document.getElementById('nextButton').disabled = false;
+                }, 1000);
+            }
+
+            showAnswerFeedback(isCorrect, question) {
+                // Remove existing feedback
+                const existingFeedback = document.getElementById('answerFeedback');
+                if (existingFeedback) {
+                    existingFeedback.remove();
+                }
+                
+                // Create feedback element
+                const feedback = document.createElement('div');
+                feedback.id = 'answerFeedback';
+                feedback.className = `mt-4 p-4 rounded-lg border-l-4 fade-in ${
+                    isCorrect 
+                        ? 'bg-green-50 border-green-400 text-green-800' 
+                        : 'bg-red-50 border-red-400 text-red-800'
+                }`;
+                
+                const correctOptionText = this.getOptionText(question, question.correctAnswer);
+                
+                feedback.innerHTML = `
+                    <div class="flex items-start">
+                        <span class="text-2xl mr-3">${isCorrect ? '✅' : '❌'}</span>
+                        <div>
+                            <p class="font-semibold mb-1">
+                                ${isCorrect ? 'Benar!' : 'Salah!'}
+                            </p>
+                            ${!isCorrect ? `<p class="mb-2">Jawaban yang benar adalah <strong>${question.correctAnswer}. ${correctOptionText}</strong></p>` : ''}
+                            <p class="text-sm opacity-90">${question.explanation}</p>
+                        </div>
+                    </div>
+                `;
+                
+                // Insert feedback after options
+                const optionsContainer = document.getElementById('optionsContainer');
+                optionsContainer.parentNode.insertBefore(feedback, optionsContainer.nextSibling);
+            }
+
+            getOptionText(question, option) {
+                switch(option) {
+                    case 'A': return question.optionA;
+                    case 'B': return question.optionB;
+                    case 'C': return question.optionC;
+                    case 'D': return question.optionD;
+                    default: return '';
+                }
+            }
+
+            nextQuestion() {
+                if (this.currentQuestionIndex < this.questions.length - 1) {
+                    this.currentQuestionIndex++;
+                    this.showQuestion();
+                } else {
+                    this.finishQuiz();
+                }
+            }
+
+            prevQuestion() {
+                if (this.currentQuestionIndex > 0) {
+                    this.currentQuestionIndex--;
+                    this.showQuestion();
+                }
+            }
+
+            updateNavigationButtons() {
+                const prevButton = document.getElementById('prevButton');
+                const nextButton = document.getElementById('nextButton');
+                
+                prevButton.disabled = this.currentQuestionIndex === 0;
+                
+                const hasAnswer = this.userAnswers[this.currentQuestionIndex] !== null;
+                nextButton.disabled = !hasAnswer;
+                
+                if (this.currentQuestionIndex === this.questions.length - 1) {
+                    nextButton.textContent = 'Selesai';
+                } else {
+                    nextButton.textContent = 'Selanjutnya →';
+                }
+            }
+
+            finishQuiz() {
+                this.calculateScore();
+                this.showResults();
+            }
+
+            calculateScore() {
+                this.score = 0;
+                for (let i = 0; i < this.questions.length; i++) {
+                    if (this.userAnswers[i] === this.questions[i].correctAnswer) {
+                        this.score++;
+                    }
+                }
+            }
+
+            showResults() {
+                const percentage = Math.round((this.score / this.questions.length) * 100);
+                const correctCount = this.score;
+                const wrongCount = this.questions.length - this.score;
+                
+                document.getElementById('correctAnswers').textContent = correctCount;
+                document.getElementById('wrongAnswers').textContent = wrongCount;
+                document.getElementById('finalScore').textContent = percentage + '%';
+                
+                // Set result message and icon based on score
+                const resultIcon = document.getElementById('resultIcon');
+                const resultEmoji = document.getElementById('resultEmoji');
+                const resultMessage = document.getElementById('resultMessage');
+                
+                if (percentage >= 80) {
+                    resultIcon.className = 'w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4';
+                    resultEmoji.textContent = '🎉';
+                    resultMessage.textContent = 'Luar biasa! Anda menguasai materi dengan sangat baik!';
+                } else if (percentage >= 60) {
+                    resultIcon.className = 'w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4';
+                    resultEmoji.textContent = '👍';
+                    resultMessage.textContent = 'Bagus! Masih ada ruang untuk perbaikan.';
+                } else {
+                    resultIcon.className = 'w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4';
+                    resultEmoji.textContent = '💪';
+                    resultMessage.textContent = 'Jangan menyerah! Coba lagi untuk hasil yang lebih baik.';
+                }
+                
+                this.showScreen('resultsScreen');
+            }
+
+            showReview() {
+                const container = document.getElementById('reviewContainer');
+                container.innerHTML = '';
+                
+                this.questions.forEach((question, index) => {
+                    const userAnswer = this.userAnswers[index];
+                    const isCorrect = userAnswer === question.correctAnswer;
+                    
+                    const reviewItem = document.createElement('div');
+                    reviewItem.className = 'border rounded-lg p-4 ' + (isCorrect ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50');
+                    
+                    const options = ['A', 'B', 'C', 'D'];
+                    const optionTexts = [question.optionA, question.optionB, question.optionC, question.optionD];
+                    
+                    reviewItem.innerHTML = `
+                        <div class="mb-3">
+                            <h3 class="font-semibold text-gray-800 mb-2">Pertanyaan ${index + 1}</h3>
+                            <p class="text-gray-700 mb-3">${question.question}</p>
+                        </div>
+                        <div class="grid grid-cols-1 gap-2 mb-3">
+                            ${options.map((opt, i) => {
+                                if (!optionTexts[i]) return '';
+                                let className = 'p-2 rounded text-sm ';
+                                if (opt === question.correctAnswer) {
+                                    className += 'bg-green-100 text-green-800 font-medium';
+                                } else if (opt === userAnswer && opt !== question.correctAnswer) {
+                                    className += 'bg-red-100 text-red-800';
+                                } else {
+                                    className += 'bg-gray-100 text-gray-700';
+                                }
+                                return `<div class="${className}">${opt}. ${optionTexts[i]}</div>`;
+                            }).join('')}
+                        </div>
+                        <div class="text-sm">
+                            <p class="mb-1">
+                                <span class="font-medium">Jawaban Anda:</span> 
+                                <span class="${isCorrect ? 'text-green-600' : 'text-red-600'}">${userAnswer || 'Tidak dijawab'}</span>
+                            </p>
+                            <p class="mb-2">
+                                <span class="font-medium">Jawaban Benar:</span> 
+                                <span class="text-green-600">${question.correctAnswer}</span>
+                            </p>
+                            <p class="text-gray-600">
+                                <span class="font-medium">Penjelasan:</span> ${question.explanation}
+                            </p>
+                        </div>
+                    `;
+                    
+                    container.appendChild(reviewItem);
+                });
+                
+                this.showScreen('reviewScreen');
+            }
+
+            restartQuiz() {
+                this.startQuiz();
+            }
+
+            showScreen(screenId) {
+                const screens = ['loadingScreen', 'welcomeScreen', 'quizScreen', 'resultsScreen', 'reviewScreen', 'errorScreen'];
+                screens.forEach(id => {
+                    const element = document.getElementById(id);
+                    if (id === screenId) {
+                        element.classList.remove('hidden');
+                        element.classList.add('fade-in');
+                    } else {
+                        element.classList.add('hidden');
+                        element.classList.remove('fade-in');
+                    }
+                });
+            }
+        }
+
+        // Initialize the quiz app when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new QuizApp();
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98ff5f2a222b6bd5',t:'MTc2MDY5OTY2MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
