@@ -150,11 +150,27 @@
                     </div>
                     <h2 class="text-2xl font-bold text-gray-800 mb-2">Terjadi Kesalahan</h2>
                     <p class="text-gray-600 mb-4">Tidak dapat memuat data kuis dari Google Sheet</p>
-                    <p class="text-sm text-gray-500">Pastikan link Google Sheet dapat diakses publik</p>
+                    <p class="text-sm text-gray-500 mb-4">Pastikan link Google Sheet dapat diakses publik</p>
+                    
+                    <!-- Troubleshooting tips -->
+                    <div class="bg-gray-50 rounded-lg p-4 mb-4 text-left text-sm">
+                        <h4 class="font-semibold mb-2">💡 Tips Mengatasi Masalah:</h4>
+                        <ul class="space-y-1 text-gray-600">
+                            <li>• Pastikan Google Sheet sudah dipublikasi (File → Share → Publish to web)</li>
+                            <li>• Pilih "Entire Document" dan format "CSV"</li>
+                            <li>• Periksa format kolom: Pertanyaan, A, B, C, D, Kunci, Penjelasan</li>
+                            <li>• Pastikan ada data di baris kedua dan seterusnya</li>
+                        </ul>
+                    </div>
                 </div>
-                <button id="retryLoad" class="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300">
-                    Coba Lagi
-                </button>
+                <div class="space-y-3">
+                    <button id="retryLoad" class="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300">
+                        Coba Lagi
+                    </button>
+                    <button id="testConnection" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-3 px-6 rounded-xl transition-colors duration-200">
+                        Test Koneksi Google Sheet
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -166,10 +182,151 @@
                 this.currentQuestionIndex = 0;
                 this.userAnswers = [];
                 this.score = 0;
-                this.csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSXp8px6BoP8tsTKMbk7hMvX96h9O5MPS52OLnDm3JQ-1WpXWIS7e94-K-eAxtVHvONK_DEmoR_yka0/pub?gid=0&single=true&output=csv';
+                this.csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSXp8px6BoP8tsTKMbk7hMvX96h9O5MPS52OLnDm3JQ-1WpXWIS7e94-K-eAxtVHvONK_DEmoR_yka0/pub?output=csv';
+                this.isQuizActive = false;
+                this.securityWarnings = 0;
                 
+                this.initializeSecurity();
                 this.initializeEventListeners();
                 this.loadQuizData();
+            }
+
+            initializeSecurity() {
+                // Prevent right-click context menu
+                document.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    this.showSecurityWarning('Klik kanan tidak diizinkan selama kuis!');
+                });
+
+                // Prevent common keyboard shortcuts
+                document.addEventListener('keydown', (e) => {
+                    // Prevent F12, Ctrl+Shift+I, Ctrl+U, Ctrl+S, Ctrl+Shift+C, Ctrl+Shift+J
+                    if (e.key === 'F12' || 
+                        (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'C' || e.key === 'J')) ||
+                        (e.ctrlKey && (e.key === 'u' || e.key === 'U' || e.key === 's' || e.key === 'S')) ||
+                        (e.key === 'PrintScreen')) {
+                        e.preventDefault();
+                        this.showSecurityWarning('Shortcut keyboard tidak diizinkan!');
+                    }
+                });
+
+                // Detect when user switches tabs or apps (visibility change)
+                document.addEventListener('visibilitychange', () => {
+                    if (this.isQuizActive && document.hidden) {
+                        this.handleTabSwitch();
+                    }
+                });
+
+                // Detect when window loses focus
+                window.addEventListener('blur', () => {
+                    if (this.isQuizActive) {
+                        this.handleTabSwitch();
+                    }
+                });
+
+                // Prevent text selection
+                document.addEventListener('selectstart', (e) => {
+                    if (this.isQuizActive) {
+                        e.preventDefault();
+                    }
+                });
+
+                // Detect mobile screenshot attempts (Android)
+                if ('ontouchstart' in window) {
+                    let volumeDownPressed = false;
+                    let powerButtonPressed = false;
+
+                    document.addEventListener('keydown', (e) => {
+                        if (e.key === 'VolumeDown') volumeDownPressed = true;
+                        if (e.key === 'Power') powerButtonPressed = true;
+                        
+                        if (volumeDownPressed && powerButtonPressed) {
+                            this.showSecurityWarning('Screenshot tidak diizinkan!');
+                        }
+                    });
+
+                    document.addEventListener('keyup', (e) => {
+                        if (e.key === 'VolumeDown') volumeDownPressed = false;
+                        if (e.key === 'Power') powerButtonPressed = false;
+                    });
+                }
+
+                // Disable drag and drop
+                document.addEventListener('dragstart', (e) => e.preventDefault());
+                document.addEventListener('drop', (e) => e.preventDefault());
+
+                // Clear console periodically
+                setInterval(() => {
+                    if (this.isQuizActive) {
+                        console.clear();
+                    }
+                }, 1000);
+
+                // Obfuscate data in memory
+                this.obfuscateData = true;
+            }
+
+            handleTabSwitch() {
+                this.securityWarnings++;
+                this.showSecurityWarning(`Peringatan ${this.securityWarnings}: Jangan berpindah aplikasi atau tab!`);
+                
+                if (this.securityWarnings >= 3) {
+                    this.endQuizForViolation();
+                }
+            }
+
+            showSecurityWarning(message) {
+                // Remove existing warning
+                const existingWarning = document.getElementById('securityWarning');
+                if (existingWarning) {
+                    existingWarning.remove();
+                }
+
+                // Create warning overlay
+                const warning = document.createElement('div');
+                warning.id = 'securityWarning';
+                warning.className = 'fixed inset-0 bg-red-600 bg-opacity-95 flex items-center justify-center z-50';
+                warning.innerHTML = `
+                    <div class="bg-white rounded-xl p-8 text-center max-w-md mx-4 shadow-2xl">
+                        <div class="text-6xl mb-4">⚠️</div>
+                        <h3 class="text-xl font-bold text-red-600 mb-2">Peringatan Keamanan!</h3>
+                        <p class="text-gray-700 mb-4">${message}</p>
+                        <p class="text-sm text-gray-500 mb-4">Peringatan: ${this.securityWarnings}/3</p>
+                        <button onclick="this.parentElement.parentElement.remove()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg">
+                            Mengerti
+                        </button>
+                    </div>
+                `;
+                
+                document.body.appendChild(warning);
+                
+                // Auto remove after 3 seconds
+                setTimeout(() => {
+                    if (warning.parentElement) {
+                        warning.remove();
+                    }
+                }, 3000);
+            }
+
+            endQuizForViolation() {
+                this.isQuizActive = false;
+                
+                // Show violation screen
+                const violationScreen = document.createElement('div');
+                violationScreen.className = 'fixed inset-0 bg-red-600 flex items-center justify-center z-50';
+                violationScreen.innerHTML = `
+                    <div class="bg-white rounded-2xl p-8 text-center max-w-md mx-4 shadow-2xl">
+                        <div class="text-6xl mb-4">🚫</div>
+                        <h2 class="text-2xl font-bold text-red-600 mb-4">Kuis Dihentikan</h2>
+                        <p class="text-gray-700 mb-4">Anda telah melanggar aturan keamanan kuis sebanyak 3 kali.</p>
+                        <p class="text-sm text-gray-500 mb-6">Silakan muat ulang halaman untuk memulai kembali.</p>
+                        <button onclick="location.reload()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-xl">
+                            Muat Ulang
+                        </button>
+                    </div>
+                `;
+                
+                document.body.appendChild(violationScreen);
             }
 
             initializeEventListeners() {
@@ -180,41 +337,133 @@
                 document.getElementById('reviewAnswers').addEventListener('click', () => this.showReview());
                 document.getElementById('backToResults').addEventListener('click', () => this.showResults());
                 document.getElementById('retryLoad').addEventListener('click', () => this.loadQuizData());
+                document.getElementById('testConnection').addEventListener('click', () => this.testConnection());
             }
 
             async loadQuizData() {
                 this.showScreen('loadingScreen');
                 
                 try {
-                    const response = await fetch(this.csvUrl);
-                    if (!response.ok) throw new Error('Failed to fetch data');
+                    // Add timeout and better error handling
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+                    
+                    const response = await fetch(this.csvUrl, {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'text/csv,text/plain,*/*',
+                            'Cache-Control': 'no-cache'
+                        },
+                        signal: controller.signal
+                    });
+                    
+                    clearTimeout(timeoutId);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
                     
                     const csvText = await response.text();
+                    
+                    if (!csvText || csvText.trim().length === 0) {
+                        throw new Error('Empty response from Google Sheet');
+                    }
+                    
+                    // Obfuscate the raw data immediately
                     this.parseCSV(csvText);
                     
                     if (this.questions.length === 0) {
-                        throw new Error('No questions found');
+                        throw new Error('No valid questions found in the sheet');
                     }
+                    
+                    // Encrypt questions data
+                    this.encryptQuestions();
                     
                     this.showWelcomeScreen();
                 } catch (error) {
                     console.error('Error loading quiz data:', error);
+                    
+                    // Show more specific error message
+                    const errorElement = document.querySelector('#errorScreen p');
+                    if (error.name === 'AbortError') {
+                        errorElement.textContent = 'Koneksi timeout. Periksa koneksi internet Anda.';
+                    } else if (error.message.includes('HTTP')) {
+                        errorElement.textContent = 'Google Sheet tidak dapat diakses. Pastikan sheet dipublikasi dengan benar.';
+                    } else if (error.message.includes('Empty response')) {
+                        errorElement.textContent = 'Google Sheet kosong atau tidak berisi data.';
+                    } else if (error.message.includes('No valid questions')) {
+                        errorElement.textContent = 'Format data di Google Sheet tidak sesuai. Periksa kolom pertanyaan dan jawaban.';
+                    } else {
+                        errorElement.textContent = 'Tidak dapat memuat data kuis. Periksa koneksi internet dan format Google Sheet.';
+                    }
+                    
                     this.showScreen('errorScreen');
                 }
             }
 
+            encryptQuestions() {
+                // Simple obfuscation to prevent easy inspection
+                this.questions = this.questions.map(q => ({
+                    ...q,
+                    question: this.obfuscateText(q.question),
+                    optionA: this.obfuscateText(q.optionA),
+                    optionB: this.obfuscateText(q.optionB),
+                    optionC: this.obfuscateText(q.optionC),
+                    optionD: this.obfuscateText(q.optionD),
+                    correctAnswer: this.obfuscateText(q.correctAnswer),
+                    explanation: this.obfuscateText(q.explanation)
+                }));
+            }
+
+            obfuscateText(text) {
+                if (!text) return '';
+                return btoa(encodeURIComponent(text));
+            }
+
+            deobfuscateText(text) {
+                if (!text) return '';
+                try {
+                    return decodeURIComponent(atob(text));
+                } catch {
+                    return text;
+                }
+            }
+
             parseCSV(csvText) {
-                const lines = csvText.trim().split('\n');
-                const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, '').toLowerCase());
+                const lines = csvText.trim().split(/\r?\n/);
                 
-                // Find column indices
-                const questionIndex = headers.findIndex(h => h.includes('pertanyaan') || h.includes('soal') || h.includes('question'));
-                const optionAIndex = headers.findIndex(h => h.includes('a') && (h.includes('pilihan') || h.includes('option')));
-                const optionBIndex = headers.findIndex(h => h.includes('b') && (h.includes('pilihan') || h.includes('option')));
-                const optionCIndex = headers.findIndex(h => h.includes('c') && (h.includes('pilihan') || h.includes('option')));
-                const optionDIndex = headers.findIndex(h => h.includes('d') && (h.includes('pilihan') || h.includes('option')));
-                const keyIndex = headers.findIndex(h => h.includes('kunci') || h.includes('jawaban') || h.includes('key'));
-                const explanationIndex = headers.findIndex(h => h.includes('penjelasan') || h.includes('pembahasan') || h.includes('explanation'));
+                if (lines.length < 2) {
+                    throw new Error('CSV must have at least header and one data row');
+                }
+                
+                const headers = this.parseCSVLine(lines[0]).map(h => h.trim().toLowerCase());
+                
+                // Find column indices with more flexible matching
+                const questionIndex = headers.findIndex(h => 
+                    h.includes('pertanyaan') || h.includes('soal') || h.includes('question') || h.includes('quest')
+                );
+                const optionAIndex = headers.findIndex(h => 
+                    (h.includes('a') || h.includes('option a') || h.includes('pilihan a')) && 
+                    (h.includes('pilihan') || h.includes('option') || h === 'a')
+                );
+                const optionBIndex = headers.findIndex(h => 
+                    (h.includes('b') || h.includes('option b') || h.includes('pilihan b')) && 
+                    (h.includes('pilihan') || h.includes('option') || h === 'b')
+                );
+                const optionCIndex = headers.findIndex(h => 
+                    (h.includes('c') || h.includes('option c') || h.includes('pilihan c')) && 
+                    (h.includes('pilihan') || h.includes('option') || h === 'c')
+                );
+                const optionDIndex = headers.findIndex(h => 
+                    (h.includes('d') || h.includes('option d') || h.includes('pilihan d')) && 
+                    (h.includes('pilihan') || h.includes('option') || h === 'd')
+                );
+                const keyIndex = headers.findIndex(h => 
+                    h.includes('kunci') || h.includes('jawaban') || h.includes('key') || h.includes('answer') || h.includes('correct')
+                );
+                const explanationIndex = headers.findIndex(h => 
+                    h.includes('penjelasan') || h.includes('pembahasan') || h.includes('explanation') || h.includes('explain')
+                );
                 
                 // Fallback to column positions if headers not found
                 const questionCol = questionIndex >= 0 ? questionIndex : 0;
@@ -228,23 +477,104 @@
                 this.questions = [];
                 
                 for (let i = 1; i < lines.length; i++) {
+                    if (lines[i].trim() === '') continue; // Skip empty lines
+                    
                     const values = this.parseCSVLine(lines[i]);
-                    if (values.length > Math.max(questionCol, optionACol, optionBCol, optionCCol, optionDCol, keyCol)) {
+                    
+                    // Ensure we have enough columns
+                    const minRequiredCols = Math.max(questionCol, optionACol, optionBCol, optionCCol, optionDCol, keyCol) + 1;
+                    
+                    if (values.length >= minRequiredCols) {
                         const question = {
-                            question: values[questionCol] || '',
-                            optionA: values[optionACol] || '',
-                            optionB: values[optionBCol] || '',
-                            optionC: values[optionCCol] || '',
-                            optionD: values[optionDCol] || '',
+                            question: (values[questionCol] || '').trim(),
+                            optionA: (values[optionACol] || '').trim(),
+                            optionB: (values[optionBCol] || '').trim(),
+                            optionC: (values[optionCCol] || '').trim(),
+                            optionD: (values[optionDCol] || '').trim(),
                             correctAnswer: (values[keyCol] || '').toUpperCase().trim(),
-                            explanation: values[explanationCol] || 'Tidak ada penjelasan tersedia.'
+                            explanation: (values[explanationCol] || 'Tidak ada penjelasan tersedia.').trim()
                         };
                         
-                        if (question.question && question.correctAnswer) {
+                        // Validate question has required fields
+                        if (question.question && 
+                            question.correctAnswer && 
+                            ['A', 'B', 'C', 'D'].includes(question.correctAnswer) &&
+                            (question.optionA || question.optionB || question.optionC || question.optionD)) {
                             this.questions.push(question);
                         }
                     }
                 }
+                
+                console.log(`Parsed ${this.questions.length} questions from CSV`);
+            }
+
+            async testConnection() {
+                const testButton = document.getElementById('testConnection');
+                const originalText = testButton.textContent;
+                testButton.textContent = 'Testing...';
+                testButton.disabled = true;
+                
+                try {
+                    const response = await fetch(this.csvUrl, {
+                        method: 'HEAD', // Just check if accessible
+                        headers: {
+                            'Accept': 'text/csv,text/plain,*/*'
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        // Try to get actual data
+                        const dataResponse = await fetch(this.csvUrl);
+                        const csvText = await dataResponse.text();
+                        
+                        const lines = csvText.trim().split(/\r?\n/);
+                        
+                        // Show connection test results
+                        const resultDiv = document.createElement('div');
+                        resultDiv.className = 'mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg text-left text-sm';
+                        resultDiv.innerHTML = `
+                            <h4 class="font-semibold text-blue-800 mb-2">📊 Hasil Test Koneksi:</h4>
+                            <ul class="space-y-1 text-blue-700">
+                                <li>✅ Koneksi berhasil (Status: ${response.status})</li>
+                                <li>📄 Total baris data: ${lines.length}</li>
+                                <li>📋 Header: ${lines[0] ? lines[0].substring(0, 50) + '...' : 'Tidak ada'}</li>
+                                <li>📝 Sample data: ${lines[1] ? lines[1].substring(0, 50) + '...' : 'Tidak ada'}</li>
+                            </ul>
+                            <p class="mt-2 text-xs text-blue-600">Jika masih error, periksa format kolom di Google Sheet</p>
+                        `;
+                        
+                        // Remove existing result if any
+                        const existingResult = document.querySelector('#errorScreen .mt-4.p-4.bg-blue-50');
+                        if (existingResult) existingResult.remove();
+                        
+                        // Add result after the tips
+                        const tipsDiv = document.querySelector('#errorScreen .bg-gray-50');
+                        tipsDiv.parentNode.insertBefore(resultDiv, tipsDiv.nextSibling);
+                        
+                    } else {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                    
+                } catch (error) {
+                    const resultDiv = document.createElement('div');
+                    resultDiv.className = 'mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-left text-sm';
+                    resultDiv.innerHTML = `
+                        <h4 class="font-semibold text-red-800 mb-2">❌ Test Koneksi Gagal:</h4>
+                        <p class="text-red-700">${error.message}</p>
+                        <p class="mt-2 text-xs text-red-600">Periksa kembali pengaturan publikasi Google Sheet</p>
+                    `;
+                    
+                    // Remove existing result if any
+                    const existingResult = document.querySelector('#errorScreen .mt-4.p-4');
+                    if (existingResult) existingResult.remove();
+                    
+                    // Add result after the tips
+                    const tipsDiv = document.querySelector('#errorScreen .bg-gray-50');
+                    tipsDiv.parentNode.insertBefore(resultDiv, tipsDiv.nextSibling);
+                }
+                
+                testButton.textContent = originalText;
+                testButton.disabled = false;
             }
 
             parseCSVLine(line) {
@@ -278,8 +608,40 @@
                 this.currentQuestionIndex = 0;
                 this.userAnswers = new Array(this.questions.length).fill(null);
                 this.score = 0;
-                this.showQuestion();
-                this.showScreen('quizScreen');
+                this.isQuizActive = true;
+                this.securityWarnings = 0;
+                
+                // Show security notice
+                this.showSecurityNotice();
+                
+                setTimeout(() => {
+                    this.showQuestion();
+                    this.showScreen('quizScreen');
+                }, 3000);
+            }
+
+            showSecurityNotice() {
+                const notice = document.createElement('div');
+                notice.className = 'fixed inset-0 bg-blue-600 bg-opacity-95 flex items-center justify-center z-50';
+                notice.innerHTML = `
+                    <div class="bg-white rounded-xl p-8 text-center max-w-md mx-4 shadow-2xl">
+                        <div class="text-6xl mb-4">🔒</div>
+                        <h3 class="text-xl font-bold text-blue-600 mb-4">Mode Keamanan Aktif</h3>
+                        <div class="text-left text-sm text-gray-700 mb-4">
+                            <p class="mb-2">• Screenshot dilarang</p>
+                            <p class="mb-2">• Klik kanan dinonaktifkan</p>
+                            <p class="mb-2">• Jangan berpindah tab/aplikasi</p>
+                            <p class="mb-2">• Maksimal 3 peringatan</p>
+                        </div>
+                        <div class="text-xs text-gray-500">Kuis akan dimulai dalam 3 detik...</div>
+                    </div>
+                `;
+                
+                document.body.appendChild(notice);
+                
+                setTimeout(() => {
+                    notice.remove();
+                }, 3000);
             }
 
             showQuestion() {
@@ -294,7 +656,7 @@
                 document.getElementById('currentQuestion').textContent = this.currentQuestionIndex + 1;
                 document.getElementById('totalQuestionsQuiz').textContent = this.questions.length;
                 document.getElementById('currentScore').textContent = this.score;
-                document.getElementById('questionText').textContent = question.question;
+                document.getElementById('questionText').textContent = this.deobfuscateText(question.question);
                 
                 const progress = ((this.currentQuestionIndex + 1) / this.questions.length) * 100;
                 document.getElementById('progressBar').style.width = progress + '%';
@@ -307,7 +669,12 @@
                 const question = this.questions[this.currentQuestionIndex];
                 const container = document.getElementById('optionsContainer');
                 const options = ['A', 'B', 'C', 'D'];
-                const optionTexts = [question.optionA, question.optionB, question.optionC, question.optionD];
+                const optionTexts = [
+                    this.deobfuscateText(question.optionA), 
+                    this.deobfuscateText(question.optionB), 
+                    this.deobfuscateText(question.optionC), 
+                    this.deobfuscateText(question.optionD)
+                ];
                 
                 container.innerHTML = '';
                 
@@ -322,13 +689,14 @@
                         
                         // Check if this question was already answered
                         const wasAnswered = this.userAnswers[this.currentQuestionIndex] !== null;
+                        const correctAnswer = this.deobfuscateText(question.correctAnswer);
                         
                         if (wasAnswered) {
                             // Disable button and show result styling
                             button.disabled = true;
                             button.classList.remove('hover:border-purple-300', 'hover:bg-purple-50');
                             
-                            if (option === question.correctAnswer) {
+                            if (option === correctAnswer) {
                                 button.classList.add('border-green-500', 'bg-green-100');
                             } else if (option === this.userAnswers[this.currentQuestionIndex]) {
                                 button.classList.add('border-red-500', 'bg-red-100');
@@ -346,14 +714,16 @@
                 
                 // Show feedback if question was already answered
                 if (this.userAnswers[this.currentQuestionIndex] !== null) {
-                    const isCorrect = this.userAnswers[this.currentQuestionIndex] === question.correctAnswer;
+                    const correctAnswer = this.deobfuscateText(question.correctAnswer);
+                    const isCorrect = this.userAnswers[this.currentQuestionIndex] === correctAnswer;
                     this.showAnswerFeedback(isCorrect, question);
                 }
             }
 
             selectAnswer(selectedOption, buttonElement) {
                 const question = this.questions[this.currentQuestionIndex];
-                const isCorrect = selectedOption === question.correctAnswer;
+                const correctAnswer = this.deobfuscateText(question.correctAnswer);
+                const isCorrect = selectedOption === correctAnswer;
                 
                 // Disable all buttons to prevent multiple selections
                 const allButtons = document.querySelectorAll('#optionsContainer button');
@@ -367,7 +737,7 @@
                     const buttonText = btn.textContent.trim();
                     const buttonOption = buttonText.charAt(0); // Get A, B, C, or D
                     
-                    if (buttonOption === question.correctAnswer) {
+                    if (buttonOption === correctAnswer) {
                         // Correct answer - green
                         btn.classList.add('border-green-500', 'bg-green-100');
                         btn.classList.add('pulse-correct');
@@ -409,7 +779,8 @@
                         : 'bg-red-50 border-red-400 text-red-800'
                 }`;
                 
-                const correctOptionText = this.getOptionText(question, question.correctAnswer);
+                const correctAnswer = this.deobfuscateText(question.correctAnswer);
+                const correctOptionText = this.getOptionText(question, correctAnswer);
                 
                 feedback.innerHTML = `
                     <div class="flex items-start">
@@ -418,8 +789,8 @@
                             <p class="font-semibold mb-1">
                                 ${isCorrect ? 'Benar!' : 'Salah!'}
                             </p>
-                            ${!isCorrect ? `<p class="mb-2">Jawaban yang benar adalah <strong>${question.correctAnswer}. ${correctOptionText}</strong></p>` : ''}
-                            <p class="text-sm opacity-90">${question.explanation}</p>
+                            ${!isCorrect ? `<p class="mb-2">Jawaban yang benar adalah <strong>${correctAnswer}. ${correctOptionText}</strong></p>` : ''}
+                            <p class="text-sm opacity-90">${this.deobfuscateText(question.explanation)}</p>
                         </div>
                     </div>
                 `;
@@ -431,10 +802,10 @@
 
             getOptionText(question, option) {
                 switch(option) {
-                    case 'A': return question.optionA;
-                    case 'B': return question.optionB;
-                    case 'C': return question.optionC;
-                    case 'D': return question.optionD;
+                    case 'A': return this.deobfuscateText(question.optionA);
+                    case 'B': return this.deobfuscateText(question.optionB);
+                    case 'C': return this.deobfuscateText(question.optionC);
+                    case 'D': return this.deobfuscateText(question.optionD);
                     default: return '';
                 }
             }
@@ -479,7 +850,8 @@
             calculateScore() {
                 this.score = 0;
                 for (let i = 0; i < this.questions.length; i++) {
-                    if (this.userAnswers[i] === this.questions[i].correctAnswer) {
+                    const correctAnswer = this.deobfuscateText(this.questions[i].correctAnswer);
+                    if (this.userAnswers[i] === correctAnswer) {
                         this.score++;
                     }
                 }
@@ -522,26 +894,32 @@
                 
                 this.questions.forEach((question, index) => {
                     const userAnswer = this.userAnswers[index];
-                    const isCorrect = userAnswer === question.correctAnswer;
+                    const correctAnswer = this.deobfuscateText(question.correctAnswer);
+                    const isCorrect = userAnswer === correctAnswer;
                     
                     const reviewItem = document.createElement('div');
                     reviewItem.className = 'border rounded-lg p-4 ' + (isCorrect ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50');
                     
                     const options = ['A', 'B', 'C', 'D'];
-                    const optionTexts = [question.optionA, question.optionB, question.optionC, question.optionD];
+                    const optionTexts = [
+                        this.deobfuscateText(question.optionA), 
+                        this.deobfuscateText(question.optionB), 
+                        this.deobfuscateText(question.optionC), 
+                        this.deobfuscateText(question.optionD)
+                    ];
                     
                     reviewItem.innerHTML = `
                         <div class="mb-3">
                             <h3 class="font-semibold text-gray-800 mb-2">Pertanyaan ${index + 1}</h3>
-                            <p class="text-gray-700 mb-3">${question.question}</p>
+                            <p class="text-gray-700 mb-3">${this.deobfuscateText(question.question)}</p>
                         </div>
                         <div class="grid grid-cols-1 gap-2 mb-3">
                             ${options.map((opt, i) => {
                                 if (!optionTexts[i]) return '';
                                 let className = 'p-2 rounded text-sm ';
-                                if (opt === question.correctAnswer) {
+                                if (opt === correctAnswer) {
                                     className += 'bg-green-100 text-green-800 font-medium';
-                                } else if (opt === userAnswer && opt !== question.correctAnswer) {
+                                } else if (opt === userAnswer && opt !== correctAnswer) {
                                     className += 'bg-red-100 text-red-800';
                                 } else {
                                     className += 'bg-gray-100 text-gray-700';
@@ -556,10 +934,10 @@
                             </p>
                             <p class="mb-2">
                                 <span class="font-medium">Jawaban Benar:</span> 
-                                <span class="text-green-600">${question.correctAnswer}</span>
+                                <span class="text-green-600">${correctAnswer}</span>
                             </p>
                             <p class="text-gray-600">
-                                <span class="font-medium">Penjelasan:</span> ${question.explanation}
+                                <span class="font-medium">Penjelasan:</span> ${this.deobfuscateText(question.explanation)}
                             </p>
                         </div>
                     `;
@@ -571,6 +949,8 @@
             }
 
             restartQuiz() {
+                this.isQuizActive = false;
+                this.securityWarnings = 0;
                 this.startQuiz();
             }
 
@@ -594,5 +974,5 @@
             new QuizApp();
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98ff5f2a222b6bd5',t:'MTc2MDY5OTY2MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98ffecfe82f881a4',t:'MTc2MDcwNTQ2OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
