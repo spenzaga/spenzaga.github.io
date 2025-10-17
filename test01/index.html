@@ -365,15 +365,29 @@
                 for (let i = 1; i < lines.length; i++) {
                     const columns = lines[i].split(',');
                     if (columns.length >= 6) {
+                        const options = [
+                            columns[1]?.trim(),
+                            columns[2]?.trim(),
+                            columns[3]?.trim(),
+                            columns[4]?.trim()
+                        ];
+                        
+                        const correctAnswerKey = columns[5]?.trim().toUpperCase(); // A, B, C, atau D
+                        let correctAnswerIndex = 0;
+                        
+                        switch(correctAnswerKey) {
+                            case 'A': correctAnswerIndex = 0; break;
+                            case 'B': correctAnswerIndex = 1; break;
+                            case 'C': correctAnswerIndex = 2; break;
+                            case 'D': correctAnswerIndex = 3; break;
+                            default: correctAnswerIndex = 0;
+                        }
+                        
                         questionsList.push({
                             question: columns[0]?.trim(),
-                            options: [
-                                columns[1]?.trim(),
-                                columns[2]?.trim(),
-                                columns[3]?.trim(),
-                                columns[4]?.trim()
-                            ],
-                            correctAnswer: columns[5]?.trim(),
+                            options: options,
+                            correctAnswer: options[correctAnswerIndex],
+                            correctAnswerKey: correctAnswerKey,
                             explanation: columns[6]?.trim() || 'Tidak ada penjelasan tersedia.'
                         });
                     }
@@ -382,6 +396,18 @@
             } catch (error) {
                 console.error('Error loading questions:', error);
                 return [];
+            }
+        }
+
+        // Check if user has already taken the quiz
+        async function checkQuizStatus(username) {
+            try {
+                const response = await fetch('https://script.google.com/macros/s/AKfycbyy0FYm7Djd8RoyCjGKgXqCAJtO2qpmT4EI7CoiToseDfF-M45TlgG1yng7cJH-7G8pgw/exec?action=check&nis=' + username);
+                const result = await response.text();
+                return result.includes('sudah mengerjakan');
+            } catch (error) {
+                console.error('Error checking quiz status:', error);
+                return false;
             }
         }
 
@@ -401,9 +427,17 @@
             const user = users.find(u => u.username === username && u.password === password);
             
             if (user) {
-                currentUser = user;
-                showProfile();
-                loginError.classList.add('hidden');
+                // Check if user has already taken the quiz
+                const hasAlreadyTaken = localStorage.getItem('quiz_taken_' + username) === 'true';
+                
+                if (hasAlreadyTaken) {
+                    loginError.textContent = 'Anda sudah mengerjakan kuis ini sebelumnya!';
+                    loginError.classList.remove('hidden');
+                } else {
+                    currentUser = user;
+                    showProfile();
+                    loginError.classList.add('hidden');
+                }
             } else {
                 loginError.textContent = 'Username atau password salah!';
                 loginError.classList.remove('hidden');
@@ -614,6 +648,9 @@
                     body: formData
                 });
                 
+                // Mark quiz as taken
+                localStorage.setItem('quiz_taken_' + currentUser.username, 'true');
+                
                 hasSubmittedResult = true;
                 console.log('Hasil berhasil dikirim');
             } catch (error) {
@@ -626,5 +663,5 @@
             initSecurity();
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'990084bf1587ce4d',t:'MTc2MDcxMTY4NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99008fd8d530fe10',t:'MTc2MDcxMjEzOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
