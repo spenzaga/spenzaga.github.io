@@ -1,245 +1,1117 @@
 <!DOCTYPE html>
-<html lang="id" class="h-full">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pendaftaran Ekstrakurikuler</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Ita's English Dictionary</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body {
+        * {
             box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #ffb7d5, #ff85a2, #ff6b8b);
+            color: #333;
+            padding: 15px;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* Pita-pita dekoratif */
+        body::before, body::after {
+            content: "";
+            position: absolute;
+            width: 120px;
+            height: 35px;
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(-45deg);
+            z-index: 0;
+        }
+        
+        body::before {
+            top: 40px;
+            left: -40px;
+        }
+        
+        body::after {
+            bottom: 60px;
+            right: -40px;
+        }
+        
+        .ribbon {
+            position: absolute;
+            width: 80px;
+            height: 25px;
+            background: rgba(255, 255, 255, 0.4);
+            transform: rotate(45deg);
+            z-index: 0;
+        }
+        
+        .ribbon-1 {
+            top: 100px;
+            right: 50px;
+        }
+        
+        .ribbon-2 {
+            bottom: 100px;
+            left: 50px;
+        }
+        
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+        }
+        
+        header {
+            background: #d81b60;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        h1 {
+            font-size: 1.4rem;
+            margin-right: 15px;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        
+        button {
+            background: #ec407a;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+        
+        button:hover {
+            background: #d81b60;
+            transform: translateY(-2px);
+        }
+        
+        button.export {
+            background: #f06292;
+        }
+        
+        button.export:hover {
+            background: #ec407a;
+        }
+        
+        .search-container {
+            padding: 12px 15px;
+            background: #fce4ec;
+            border-bottom: 1px solid #f8bbd0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+        }
+        
+        .search-box {
+            display: flex;
+            align-items: center;
+            background: white;
+            border: 2px solid #f8bbd0;
+            border-radius: 22px;
+            padding: 6px 12px;
+            flex: 1;
+            min-width: 120px;
+        }
+        
+        .search-box i {
+            color: #ec407a;
+            margin-right: 6px;
+            font-size: 0.9rem;
+        }
+        
+        .search-box input {
+            border: none;
+            outline: none;
+            width: 100%;
+            font-size: 0.95rem;
+            background: transparent;
+        }
+        
+        .filter-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .filter {
+            padding: 6px 12px;
+            border: 2px solid #f8bbd0;
+            border-radius: 18px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.85rem;
+        }
+        
+        .filter.active {
+            background: #ec407a;
+            color: white;
+            border-color: #ec407a;
+        }
+        
+        .filter:hover {
+            background: #fce4ec;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            max-height: 55vh;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+        
+        th, td {
+            border: 1px solid #f8bbd0;
+            padding: 10px 12px;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+        
+        th {
+            background-color: #fce4ec;
+            position: sticky;
+            top: 0;
+            cursor: pointer;
+            color: #d81b60;
+            font-weight: 600;
+        }
+        
+        th:hover {
+            background-color: #f8bbd0;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #fef5f9;
+        }
+        
+        tr:hover {
+            background-color: #fce4ec;
+        }
+        
+        .action-btns {
+            display: flex;
+            gap: 4px;
+        }
+        
+        .action-btns button {
+            padding: 4px 8px;
+            font-size: 0.8rem;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 15px;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            border: 2px solid #f8bbd0;
+        }
+        
+        .form-group {
+            margin-bottom: 12px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 4px;
+            font-weight: 600;
+            color: #d81b60;
+            font-size: 0.9rem;
+        }
+        
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 8px 10px;
+            border: 2px solid #f8bbd0;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+        
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 15px;
+        }
+        
+        .footer {
+            padding: 12px 15px;
+            text-align: center;
+            color: #ec407a;
+            font-size: 0.8rem;
+            background: #fce4ec;
+            border-top: 1px solid #f8bbd0;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            margin-top: 8px;
+            gap: 10px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            flex: 1;
+            min-width: 70px;
+        }
+        
+        .stat-value {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #d81b60;
+        }
+        
+        .mastery-stars {
+            color: #ff4081;
+            text-shadow: 0px 0px 1px rgba(0,0,0,0.3);
+            font-size: 0.9rem;
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            padding: 15px;
+        }
+        
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #ec407a;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .notification {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            padding: 12px 16px;
+            border-radius: 6px;
+            color: white;
+            z-index: 1001;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            max-width: 300px;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.success {
+            background-color: #4caf50;
+        }
+        
+        .notification.error {
+            background-color: #f44336;
+        }
+        
+        .notification.info {
+            background-color: #2196f3;
+        }
+        
+        .confirm-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1002;
+            padding: 15px;
+        }
+        
+        .confirm-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            border: 2px solid #f8bbd0;
+        }
+        
+        .confirm-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 15px;
+        }
+        
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            body::before, body::after {
+                width: 100px;
+                height: 30px;
+            }
+            
+            body::before {
+                top: 30px;
+                left: -30px;
+            }
+            
+            body::after {
+                bottom: 50px;
+                right: -30px;
+            }
+            
+            .ribbon {
+                display: none;
+            }
+            
+            header {
+                flex-direction: column;
+                align-items: stretch;
+                padding: 12px 15px;
+            }
+            
+            h1 {
+                margin-bottom: 10px;
+                text-align: center;
+                font-size: 1.3rem;
+            }
+            
+            .controls {
+                justify-content: center;
+            }
+            
+            .search-container {
+                flex-direction: column;
+                align-items: stretch;
+                padding: 10px;
+            }
+            
+            .search-box {
+                width: 100%;
+            }
+            
+            .filter-group {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            th, td {
+                padding: 8px 10px;
+                font-size: 0.85rem;
+            }
+            
+            .modal-content {
+                padding: 15px;
+            }
+            
+            .form-group input, .form-group select, .form-group textarea {
+                padding: 7px 9px;
+            }
+            
+            .stats {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .stat-item {
+                min-width: auto;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.2rem;
+            }
+            
+            button {
+                padding: 7px 10px;
+                font-size: 0.85rem;
+            }
+            
+            .filter {
+                padding: 5px 10px;
+                font-size: 0.8rem;
+            }
+            
+            th, td {
+                padding: 6px 8px;
+                font-size: 0.8rem;
+            }
+            
+            .action-btns button {
+                padding: 3px 6px;
+                font-size: 0.75rem;
+            }
+            
+            .modal-content {
+                padding: 12px;
+            }
+            
+            .form-group label {
+                font-size: 0.85rem;
+            }
+            
+            .form-group input, .form-group select, .form-group textarea {
+                font-size: 0.85rem;
+            }
+            
+            .confirm-content {
+                padding: 15px;
+            }
+            
+            .confirm-buttons {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .confirm-buttons button {
+                width: 100%;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .container {
+                max-width: 1300px;
+            }
+        }
+        
+        @media (min-width: 1400px) {
+            .container {
+                max-width: 1400px;
+            }
+            
+            th, td {
+                padding: 12px 15px;
+                font-size: 1rem;
+            }
+        }
+        
+        /* Hide Firebase status */
+        .firebase-status {
+            display: none;
         }
     </style>
 </head>
-<body class="h-full bg-gradient-to-br from-blue-50 to-indigo-100 font-sans">
-    <main class="min-h-full flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-md w-full space-y-8">
-            <div class="text-center">
-                <div class="mx-auto h-16 w-16 bg-indigo-600 rounded-full flex items-center justify-center mb-4">
-                    <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-                    </svg>
-                </div>
-                <h1 class="text-3xl font-bold text-gray-900 mb-2">Pendaftaran Ekstrakurikuler</h1>
-                <p class="text-gray-600">Lengkapi data diri Anda untuk mendaftar</p>
+<body>
+    <div class="ribbon ribbon-1"></div>
+    <div class="ribbon ribbon-2"></div>
+    
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-book"></i> Ita's English Dictionary</h1>
+            <div class="controls">
+                <button id="addBtn"><i class="fas fa-plus"></i> New Vocabulary</button>
+                <button id="exportBtn" class="export"><i class="fas fa-file-export"></i> Export to Excel</button>
             </div>
-
-            <form id="registrationForm" class="bg-white rounded-lg shadow-lg p-8 space-y-6">
-                <div>
-                    <label for="nama" class="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap</label>
-                    <input type="text" id="nama" name="nama" required 
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                </div>
-
-                <div>
-                    <label for="tempatLahir" class="block text-sm font-medium text-gray-700 mb-2">Tempat Lahir</label>
-                    <input type="text" id="tempatLahir" name="tempatLahir" required 
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                </div>
-
-                <div>
-                    <label for="tanggalLahir" class="block text-sm font-medium text-gray-700 mb-2">Tanggal Lahir</label>
-                    <input type="date" id="tanggalLahir" name="tanggalLahir" required 
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                </div>
-
-                <div>
-                    <label for="kelas" class="block text-sm font-medium text-gray-700 mb-2">Kelas</label>
-                    <select id="kelas" name="kelas" required 
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                        <option value="">Pilih Kelas</option>
-                        <option value="X IPA 1">X IPA 1</option>
-                        <option value="X IPA 2">X IPA 2</option>
-                        <option value="X IPS 1">X IPS 1</option>
-                        <option value="X IPS 2">X IPS 2</option>
-                        <option value="XI IPA 1">XI IPA 1</option>
-                        <option value="XI IPA 2">XI IPA 2</option>
-                        <option value="XI IPS 1">XI IPS 1</option>
-                        <option value="XI IPS 2">XI IPS 2</option>
-                        <option value="XII IPA 1">XII IPA 1</option>
-                        <option value="XII IPA 2">XII IPA 2</option>
-                        <option value="XII IPS 1">XII IPS 1</option>
-                        <option value="XII IPS 2">XII IPS 2</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label for="alamat" class="block text-sm font-medium text-gray-700 mb-2">Alamat</label>
-                    <textarea id="alamat" name="alamat" rows="3" required 
-                              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none"></textarea>
-                </div>
-
-                <div>
-                    <label for="nomorHp" class="block text-sm font-medium text-gray-700 mb-2">Nomor HP</label>
-                    <input type="tel" id="nomorHp" name="nomorHp" required 
-                           placeholder="08xxxxxxxxxx"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                </div>
-
-                <div class="bg-gray-50 p-4 rounded-md">
-                    <p class="text-sm text-gray-700 mb-3 font-medium">Persyaratan Pendaftaran:</p>
-                    <ul class="text-sm text-gray-600 space-y-1 mb-4">
-                        <li>• Siswa aktif sekolah</li>
-                        <li>• Tidak sedang mengikuti ekstrakurikuler lain</li>
-                        <li>• Memiliki komitmen waktu yang cukup</li>
-                        <li>• Mendapat izin dari orang tua/wali</li>
-                    </ul>
-                    
-                    <div class="flex items-start">
-                        <input type="checkbox" id="persyaratan" name="persyaratan" required 
-                               class="mt-1 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
-                        <label for="persyaratan" class="ml-2 text-sm text-gray-700">
-                            Ya, saya telah membaca dan menyetujui persyaratan di atas
-                        </label>
-                    </div>
-                </div>
-
-                <button type="submit" 
-                        class="w-full bg-indigo-600 text-white py-3 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition duration-200 font-medium">
-                    Daftar Sekarang
-                </button>
-            </form>
-
-            <!-- Success Message -->
-            <div id="successMessage" class="hidden bg-green-50 border border-green-200 rounded-lg p-6 text-center">
-                <div class="mx-auto h-12 w-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
-                    <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                </div>
-                <h3 class="text-lg font-medium text-green-900 mb-2">Pendaftaran Berhasil!</h3>
-                <p class="text-green-700 mb-4">Terima kasih telah mendaftar. Data Anda telah tersimpan di Google Sheets.</p>
-                <button onclick="resetForm()" 
-                        class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition duration-200">
-                    Daftar Lagi
-                </button>
+        </header>
+        
+        <div class="search-container">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Cari vocabulary...">
             </div>
-
-            <!-- Error Message -->
-            <div id="errorMessage" class="hidden bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-                <div class="mx-auto h-12 w-12 bg-red-100 rounded-full flex items-center justify-center mb-4">
-                    <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                </div>
-                <h3 class="text-lg font-medium text-red-900 mb-2">Gagal Mengirim Data</h3>
-                <p class="text-red-700 mb-4" id="errorText">Terjadi kesalahan saat mengirim data. Silakan coba lagi.</p>
-                <button onclick="hideError()" 
-                        class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition duration-200">
-                    Coba Lagi
-                </button>
+            <div class="filter-group">
+                <div class="filter active" data-filter="all">All</div>
+                <div class="filter" data-filter="new">New</div>
+                <div class="filter" data-filter="learning">Learning</div>
+                <div class="filter" data-filter="mastered">Mastered</div>
             </div>
         </div>
-    </main>
-
-    <script>
-        // URL Google Apps Script Web App yang Anda berikan
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxfsAran9NrKZsUqd2vqsRxhP0dawjbqj5H4yk8BJzju09xtiXaRgZ56gFUMzO0dLt9/exec';
         
-        document.getElementById('registrationForm').addEventListener('submit', function(e) {
-            e.preventDefault();
+        <div class="table-container">
+            <div class="loading" id="loadingIndicator">
+                <div class="loading-spinner"></div>
+            </div>
+            <table id="vocabTable">
+                <thead>
+                    <tr>
+                        <th data-sort="word">Vocabulary <i class="fas fa-sort"></i></th>
+                        <th data-sort="meaning">Meaning <i class="fas fa-sort"></i></th>
+                        <th data-sort="pronunciation">Pronunciation <i class="fas fa-sort"></i></th>
+                        <th data-sort="pos">Category <i class="fas fa-sort"></i></th>
+                        <th data-sort="example">Example Sentence <i class="fas fa-sort"></i></th>
+                        <th data-sort="mastery">Level <i class="fas fa-sort"></i></th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="vocabBody">
+                    <!-- Data akan dimuat di sini -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="footer">
+            <p>LITTLE STEP, BIG RESULT</p>
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="totalCount">0</div>
+                    <div>Total</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="learningCount">0</div>
+                    <div>Learning</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="masteredCount">0</div>
+                    <div>Mastered</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal untuk menambah/mengedit vocabulary -->
+    <div id="vocabModal" class="modal">
+        <div class="modal-content">
+            <h2 id="modalTitle"><i class="fas fa-book"></i> Add New Vocabulary</h2>
+            <form id="vocabForm">
+                <input type="hidden" id="editId" value="">
+                <div class="form-group">
+                    <label for="word">Vocabulary*</label>
+                    <input type="text" id="word" required placeholder="Enter word or phrase">
+                </div>
+                <div class="form-group">
+                    <label for="meaning">Meaning*</label>
+                    <input type="text" id="meaning" required placeholder="Translation in Indonesian">
+                </div>
+                <div class="form-group">
+                    <label for="pronunciation">Pronunciation</label>
+                    <input type="text" id="pronunciation" placeholder="e.g: hellow/halou">
+                </div>
+                <div class="form-group">
+                    <label for="pos">Category</label>
+                    <select id="pos">
+                        <option value="">Select Category</option>
+                        <option value="Noun">Noun (Kata Benda)</option>
+                        <option value="Verb">Verb (Kata Kerja)</option>
+                        <option value="Adjective">Adjective (Kata Sifat)</option>
+                        <option value="Adverb">Adverb (Kata Keterangan)</option>
+                        <option value="Preposition">Preposition (Kata Depan)</option>
+                        <option value="Conjunction">Conjunction (Kata Hubung)</option>
+                        <option value="Interjection">Interjection (Kata Seru)</option>
+                        <option value="Phrase">Phrase (Frasa)</option>
+                        <option value="Idiom">Idiom (Ungkapan)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="example">Example Sentence</label>
+                    <textarea id="example" rows="2" placeholder="Example sentence"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="synonym">Synonym</label>
+                    <input type="text" id="synonym" placeholder="Word with similar meaning">
+                </div>
+                <div class="form-group">
+                    <label for="category">Antonym</label>
+                    <input type="text" id="category" placeholder="Word with opposite meaning">
+                </div>
+                <div class="form-group">
+                    <label for="mastery">Mastery Level</label>
+                    <select id="mastery">
+                        <option value="1">⭐ New (Just Learned)</option>
+                        <option value="2">⭐⭐ In Progress</option>
+                        <option value="3">⭐⭐⭐ Mastered</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="button" id="cancelBtn">Cancel</button>
+                    <button type="submit" id="saveBtn">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal konfirmasi hapus -->
+    <div id="confirmModal" class="confirm-modal">
+        <div class="confirm-content">
+            <h3><i class="fas fa-exclamation-triangle"></i> Confirm Deletion</h3>
+            <p>Are you sure you want to delete this vocabulary?</p>
+            <p><strong id="vocabToDelete"></strong></p>
+            <div class="confirm-buttons">
+                <button id="confirmCancelBtn" style="background: #9e9e9e;">Cancel</button>
+                <button id="confirmDeleteBtn" style="background: #f44336;">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notifikasi -->
+    <div id="notification" class="notification">
+        <i class="fas fa-info-circle"></i>
+        <span id="notificationText"></span>
+    </div>
+
+    <div id="firebaseStatus" class="firebase-status firebase-disconnected">Firebase: Disconnected</div>
+
+<script type="module">
+    // Import Firebase functions
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { 
+        getFirestore, collection, addDoc, updateDoc, deleteDoc, doc,
+        onSnapshot, serverTimestamp, query, orderBy 
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    // Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyAosg4GV5ZxQFLCh6VuqY0koXAdHZZGW78",
+        authDomain: "my-dictionary-427dd.firebaseapp.com",
+        projectId: "my-dictionary-427dd",
+        storageBucket: "my-dictionary-427dd.appspot.com",
+        messagingSenderId: "292732103597",
+        appId: "1:292732103597:web:1c9515c1d0f61cae438f24",
+        measurementId: "G-3JRX4KTHMB"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Data vocabulary
+    let vocabData = [];
+    let currentSort = { column: 'word', direction: 'asc' };
+    let editMode = false;
+    let currentEditId = null;
+    let currentFilter = 'all';
+    
+    // Elemen DOM
+    const vocabBody = document.getElementById('vocabBody');
+    const vocabForm = document.getElementById('vocabForm');
+    const modal = document.getElementById('vocabModal');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const addBtn = document.getElementById('addBtn');
+    const searchInput = document.getElementById('searchInput');
+    const exportBtn = document.getElementById('exportBtn');
+    const modalTitle = document.getElementById('modalTitle');
+    const editId = document.getElementById('editId');
+    const totalCount = document.getElementById('totalCount');
+    const learningCount = document.getElementById('learningCount');
+    const masteredCount = document.getElementById('masteredCount');
+    const filters = document.querySelectorAll('.filter');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    const confirmModal = document.getElementById('confirmModal');
+    const vocabToDelete = document.getElementById('vocabToDelete');
+    const confirmCancelBtn = document.getElementById('confirmCancelBtn');
+    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+    const notification = document.getElementById('notification');
+    const notificationText = document.getElementById('notificationText');
+
+    // Sembunyikan loading indicator
+    loadingIndicator.style.display = 'none';
+
+    // Fungsi untuk menampilkan notifikasi
+    function showNotification(message, type = 'info') {
+        notificationText.textContent = message;
+        notification.className = `notification ${type}`;
+        notification.classList.add('show');
+        
+        setTimeout(() => {
+            notification.classList.remove('show');
+        }, 3000);
+    }
+
+    // Fungsi untuk mengurutkan data berdasarkan abjad
+    function sortDataAlphabetically() {
+        vocabData.sort((a, b) => {
+            let valueA = a.word.toLowerCase();
+            let valueB = b.word.toLowerCase();
             
-            // Show loading state
-            const submitBtn = document.querySelector('button[type="submit"]');
-            const originalText = submitBtn.textContent;
-            submitBtn.innerHTML = `
-                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Mengirim Data...
+            if (valueA < valueB) return -1;
+            if (valueA > valueB) return 1;
+            return 0;
+        });
+    }
+    
+    // Render tabel vocabulary
+    function renderVocabTable(data = vocabData) {
+        vocabBody.innerHTML = '';
+        
+        if (data.length === 0) {
+            vocabBody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 20px;">No vocabulary found</td></tr>`;
+            totalCount.textContent = '0';
+            learningCount.textContent = '0';
+            masteredCount.textContent = '0';
+            return;
+        }
+        
+        // Urutkan data berdasarkan abjad
+        sortDataAlphabetically();
+        
+        // Hitung statistik
+        const total = vocabData.length;
+        const learning = vocabData.filter(item => item.mastery === "2").length;
+        const mastered = vocabData.filter(item => item.mastery === "3").length;
+        
+        totalCount.textContent = total;
+        learningCount.textContent = learning;
+        masteredCount.textContent = mastered;
+        
+        // Terapkan filter
+        let filteredData = data;
+        if (currentFilter !== 'all') {
+            const masteryFilter = currentFilter === 'new' ? '1' : 
+                                currentFilter === 'learning' ? '2' : '3';
+            filteredData = data.filter(item => item.mastery === masteryFilter);
+        }
+        
+        if (filteredData.length === 0) {
+            vocabBody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 20px;">No vocabulary found for this filter</td></tr>`;
+            return;
+        }
+        
+        filteredData.forEach(item => {
+            const row = document.createElement('tr');
+            
+            // Konversi nilai mastery ke bintang
+            let masteryStars = '';
+            for (let i = 0; i < parseInt(item.mastery); i++) {
+                masteryStars += '⭐';
+            }
+            
+            row.innerHTML = `
+                <td>${item.word}</td>
+                <td>${item.meaning}</td>
+                <td>${item.pronunciation || '-'}</td>
+                <td>${item.pos || '-'}</td>
+                <td>${item.example || '-'}</td>
+                <td class="mastery-stars">${masteryStars}</td>
+                <td class="action-btns">
+                    <button class="edit-btn" data-id="${item.id}"><i class="fas fa-edit"></i></button>
+                    <button class="delete-btn" data-id="${item.id}" data-word="${item.word}"><i class="fas fa-trash"></i></button>
+                </td>
             `;
-            submitBtn.disabled = true;
             
-            // Get form data
-            const formData = new FormData(this);
-            const data = {};
-            for (let [key, value] of formData.entries()) {
-                data[key] = value;
-            }
-            
-            // Validate phone number format
-            const phoneRegex = /^08[0-9]{8,11}$/;
-            if (!phoneRegex.test(data.nomorHp)) {
-                showError('Format nomor HP tidak valid. Gunakan format 08xxxxxxxxxx');
-                resetButton(submitBtn, originalText);
-                return;
-            }
-            
-            // Add timestamp
-            data.timestamp = new Date().toLocaleString('id-ID', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-            });
-            
-            // Send to Google Apps Script
-            sendToGoogleSheets(data, submitBtn, originalText);
+            vocabBody.appendChild(row);
         });
         
-        function sendToGoogleSheets(data, submitBtn, originalText) {
-            // Create form data for Google Apps Script
-            const formData = new FormData();
-            Object.keys(data).forEach(key => {
-                formData.append(key, data[key]);
+        // Tambahkan event listener untuk tombol edit dan hapus
+        document.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = e.target.closest('.edit-btn').getAttribute('data-id');
+                editVocab(id);
+            });
+        });
+        
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = e.target.closest('.delete-btn').getAttribute('data-id');
+                const word = e.target.closest('.delete-btn').getAttribute('data-word');
+                confirmDeleteVocab(id, word);
+            });
+        });
+    }
+    
+    // Tambah vocabulary baru
+    function addVocab() {
+        editMode = false;
+        currentEditId = null;
+        modalTitle.innerHTML = '<i class="fas fa-plus"></i> Add New Vocabulary';
+        vocabForm.reset();
+        editId.value = '';
+        modal.style.display = 'flex';
+    }
+    
+    // Edit vocabulary
+    function editVocab(id) {
+        editMode = true;
+        currentEditId = id;
+        const vocab = vocabData.find(item => item.id === id);
+        
+        if (vocab) {
+            modalTitle.innerHTML = '<i class="fas fa-edit"></i> Edit Vocabulary';
+            document.getElementById('word').value = vocab.word;
+            document.getElementById('meaning').value = vocab.meaning;
+            document.getElementById('pronunciation').value = vocab.pronunciation || '';
+            document.getElementById('pos').value = vocab.pos || '';
+            document.getElementById('example').value = vocab.example || '';
+            document.getElementById('synonym').value = vocab.synonym || '';
+            document.getElementById('category').value = vocab.category || '';
+            document.getElementById('mastery').value = vocab.mastery || '1';
+            editId.value = vocab.id;
+            modal.style.display = 'flex';
+        }
+    }
+    
+    // Konfirmasi hapus vocabulary
+    function confirmDeleteVocab(id, word) {
+        vocabToDelete.textContent = word;
+        confirmModal.style.display = 'flex';
+        
+        // Set event listeners untuk tombol confirm
+        confirmCancelBtn.onclick = () => {
+            confirmModal.style.display = 'none';
+        };
+        
+        confirmDeleteBtn.onclick = () => {
+            deleteVocab(id);
+            confirmModal.style.display = 'none';
+        };
+    }
+    
+    // Hapus vocabulary dari Firebase
+    async function deleteVocab(id) {
+        try {
+            await deleteDoc(doc(db, "vocabularies", id));
+            showNotification('Vocabulary deleted successfully', 'success');
+        } catch (error) {
+            console.error("Error deleting document: ", error);
+            showNotification("Error deleting vocabulary. Please try again.", 'error');
+        }
+    }
+    
+    // Simpan vocabulary (tambah atau edit) ke Firebase
+    async function saveVocab(e) {
+        e.preventDefault();
+        
+        const word = document.getElementById('word').value;
+        const meaning = document.getElementById('meaning').value;
+        const pronunciation = document.getElementById('pronunciation').value;
+        const pos = document.getElementById('pos').value;
+        const example = document.getElementById('example').value;
+        const synonym = document.getElementById('synonym').value;
+        const category = document.getElementById('category').value;
+        const mastery = document.getElementById('mastery').value;
+        
+        // Tampilkan loading state
+        const saveBtn = document.getElementById('saveBtn');
+        const originalBtnText = saveBtn.innerHTML;
+        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+        saveBtn.disabled = true;
+        
+        try {
+            if (editMode) {
+                // Edit vocabulary yang sudah ada di Firebase
+                await updateDoc(doc(db, "vocabularies", currentEditId), {
+                    word,
+                    meaning,
+                    pronunciation,
+                    pos,
+                    example,
+                    synonym,
+                    category,
+                    mastery,
+                    updatedAt: serverTimestamp()
+                });
+                showNotification('Vocabulary updated successfully', 'success');
+            } else {
+                // Tambah vocabulary baru ke Firebase
+                await addDoc(collection(db, "vocabularies"), {
+                    word,
+                    meaning,
+                    pronunciation,
+                    pos,
+                    example,
+                    synonym,
+                    category,
+                    mastery,
+                    createdAt: serverTimestamp(),
+                    updatedAt: serverTimestamp()
+                });
+                showNotification('Vocabulary added successfully', 'success');
+            }
+            
+            modal.style.display = 'none';
+        } catch (error) {
+            console.error("Error saving document: ", error);
+            showNotification("Error saving vocabulary. Please try again.", 'error');
+        } finally {
+            // Reset loading state
+            saveBtn.innerHTML = originalBtnText;
+            saveBtn.disabled = false;
+        }
+    }
+    
+    // Cari vocabulary
+    function searchVocab() {
+        const searchTerm = searchInput.value.toLowerCase();
+        
+        if (searchTerm.trim() === '') {
+            renderVocabTable(vocabData);
+            return;
+        }
+        
+        const filteredData = vocabData.filter(item => 
+            item.word.toLowerCase().includes(searchTerm) ||
+            item.meaning.toLowerCase().includes(searchTerm) ||
+            (item.example && item.example.toLowerCase().includes(searchTerm)) ||
+            (item.synonym && item.synonym.toLowerCase().includes(searchTerm)) ||
+            (item.category && item.category.toLowerCase().includes(searchTerm))
+        );
+        
+        renderVocabTable(filteredData);
+    }
+    
+    // Urutkan data
+    function sortData(column) {
+        if (currentSort.column === column) {
+            currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+        } else {
+            currentSort.column = column;
+            currentSort.direction = 'asc';
+        }
+        
+        vocabData.sort((a, b) => {
+            let valueA = a[column] || '';
+            let valueB = b[column] || '';
+            
+            // Untuk pengurutan numerik pada kolom mastery
+            if (column === 'mastery') {
+                valueA = parseInt(valueA);
+                valueB = parseInt(valueB);
+            } else {
+                // Untuk pengurutan teks
+                valueA = valueA.toString().toLowerCase();
+                valueB = valueB.toString().toLowerCase();
+            }
+            
+            if (valueA < valueB) return currentSort.direction === 'asc' ? -1 : 1;
+            if (valueA > valueB) return currentSort.direction === 'asc' ? 1 : -1;
+            return 0;
+        });
+        
+        renderVocabTable();
+    }
+    
+    // Export ke Excel (simulasi)
+    function exportToExcel() {
+        alert('Fitur export akan mengunduh file Excel dengan semua vocabulary Anda. Data Anda aman dan tersimpan di browser.');
+        // Dalam implementasi nyata, ini akan mengunduh file Excel
+    }
+
+    // Muat data dari Firestore secara real-time
+    function loadVocabFromFirestore() {
+        const q = query(collection(db, "vocabularies"), orderBy("createdAt", "desc"));
+        
+        onSnapshot(q, (querySnapshot) => {
+            vocabData = [];
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                vocabData.push({
+                    id: doc.id,
+                    word: data.word || '',
+                    meaning: data.meaning || '',
+                    pronunciation: data.pronunciation || '',
+                    pos: data.pos || '',
+                    example: data.example || '',
+                    synonym: data.synonym || '',
+                    category: data.category || '',
+                    mastery: data.mastery || '1'
+                });
             });
             
-            fetch(SCRIPT_URL, {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(result => {
-                if (result.status === 'success') {
-                    // Show success message
-                    document.getElementById('registrationForm').style.display = 'none';
-                    document.getElementById('successMessage').classList.remove('hidden');
-                } else {
-                    throw new Error(result.message || 'Terjadi kesalahan pada server');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showError('Gagal mengirim data ke Google Sheets. Pastikan Apps Script sudah di-deploy dengan benar.');
-                resetButton(submitBtn, originalText);
-            });
+            renderVocabTable();
+        }, (error) => {
+            console.error("Error loading documents: ", error);
+            vocabBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #d81b60;">Error loading data. Please check your connection.</td></tr>`;
+        });
+    }
+    
+    // Event Listeners
+    addBtn.addEventListener('click', addVocab);
+    cancelBtn.addEventListener('click', () => modal.style.display = 'none');
+    vocabForm.addEventListener('submit', saveVocab);
+    searchInput.addEventListener('input', searchVocab);
+    exportBtn.addEventListener('click', exportToExcel);
+    
+    // Event listener untuk sorting
+    document.querySelectorAll('th[data-sort]').forEach(th => {
+        th.addEventListener('click', () => {
+            sortData(th.getAttribute('data-sort'));
+        });
+    });
+    
+    // Event listener untuk filter
+    filters.forEach(filter => {
+        filter.addEventListener('click', () => {
+            filters.forEach(f => f.classList.remove('active'));
+            filter.classList.add('active');
+            currentFilter = filter.getAttribute('data-filter');
+            renderVocabTable();
+        });
+    });
+    
+    // Tutup modal ketika klik di luar area konten
+    window.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.style.display = 'none';
         }
-        
-        function showError(message) {
-            document.getElementById('errorText').textContent = message;
-            document.getElementById('errorMessage').classList.remove('hidden');
-            document.getElementById('registrationForm').style.display = 'none';
+        if (e.target === confirmModal) {
+            confirmModal.style.display = 'none';
         }
-        
-        function hideError() {
-            document.getElementById('errorMessage').classList.add('hidden');
-            document.getElementById('registrationForm').style.display = 'block';
-        }
-        
-        function resetButton(button, originalText) {
-            button.textContent = originalText;
-            button.disabled = false;
-        }
-        
-        function resetForm() {
-            document.getElementById('registrationForm').reset();
-            document.getElementById('registrationForm').style.display = 'block';
-            document.getElementById('successMessage').classList.add('hidden');
-            document.getElementById('errorMessage').classList.add('hidden');
-            
-            // Reset button state
-            const submitBtn = document.querySelector('button[type="submit"]');
-            submitBtn.textContent = 'Daftar Sekarang';
-            submitBtn.disabled = false;
-        }
-    </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9903520ee3d5fe8a',t:'MTc2MDc0MTA2Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+    });
+    
+    // Muat data saat halaman dimuat
+    document.addEventListener('DOMContentLoaded', () => {
+        loadVocabFromFirestore();
+        // Set filter "all" sebagai aktif
+        document.querySelector('.filter[data-filter="all"]').classList.add('active');
+    });
+</script>
+</body>
 </html>
