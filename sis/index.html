@@ -401,7 +401,84 @@
             appId: "1:518987959345:web:c8993f19a6984633f5d910",
             measurementId: "G-GP2EY38CCV"
         };
+         // Create sample data if database is empty
+        function createSampleData() {
+            const sampleVocabs = [
+                {
+                      id: "siswa_12344",
+                      nisn: "123456789",
+                      nis: "123456",
+                      nama: "Agustian",
+                      tempat_lahir: "Purbalingga",
+                      tanggal_lahir: "25 Agustus 2025",
+                      agama: "Islam",
+                      jenis_kelamin: "Laki-Laki",
+                      alamat: "Jl. Kapten Piere Tendean No.8",
+                      desa: "Purbalingga Lor",
+                      rt: "3",
+                      rw: "4",
+                      no_hp: "4",
+                      kelas: "7A",
+                      ekskul_wajib: "Pramuka",
+                      eskul_pilihan: "Bola Voli",
+                      penerima_kip: "Ya",
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                },
+                {
+                      id: "siswa_12344",
+                      nisn: "123456789",
+                      nis: "123456",
+                      nama: "Agustian",
+                      tempat_lahir: "Purbalingga",
+                      tanggal_lahir: "25 Agustus 2025",
+                      agama: "Islam",
+                      jenis_kelamin: "Laki-Laki",
+                      alamat: "Jl. Kapten Piere Tendean No.8",
+                      desa: "Purbalingga Lor",
+                      rt: "3",
+                      rw: "4",
+                      no_hp: "4",
+                      kelas: "7A",
+                      ekskul_wajib: "Pramuka",
+                      eskul_pilihan: "Bola Voli",
+                      penerima_kip: "Ya",
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                },
+                {
+                      id: "siswa_12344",
+                      nisn: "123456789",
+                      nis: "123456",
+                      nama: "Agustian",
+                      tempat_lahir: "Purbalingga",
+                      tanggal_lahir: "25 Agustus 2025",
+                      agama: "Islam",
+                      jenis_kelamin: "Laki-Laki",
+                      alamat: "Jl. Kapten Piere Tendean No.8",
+                      desa: "Purbalingga Lor",
+                      rt: "3",
+                      rw: "4",
+                      no_hp: "4",
+                      kelas: "7A",
+                      ekskul_wajib: "Pramuka",
+                      eskul_pilihan: "Bola Voli",
+                      penerima_kip: "Ya",
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                }
+            ];
 
+            // Add sample data to Firebase
+            sampleSiswa.forEach((siswa, index) => {
+                database.ref('vocab').push(siswa);
+            });
+
+            // Load the data again
+            setTimeout(() => {
+                loadDatasiswa();
+            }, 1000);
+        }
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
@@ -733,3 +810,4 @@
     </script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'990fbd2155dd3fa1',t:'MTc2MDg3MTI4MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
+
