@@ -243,59 +243,36 @@
                 <p class="mt-2 text-gray-400 text-sm">Mohon tunggu sebentar</p>
             </div>
 
-            <!-- Table Container -->
-            <div id="tableContainer" class="bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl overflow-hidden border border-white/20" style="display: none;">
-                <div class="overflow-x-auto">
-                    <table class="min-w-full">
-                        <thead class="bg-gradient-to-r from-slate-50 to-blue-50 border-b border-gray-200/50">
-                            <tr>
-                                <th class="px-8 py-6 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                    <div class="flex items-center space-x-2">
-                                        <span class="w-6 h-6 bg-blue-100 rounded-lg flex items-center justify-center">👤</span>
-                                        <span>Siswa</span>
-                                    </div>
-                                </th>
-                                <th class="px-8 py-6 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                    <div class="flex items-center space-x-2">
-                                        <span class="w-6 h-6 bg-green-100 rounded-lg flex items-center justify-center">🆔</span>
-                                        <span>NISN/NIS</span>
-                                    </div>
-                                </th>
-                                <th class="px-8 py-6 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                    <div class="flex items-center space-x-2">
-                                        <span class="w-6 h-6 bg-purple-100 rounded-lg flex items-center justify-center">📅</span>
-                                        <span>Tempat, Tanggal Lahir</span>
-                                    </div>
-                                </th>
-                                <th class="px-8 py-6 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                    <div class="flex items-center space-x-2">
-                                        <span class="w-6 h-6 bg-orange-100 rounded-lg flex items-center justify-center">🎓</span>
-                                        <span>Kelas</span>
-                                    </div>
-                                </th>
-                                <th class="px-8 py-6 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                    <div class="flex items-center space-x-2">
-                                        <span class="w-6 h-6 bg-red-100 rounded-lg flex items-center justify-center">🏠</span>
-                                        <span>Alamat</span>
-                                    </div>
-                                </th>
-                                <th class="px-8 py-6 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                    <div class="flex items-center space-x-2">
-                                        <span class="w-6 h-6 bg-indigo-100 rounded-lg flex items-center justify-center">⚽</span>
-                                        <span>Ekstrakurikuler</span>
-                                    </div>
-                                </th>
-                                <th class="px-8 py-6 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                    <div class="flex items-center space-x-2">
-                                        <span class="w-6 h-6 bg-gray-100 rounded-lg flex items-center justify-center">⚙️</span>
-                                        <span>Aksi</span>
-                                    </div>
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody id="siswaTableBody" class="bg-white/50 backdrop-blur-sm divide-y divide-gray-100/50">
-                        </tbody>
-                    </table>
+            <!-- Cards Container -->
+            <div id="tableContainer" class="space-y-6" style="display: none;">
+                <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl p-8 border border-white/20">
+                    <div class="flex items-center justify-between mb-8">
+                        <h3 class="text-2xl font-bold text-gray-900 flex items-center">
+                            <span class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mr-4">
+                                <span class="text-white text-lg">👥</span>
+                            </span>
+                            Data Siswa
+                        </h3>
+                        <div class="flex items-center space-x-4">
+                            <button onclick="toggleView('grid')" id="gridViewBtn" 
+                                    class="px-4 py-2 bg-blue-500 text-white rounded-xl font-medium transition-all duration-300 hover:bg-blue-600 shadow-lg">
+                                <span class="flex items-center space-x-2">
+                                    <span>⊞</span>
+                                    <span>Grid</span>
+                                </span>
+                            </button>
+                            <button onclick="toggleView('list')" id="listViewBtn" 
+                                    class="px-4 py-2 bg-gray-200 text-gray-700 rounded-xl font-medium transition-all duration-300 hover:bg-gray-300 shadow-lg">
+                                <span class="flex items-center space-x-2">
+                                    <span>☰</span>
+                                    <span>List</span>
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="siswaCardsContainer" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+                        <!-- Cards will be rendered here -->
+                    </div>
                 </div>
             </div>
 
@@ -684,6 +661,7 @@
         let siswaData = {};
         let editingId = null;
         let deleteId = null;
+        let currentView = 'grid'; // 'grid' or 'list'
 
         // Load data on page load
         document.addEventListener('DOMContentLoaded', function() {
@@ -788,101 +766,178 @@
             document.getElementById('kipCount').textContent = kip;
         }
 
-        // Render table
+        // Render cards
         function renderTable(filteredData = null) {
-            const tbody = document.getElementById('siswaTableBody');
+            const container = document.getElementById('siswaCardsContainer');
             const dataToRender = filteredData || siswaData;
             
-            tbody.innerHTML = '';
+            container.innerHTML = '';
             
             Object.entries(dataToRender).forEach(([id, siswa]) => {
-                const row = document.createElement('tr');
-                row.className = 'hover:bg-purple-50 transition-all duration-200';
-                
                 const genderIcon = siswa.jenis_kelamin === 'Laki-Laki' ? '👨' : '👩';
                 const kelasColor = getKelasColor(siswa.kelas);
+                const kelasGradient = getKelasGradient(siswa.kelas);
                 
-                row.innerHTML = `
-                    <td class="px-8 py-6">
-                        <div class="flex items-center space-x-4">
-                            <div class="relative">
-                                <div class="w-14 h-14 bg-gradient-to-br ${kelasColor} rounded-2xl flex items-center justify-center shadow-xl">
-                                    <span class="text-white font-bold text-xl">${siswa.nama ? siswa.nama.charAt(0).toUpperCase() : 'S'}</span>
+                const card = document.createElement('div');
+                card.className = 'bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 overflow-hidden card-hover slide-up';
+                
+                card.innerHTML = `
+                    <!-- Card Header -->
+                    <div class="relative ${kelasGradient} p-8 text-white">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
+                        <div class="relative flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <div class="relative">
+                                    <div class="w-20 h-20 bg-white/20 rounded-3xl flex items-center justify-center shadow-2xl backdrop-blur-sm">
+                                        <span class="text-white font-bold text-3xl">${siswa.nama ? siswa.nama.charAt(0).toUpperCase() : 'S'}</span>
+                                    </div>
+                                    <div class="absolute -bottom-2 -right-2 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg">
+                                        <span class="text-lg">${genderIcon}</span>
+                                    </div>
                                 </div>
-                                <div class="absolute -bottom-1 -right-1 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-lg">
-                                    <span class="text-sm">${genderIcon}</span>
+                                <div>
+                                    <h3 class="text-2xl font-bold mb-1">${siswa.nama || 'Nama Tidak Tersedia'}</h3>
+                                    <div class="flex items-center space-x-3">
+                                        <span class="bg-white/20 px-3 py-1 rounded-xl text-sm font-medium backdrop-blur-sm">
+                                            ${siswa.kelas || '-'}
+                                        </span>
+                                        ${siswa.penerima_kip === 'Ya' ? '<span class="bg-yellow-400/90 text-yellow-900 px-3 py-1 rounded-xl text-sm font-bold">🎓 KIP</span>' : ''}
+                                    </div>
                                 </div>
                             </div>
-                            <div>
-                                <div class="text-base font-bold text-gray-900 mb-1">
-                                    ${siswa.nama || '-'}
+                        </div>
+                    </div>
+
+                    <!-- Card Body -->
+                    <div class="p-8 space-y-6">
+                        <!-- Identitas Section -->
+                        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6">
+                            <h4 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                                <span class="w-8 h-8 bg-blue-500 rounded-xl flex items-center justify-center mr-3">
+                                    <span class="text-white text-sm">🆔</span>
+                                </span>
+                                Data Identitas
+                            </h4>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">NISN</p>
+                                    <p class="text-sm font-bold text-gray-900 bg-blue-100 px-3 py-2 rounded-xl">${siswa.nisn || '-'}</p>
                                 </div>
-                                <div class="flex items-center space-x-2">
-                                    <span class="inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium bg-gray-100 text-gray-700">
-                                        ${siswa.agama || '-'}
+                                <div>
+                                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">NIS</p>
+                                    <p class="text-sm font-bold text-gray-900 bg-green-100 px-3 py-2 rounded-xl">${siswa.nis || '-'}</p>
+                                </div>
+                                <div class="col-span-2">
+                                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Agama</p>
+                                    <p class="text-sm font-medium text-gray-700 bg-purple-100 px-3 py-2 rounded-xl inline-block">${siswa.agama || '-'}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Kelahiran Section -->
+                        <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6">
+                            <h4 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                                <span class="w-8 h-8 bg-purple-500 rounded-xl flex items-center justify-center mr-3">
+                                    <span class="text-white text-sm">📅</span>
+                                </span>
+                                Kelahiran
+                            </h4>
+                            <div class="space-y-3">
+                                <div>
+                                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Tempat Lahir</p>
+                                    <p class="text-sm font-medium text-gray-900">${siswa.tempat_lahir || '-'}</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Tanggal Lahir</p>
+                                    <p class="text-sm font-medium text-gray-700 bg-purple-100 px-3 py-2 rounded-xl inline-block">${formatDate(siswa.tanggal_lahir) || '-'}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Alamat Section -->
+                        <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-6">
+                            <h4 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                                <span class="w-8 h-8 bg-green-500 rounded-xl flex items-center justify-center mr-3">
+                                    <span class="text-white text-sm">🏠</span>
+                                </span>
+                                Alamat
+                            </h4>
+                            <div class="space-y-3">
+                                <div>
+                                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Alamat Lengkap</p>
+                                    <p class="text-sm text-gray-700 leading-relaxed">${siswa.alamat || '-'}</p>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Desa/Kelurahan</p>
+                                        <p class="text-sm font-medium text-gray-700">${siswa.desa || '-'}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">RT/RW</p>
+                                        <p class="text-sm font-medium text-gray-700">${siswa.rt ? 'RT ' + siswa.rt : ''} ${siswa.rw ? 'RW ' + siswa.rw : ''}</p>
+                                    </div>
+                                </div>
+                                ${siswa.no_hp ? `
+                                <div>
+                                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">No. HP</p>
+                                    <p class="text-sm font-medium text-blue-600 bg-blue-100 px-3 py-2 rounded-xl inline-flex items-center space-x-2">
+                                        <span>📱</span>
+                                        <span>${siswa.no_hp}</span>
+                                    </p>
+                                </div>
+                                ` : ''}
+                            </div>
+                        </div>
+
+                        <!-- Ekstrakurikuler Section -->
+                        <div class="bg-gradient-to-r from-orange-50 to-red-50 rounded-2xl p-6">
+                            <h4 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                                <span class="w-8 h-8 bg-orange-500 rounded-xl flex items-center justify-center mr-3">
+                                    <span class="text-white text-sm">⚽</span>
+                                </span>
+                                Ekstrakurikuler
+                            </h4>
+                            <div class="space-y-3">
+                                <div>
+                                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Wajib</p>
+                                    <span class="inline-block bg-red-100 text-red-800 px-4 py-2 rounded-xl text-sm font-bold">
+                                        ${siswa.ekskul_wajib || '-'}
                                     </span>
                                 </div>
+                                ${siswa.eskul_pilihan ? `
+                                <div>
+                                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Pilihan</p>
+                                    <span class="inline-block bg-indigo-100 text-indigo-800 px-4 py-2 rounded-xl text-sm font-bold">
+                                        ${siswa.eskul_pilihan}
+                                    </span>
+                                </div>
+                                ` : ''}
                             </div>
                         </div>
-                    </td>
-                    <td class="px-8 py-6">
-                        <div class="space-y-1">
-                            <div class="text-sm font-bold text-gray-900 bg-blue-50 px-3 py-1 rounded-lg inline-block">
-                                ${siswa.nisn || '-'}
-                            </div>
-                            <div class="text-sm font-medium text-gray-600 bg-green-50 px-3 py-1 rounded-lg inline-block">
-                                ${siswa.nis || '-'}
-                            </div>
-                        </div>
-                    </td>
-                    <td class="px-8 py-6">
-                        <div class="space-y-1">
-                            <div class="text-sm font-semibold text-gray-900">${siswa.tempat_lahir || '-'}</div>
-                            <div class="text-sm text-gray-600 bg-purple-50 px-3 py-1 rounded-lg inline-block">
-                                ${formatDate(siswa.tanggal_lahir) || '-'}
-                            </div>
-                        </div>
-                    </td>
-                    <td class="px-8 py-6">
-                        <div class="space-y-2">
-                            <span class="inline-flex items-center px-4 py-2 rounded-xl text-sm font-bold bg-gradient-to-r ${kelasColor} text-white shadow-lg">
-                                ${siswa.kelas || '-'}
-                            </span>
-                            ${siswa.penerima_kip === 'Ya' ? '<div><span class="inline-flex items-center px-3 py-1 rounded-xl text-xs font-bold bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-lg">🎓 KIP</span></div>' : ''}
-                        </div>
-                    </td>
-                    <td class="px-8 py-6">
-                        <div class="space-y-2 max-w-xs">
-                            <div class="text-sm font-medium text-gray-900 line-clamp-2">${siswa.alamat || '-'}</div>
-                            <div class="text-sm text-gray-600 bg-red-50 px-3 py-1 rounded-lg inline-block">
-                                ${siswa.desa || '-'} ${siswa.rt ? 'RT ' + siswa.rt : ''} ${siswa.rw ? 'RW ' + siswa.rw : ''}
-                            </div>
-                            ${siswa.no_hp ? '<div class="text-sm font-medium text-blue-600 bg-blue-50 px-3 py-1 rounded-lg inline-flex items-center space-x-1"><span>📱</span><span>' + siswa.no_hp + '</span></div>' : ''}
-                        </div>
-                    </td>
-                    <td class="px-8 py-6">
-                        <div class="space-y-2">
-                            <div class="text-sm font-semibold text-gray-900 bg-red-50 px-3 py-1 rounded-lg inline-block">
-                                ${siswa.ekskul_wajib || '-'}
-                            </div>
-                            ${siswa.eskul_pilihan ? '<div class="text-sm text-gray-600 bg-indigo-50 px-3 py-1 rounded-lg inline-block">' + siswa.eskul_pilihan + '</div>' : ''}
-                        </div>
-                    </td>
-                    <td class="px-8 py-6">
-                        <div class="flex flex-col space-y-2">
+                    </div>
+
+                    <!-- Card Footer -->
+                    <div class="px-8 pb-8">
+                        <div class="flex flex-col sm:flex-row gap-3">
                             <button onclick="editSiswa('${id}')" 
-                                    class="text-blue-600 hover:text-white bg-blue-50 hover:bg-blue-500 px-4 py-2 rounded-xl transition-all duration-300 font-bold text-sm shadow-lg hover:shadow-xl hover:scale-105">
-                                ✏️ Edit
+                                    class="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-4 rounded-2xl font-bold transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 flex items-center justify-center space-x-2">
+                                <span class="w-6 h-6 bg-white/20 rounded-lg flex items-center justify-center">
+                                    <span class="text-white text-sm">✏️</span>
+                                </span>
+                                <span>Edit Data</span>
                             </button>
                             <button onclick="deleteSiswa('${id}', '${siswa.nama}')" 
-                                    class="text-red-600 hover:text-white bg-red-50 hover:bg-red-500 px-4 py-2 rounded-xl transition-all duration-300 font-bold text-sm shadow-lg hover:shadow-xl hover:scale-105">
-                                🗑️ Hapus
+                                    class="flex-1 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-6 py-4 rounded-2xl font-bold transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 flex items-center justify-center space-x-2">
+                                <span class="w-6 h-6 bg-white/20 rounded-lg flex items-center justify-center">
+                                    <span class="text-white text-sm">🗑️</span>
+                                </span>
+                                <span>Hapus</span>
                             </button>
                         </div>
-                    </td>
+                    </div>
                 `;
                 
-                tbody.appendChild(row);
+                container.appendChild(card);
             });
         }
 
@@ -893,6 +948,33 @@
             if (kelas.startsWith('8')) return 'from-green-400 to-green-500';
             if (kelas.startsWith('9')) return 'from-purple-400 to-purple-500';
             return 'from-gray-400 to-gray-500';
+        }
+
+        // Get kelas gradient for card headers
+        function getKelasGradient(kelas) {
+            if (!kelas) return 'bg-gradient-to-br from-gray-500 via-gray-600 to-gray-700';
+            if (kelas.startsWith('7')) return 'bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-700';
+            if (kelas.startsWith('8')) return 'bg-gradient-to-br from-green-500 via-emerald-600 to-teal-700';
+            if (kelas.startsWith('9')) return 'bg-gradient-to-br from-purple-500 via-violet-600 to-purple-700';
+            return 'bg-gradient-to-br from-gray-500 via-gray-600 to-gray-700';
+        }
+
+        // Toggle view between grid and list
+        function toggleView(view) {
+            currentView = view;
+            const gridBtn = document.getElementById('gridViewBtn');
+            const listBtn = document.getElementById('listViewBtn');
+            const container = document.getElementById('siswaCardsContainer');
+            
+            if (view === 'grid') {
+                gridBtn.className = 'px-4 py-2 bg-blue-500 text-white rounded-xl font-medium transition-all duration-300 hover:bg-blue-600 shadow-lg';
+                listBtn.className = 'px-4 py-2 bg-gray-200 text-gray-700 rounded-xl font-medium transition-all duration-300 hover:bg-gray-300 shadow-lg';
+                container.className = 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8';
+            } else {
+                gridBtn.className = 'px-4 py-2 bg-gray-200 text-gray-700 rounded-xl font-medium transition-all duration-300 hover:bg-gray-300 shadow-lg';
+                listBtn.className = 'px-4 py-2 bg-blue-500 text-white rounded-xl font-medium transition-all duration-300 hover:bg-blue-600 shadow-lg';
+                container.className = 'grid grid-cols-1 gap-6';
+            }
         }
 
         // Format date for display
@@ -1154,5 +1236,5 @@
             }
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99100deac379fdb4',t:'MTc2MDg3NDU5MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'991021dd86e2fd15',t:'MTc2MDg3NTQwNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
