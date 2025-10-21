@@ -101,7 +101,7 @@
     <!-- Warning Overlay -->
     <div id="warningOverlay" class="warning-overlay hidden">
         <div class="text-center p-8">
-            <div class="text-6xl mb-4"⚠️</div>
+            <div class="text-6xl mb-4">⚠️</div>
             <h2 class="text-3xl font-bold mb-4 text-red-400">PERINGATAN KEAMANAN</h2>
             <p class="text-xl mb-2">Anda telah meninggalkan halaman kuis!</p>
             <p class="text-lg mb-4">Pelanggaran: <span id="violationCount">0</span>/3</p>
@@ -309,7 +309,7 @@
 
         // Security measures
         let tabSwitchCount = 0;
-        const MAX_TAB_SWITCHES = 2;
+        const MAX_TAB_SWITCHES = 3;
         let securityViolations = [];
 
         // Sample data for demo (will be overridden by Firebase data)
@@ -350,6 +350,16 @@
                     opsic: "Surabaya",
                     opsid: "Bali",
                     kunci: "B",
+                    created_at: "2025-10-19T11:51:32.380Z",
+                    updated_at: "2025-10-19T11:51:32.380Z"
+                },
+                "soal_3": {
+                    pertanyaan: "Pancasila terdiri dari berapa sila?",
+                    opsia: "3",
+                    opsib: "4",
+                    opsic: "5",
+                    opsid: "6",
+                    kunci: "C",
                     created_at: "2025-10-19T11:51:32.380Z",
                     updated_at: "2025-10-19T11:51:32.380Z"
                 }
@@ -578,20 +588,17 @@
         async function loginStudent(nis) {
             try {
                 // Try to get data from Firebase first, fallback to sample data
-                let studentsData, resultsData, quizResultsData;
+                let studentsData, resultsData;
                 
                 try {
                     const studentsSnapshot = await database.ref('siswa').once('value');
                     const resultsSnapshot = await database.ref('hasil').once('value');
-                    const quizResultsSnapshot = await database.ref('hasil_kuis').once('value');
                     studentsData = studentsSnapshot.val() || sampleData.siswa;
                     resultsData = resultsSnapshot.val() || sampleData.hasil;
-                    quizResultsData = quizResultsSnapshot.val() || {};
                 } catch (error) {
                     console.warn('Using sample data due to Firebase error:', error);
                     studentsData = sampleData.siswa;
                     resultsData = sampleData.hasil;
-                    quizResultsData = {};
                 }
                 
                 let foundStudent = null;
@@ -606,40 +613,13 @@
                     throw new Error('NIS tidak ditemukan dalam database');
                 }
 
-                // Check if student has already taken the quiz (multiple checks for security)
-                let hasAlreadyTaken = false;
-                
-                // Check in hasil table
+                // Check if student has already taken the quiz
                 if (resultsData) {
                     for (let key in resultsData) {
                         if (resultsData[key].nis === nis && resultsData[key].hasil !== "") {
-                            hasAlreadyTaken = true;
-                            break;
+                            throw new Error('Anda sudah mengerjakan kuis ini sebelumnya');
                         }
                     }
-                }
-                
-                // Check in hasil_kuis table (more comprehensive)
-                if (quizResultsData) {
-                    for (let key in quizResultsData) {
-                        if (quizResultsData[key].nis === nis) {
-                            hasAlreadyTaken = true;
-                            break;
-                        }
-                    }
-                }
-                
-                // Check localStorage for any previous attempts (additional security)
-                const localStorageKeys = Object.keys(localStorage);
-                for (let key of localStorageKeys) {
-                    if (key.startsWith('quiz_completed_') && key.includes(nis)) {
-                        hasAlreadyTaken = true;
-                        break;
-                    }
-                }
-
-                if (hasAlreadyTaken) {
-                    throw new Error('Anda sudah mengerjakan kuis ini sebelumnya. Setiap siswa hanya dapat mengerjakan kuis satu kali.');
                 }
 
                 currentStudent = foundStudent;
@@ -1040,30 +1020,28 @@
                     console.warn('Could not save to Firebase backup:', firebaseError);
                 }
 
-                // Mark quiz as completed in localStorage to prevent retaking
-                localStorage.setItem(`quiz_completed_${currentStudent.nis}_${Date.now()}`, JSON.stringify({
-                    nis: currentStudent.nis,
-                    nama: currentStudent.nama,
-                    completedAt: new Date().toISOString(),
-                    score: score
-                }));
-
                 // Since we're using no-cors, we can't read the response
                 // But we'll assume it worked if no error was thrown
                 console.log('Result submission completed');
                 return 'Data berhasil dikirim ke server';
                 
             } catch (error) {
-                // Even if submission fails, mark as completed to prevent retaking
-                localStorage.setItem(`quiz_completed_${currentStudent.nis}_${Date.now()}`, JSON.stringify({
+                // If Google Apps Script fails, at least we have local storage backup
+                const backupData = {
                     nis: currentStudent.nis,
                     nama: currentStudent.nama,
-                    completedAt: new Date().toISOString(),
-                    score: score,
-                    submissionFailed: true
-                }));
+                    kelas: currentStudent.kelas,
+                    skor: score,
+                    timestamp: new Date().toISOString(),
+                    jawaban: userAnswers,
+                    dipaksa: forced,
+                    pelanggaran: tabSwitchCount
+                };
                 
-                throw new Error('Gagal mengirim ke server: ' + error.message);
+                localStorage.setItem(`quiz_result_${currentStudent.nis}_${Date.now()}`, JSON.stringify(backupData));
+                console.log('Result saved to local storage as backup');
+                
+                throw new Error('Gagal mengirim ke server, data disimpan lokal sebagai backup');
             }
         }
 
@@ -1077,5 +1055,5 @@
             }, 5000);
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'992393f1d6e0fe8a',t:'MTc2MTA3OTMwOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99244075d37f55ec',t:'MTc2MTA4NjM3NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
