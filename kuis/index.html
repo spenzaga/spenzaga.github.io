@@ -143,7 +143,7 @@
                         type="text" 
                         id="nisInput" 
                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-                        placeholder="Contoh: 12345 atau 12346"
+                        placeholder="NIS"
                         required
                         autocomplete="off"
                     >
@@ -163,8 +163,7 @@
             </div>
             
             <div class="mt-6 text-center text-sm text-gray-500">
-                <p>Data demo tersedia:</p>
-                <p>NIS: 12345 (Agus) atau 12346 (Nina)</p>
+                <p>SMP NEGERI 1 PURBALINGGA</p>
             </div>
         </div>
 
@@ -588,17 +587,20 @@
         async function loginStudent(nis) {
             try {
                 // Try to get data from Firebase first, fallback to sample data
-                let studentsData, resultsData;
+                let studentsData, resultsData, quizResultsData;
                 
                 try {
                     const studentsSnapshot = await database.ref('siswa').once('value');
                     const resultsSnapshot = await database.ref('hasil').once('value');
+                    const quizResultsSnapshot = await database.ref('hasil_kuis').once('value');
                     studentsData = studentsSnapshot.val() || sampleData.siswa;
                     resultsData = resultsSnapshot.val() || sampleData.hasil;
+                    quizResultsData = quizResultsSnapshot.val() || {};
                 } catch (error) {
                     console.warn('Using sample data due to Firebase error:', error);
                     studentsData = sampleData.siswa;
                     resultsData = sampleData.hasil;
+                    quizResultsData = {};
                 }
                 
                 let foundStudent = null;
@@ -613,13 +615,40 @@
                     throw new Error('NIS tidak ditemukan dalam database');
                 }
 
-                // Check if student has already taken the quiz
+                // Check if student has already taken the quiz (multiple checks for security)
+                let hasAlreadyTaken = false;
+                
+                // Check in hasil table
                 if (resultsData) {
                     for (let key in resultsData) {
                         if (resultsData[key].nis === nis && resultsData[key].hasil !== "") {
-                            throw new Error('Anda sudah mengerjakan kuis ini sebelumnya');
+                            hasAlreadyTaken = true;
+                            break;
                         }
                     }
+                }
+                
+                // Check in hasil_kuis table (more comprehensive)
+                if (quizResultsData) {
+                    for (let key in quizResultsData) {
+                        if (quizResultsData[key].nis === nis) {
+                            hasAlreadyTaken = true;
+                            break;
+                        }
+                    }
+                }
+                
+                // Check localStorage for any previous attempts (additional security)
+                const localStorageKeys = Object.keys(localStorage);
+                for (let key of localStorageKeys) {
+                    if (key.startsWith('quiz_completed_') && key.includes(nis)) {
+                        hasAlreadyTaken = true;
+                        break;
+                    }
+                }
+
+                if (hasAlreadyTaken) {
+                    throw new Error('Anda sudah mengerjakan kuis ini sebelumnya. Setiap siswa hanya dapat mengerjakan kuis satu kali.');
                 }
 
                 currentStudent = foundStudent;
@@ -994,27 +1023,38 @@
                     mode: 'no-cors' // Handle CORS issues
                 });
 
+                // Save to localStorage as backup
+                const localData = {
+                    nis: currentStudent.nis,
+                    nama: currentStudent.nama,
+                    kelas: currentStudent.kelas,
+                    skor: score,
+                    totalSoal: questions.length,
+                    jawabanBenar: userAnswers.filter((answer, index) => {
+                        if (answer === null) return false;
+                        return ['A', 'B', 'C', 'D'][answer] === questions[index].correctAnswer;
+                    }).length,
+                    dipaksa: forced,
+                    pelanggaran: tabSwitchCount,
+                    waktuMulai: startTime.toISOString(),
+                    waktuSelesai: new Date().toISOString(),
+                    jawaban: answersData,
+                    pelanggaranKeamanan: securityViolations
+                };
+
+                localStorage.setItem(`quiz_result_${currentStudent.nis}`, JSON.stringify(localData));
+
+                // Mark quiz as completed to prevent retaking (multiple markers for security)
+                localStorage.setItem(`quiz_completed_${currentStudent.nis}_${Date.now()}`, JSON.stringify({
+                    nis: currentStudent.nis,
+                    nama: currentStudent.nama,
+                    completedAt: new Date().toISOString(),
+                    score: score
+                }));
+
                 // Also try to save to Firebase as backup
                 try {
-                    const resultData = {
-                        nis: currentStudent.nis,
-                        nama: currentStudent.nama,
-                        kelas: currentStudent.kelas,
-                        skor: score,
-                        totalSoal: questions.length,
-                        jawabanBenar: userAnswers.filter((answer, index) => {
-                            if (answer === null) return false;
-                            return ['A', 'B', 'C', 'D'][answer] === questions[index].correctAnswer;
-                        }).length,
-                        dipaksa: forced,
-                        pelanggaran: tabSwitchCount,
-                        waktuMulai: startTime.toISOString(),
-                        waktuSelesai: new Date().toISOString(),
-                        jawaban: answersData,
-                        pelanggaranKeamanan: securityViolations
-                    };
-
-                    await database.ref('hasil_kuis').push(resultData);
+                    await database.ref('hasil_kuis').push(localData);
                     console.log('Result also saved to Firebase as backup');
                 } catch (firebaseError) {
                     console.warn('Could not save to Firebase backup:', firebaseError);
@@ -1026,22 +1066,7 @@
                 return 'Data berhasil dikirim ke server';
                 
             } catch (error) {
-                // If Google Apps Script fails, at least we have local storage backup
-                const backupData = {
-                    nis: currentStudent.nis,
-                    nama: currentStudent.nama,
-                    kelas: currentStudent.kelas,
-                    skor: score,
-                    timestamp: new Date().toISOString(),
-                    jawaban: userAnswers,
-                    dipaksa: forced,
-                    pelanggaran: tabSwitchCount
-                };
-                
-                localStorage.setItem(`quiz_result_${currentStudent.nis}_${Date.now()}`, JSON.stringify(backupData));
-                console.log('Result saved to local storage as backup');
-                
-                throw new Error('Gagal mengirim ke server, data disimpan lokal sebagai backup');
+                throw new Error('Gagal mengirim ke server: ' + error.message);
             }
         }
 
@@ -1055,5 +1080,5 @@
             }, 5000);
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99244075d37f55ec',t:'MTc2MTA4NjM3NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'992453c1e2d6f875',t:'MTc2MTA4NzE2Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
