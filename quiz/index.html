@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Kuis Siswa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+    <style>
+        body {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+        
+        /* Disable screenshot and screen recording */
+        * {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        
+        /* Disable Google Translate */
+        .notranslate {
+            -webkit-transform: none;
+            -moz-transform: none;
+            -ms-transform: none;
+            -o-transform: none;
+            transform: none;
+        }
+        
+        /* Hide Google Translate elements */
+        .goog-te-banner-frame,
+        .goog-te-menu-frame,
+        .skiptranslate,
+        .goog-tooltip,
+        .goog-tooltip:hover,
+        .goog-text-highlight {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+        }
+        
+        /* Question image styling */
+        .question-image {
+            max-width: 100%;
+            height: auto;
+            max-height: 300px;
+            object-fit: contain;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin: 16px 0;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        @media (max-width: 768px) {
+            .question-image {
+                max-height: 200px;
+                margin: 12px 0;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .question-image {
+                max-height: 150px;
+                margin: 8px 0;
+            }
+        }
+        
+        /* Hide content when dev tools are open */
+        @media (max-height: 500px) and (min-width: 800px) {
+            .quiz-container {
+                display: none !important;
+            }
+            .security-warning {
+                display: block !important;
+            }
+        }
+        
+        .security-warning {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #dc2626;
+            color: white;
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            text-align: center;
+        }
+        
+        .quiz-question {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .option-button {
+            transition: all 0.3s ease;
+        }
+        
+        .option-button:hover {
+            transform: translateX(8px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+        
+        .progress-bar {
+            transition: width 0.5s ease;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-full notranslate" translate="no">
+    <!-- Security Warning -->
+    <div class="security-warning">
+        <div>
+            <h1>⚠️ PERINGATAN KEAMANAN ⚠️</h1>
+            <p>Aplikasi kuis telah mendeteksi aktivitas mencurigakan.<br>Tutup developer tools dan refresh halaman.</p>
+        </div>
+    </div>
+
+    <main class="quiz-container min-h-full">
+        <!-- Login Screen -->
+        <div id="loginScreen" class="flex items-center justify-center min-h-full p-4">
+            <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
+                <div class="text-center mb-8">
+                    <div class="bg-blue-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <h1 class="text-3xl font-bold text-gray-800 mb-2">Kuis Online</h1>
+                    <p class="text-gray-600">Masukkan NIS untuk memulai kuis</p>
+                </div>
+                
+                <form id="loginForm" class="space-y-6">
+                    <div>
+                        <label for="nisInput" class="block text-sm font-medium text-gray-700 mb-2">Nomor Induk Siswa (NIS)</label>
+                        <input type="text" id="nisInput" required 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                               placeholder="Masukkan NIS Anda">
+                    </div>
+                    
+                    <button type="submit" 
+                            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors">
+                        Masuk Kuis
+                    </button>
+                </form>
+                
+                <div id="loginError" class="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg hidden">
+                    NIS tidak ditemukan atau Anda sudah mengerjakan kuis ini.
+                </div>
+            </div>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quizScreen" class="hidden min-h-full p-4">
+            <div class="max-w-4xl mx-auto">
+                <!-- Header -->
+                <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-800">Kuis Online</h2>
+                            <p id="studentInfo" class="text-gray-600"></p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-sm text-gray-500">Soal</div>
+                            <div id="questionCounter" class="text-2xl font-bold text-blue-600">1 / 3</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Progress Bar -->
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div id="progressBar" class="progress-bar bg-blue-600 h-2 rounded-full" style="width: 50%"></div>
+                    </div>
+                </div>
+
+                <!-- Question Card -->
+                <div id="questionCard" class="bg-white rounded-2xl shadow-lg p-8 mb-6">
+                    <div class="quiz-question">
+                        <h3 id="questionText" class="text-xl font-semibold text-gray-800 mb-6 leading-relaxed"></h3>
+                        
+                        <div id="optionsContainer" class="space-y-4">
+                            <!-- Options will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation -->
+                <div class="flex justify-between">
+                    <button id="prevBtn" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors hidden">
+                        ← Sebelumnya
+                    </button>
+                    <button id="nextBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors ml-auto">
+                        Selanjutnya →
+                    </button>
+                    <button id="submitBtn" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors ml-auto hidden">
+                        Selesai Kuis
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Screen -->
+        <div id="loadingScreen" class="hidden flex items-center justify-center min-h-full p-4">
+            <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md text-center">
+                <div class="bg-blue-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
+                    <svg class="w-10 h-10 text-blue-600 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                </div>
+                
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Menyimpan Jawaban</h2>
+                <p class="text-gray-600 mb-6">Jawaban sedang disimpan ke database...</p>
+                
+                <div class="flex justify-center">
+                    <div class="flex space-x-1">
+                        <div class="w-2 h-2 bg-blue-600 rounded-full animate-bounce"></div>
+                        <div class="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                        <div class="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Result Screen -->
+        <div id="resultScreen" class="hidden flex items-center justify-center min-h-full p-4">
+            <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md text-center">
+                <div class="bg-green-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
+                    <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">Kuis Selesai!</h2>
+                <div id="finalScore" class="text-6xl font-bold text-blue-600 mb-2">0</div>
+                <p id="totalQuestions" class="text-gray-600 mb-6">dari 3 soal benar</p>
+                
+                <div id="resultMessage" class="p-4 rounded-lg mb-6">
+                    <p class="font-semibold"></p>
+                </div>
+                
+                <p class="text-sm text-gray-500">Hasil telah disimpan secara otomatis</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDAXMd9cAPtkgjo7R4xEZY18IGOJMxsJ3g",
+            authDomain: "view-count-1287b.firebaseapp.com",
+            databaseURL: "https://view-count-1287b-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "view-count-1287b",
+            storageBucket: "view-count-1287b.firebasestorage.app",
+            messagingSenderId: "264930996114",
+            appId: "1:264930996114:web:6f7b6ed38a73e992529b4b",
+            measurementId: "G-99YYF6TG0P"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Global Variables for Firebase Data
+        let quizData = {
+            siswa: {},
+            soal: {}
+        };
+
+        // Load data from Firebase
+        async function loadDataFromFirebase() {
+            try {
+                // Load siswa data
+                const siswaSnapshot = await database.ref('siswa').once('value');
+                const siswaData = siswaSnapshot.val();
+                if (siswaData) {
+                    quizData.siswa = siswaData;
+                }
+
+                // Load soal data
+                const soalSnapshot = await database.ref('soal').once('value');
+                const soalData = soalSnapshot.val();
+                if (soalData) {
+                    quizData.soal = soalData;
+                }
+
+                console.log('Data loaded from Firebase successfully');
+                return true;
+            } catch (error) {
+                console.error('Error loading data from Firebase:', error);
+                return false;
+            }
+        }
+
+        // Global Variables
+        let currentStudent = null;
+        let questions = [];
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+        let quizCompleted = false;
+
+        // Security Functions
+        function initSecurity() {
+            // Disable right click
+            document.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                return false;
+            });
+
+            // Disable F12, Ctrl+Shift+I, Ctrl+U, etc.
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'F12' || 
+                    (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+                    (e.ctrlKey && e.shiftKey && e.key === 'C') ||
+                    (e.ctrlKey && e.key === 'u') ||
+                    (e.ctrlKey && e.key === 'U')) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+
+            // Detect tab switch
+            document.addEventListener('visibilitychange', function() {
+                if (document.hidden && !quizCompleted) {
+                    alert('Peringatan: Jangan pindah tab selama kuis berlangsung!');
+                }
+            });
+
+            // Disable text selection
+            document.onselectstart = function() {
+                return false;
+            };
+
+            // Disable drag
+            document.ondragstart = function() {
+                return false;
+            };
+
+            // Monitor window focus
+            window.addEventListener('blur', function() {
+                if (!quizCompleted) {
+                    console.log('Window lost focus - potential tab switch detected');
+                }
+            });
+            
+            // Disable Google Translate
+            document.documentElement.setAttribute('translate', 'no');
+            document.documentElement.className += ' notranslate';
+            
+            // Block Google Translate attempts
+            if (typeof google !== 'undefined' && google.translate) {
+                google.translate.TranslateElement = function() {};
+            }
+            
+            // Monitor for translate attempts
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.type === 'childList') {
+                        mutation.addedNodes.forEach(function(node) {
+                            if (node.nodeType === 1) {
+                                // Remove any Google Translate elements
+                                if (node.classList && (
+                                    node.classList.contains('goog-te-banner-frame') ||
+                                    node.classList.contains('goog-te-menu-frame') ||
+                                    node.classList.contains('skiptranslate')
+                                )) {
+                                    node.remove();
+                                }
+                            }
+                        });
+                    }
+                });
+            });
+            
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+        }
+
+        // Check if student has already completed quiz
+        async function checkQuizCompletion(nis) {
+            try {
+                const snapshot = await database.ref('hasil').once('value');
+                const results = snapshot.val();
+                
+                if (results) {
+                    for (let key in results) {
+                        if (results[key].nis === nis && results[key].hasil !== "") {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            } catch (error) {
+                console.error('Error checking quiz completion:', error);
+                return false;
+            }
+        }
+
+        // Login Function
+        async function handleLogin(event) {
+            event.preventDefault();
+            
+            const nis = document.getElementById('nisInput').value.trim();
+            const errorDiv = document.getElementById('loginError');
+            
+            // Show loading state
+            const submitBtn = event.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Memuat...';
+            submitBtn.disabled = true;
+            
+            try {
+                // Load data from Firebase first
+                const dataLoaded = await loadDataFromFirebase();
+                if (!dataLoaded) {
+                    errorDiv.textContent = 'Gagal memuat data. Silakan coba lagi.';
+                    errorDiv.classList.remove('hidden');
+                    return;
+                }
+                
+                // Find student by NIS
+                let foundStudent = null;
+                for (let key in quizData.siswa) {
+                    if (quizData.siswa[key].nis === nis) {
+                        foundStudent = quizData.siswa[key];
+                        break;
+                    }
+                }
+                
+                if (!foundStudent) {
+                    errorDiv.textContent = 'NIS tidak ditemukan dalam database.';
+                    errorDiv.classList.remove('hidden');
+                    return;
+                }
+                
+                // Check if already completed
+                const hasCompleted = await checkQuizCompletion(nis);
+                if (hasCompleted) {
+                    errorDiv.textContent = 'Anda sudah mengerjakan kuis ini sebelumnya.';
+                    errorDiv.classList.remove('hidden');
+                    return;
+                }
+                
+                currentStudent = foundStudent;
+                errorDiv.classList.add('hidden');
+                startQuiz();
+                
+            } catch (error) {
+                console.error('Login error:', error);
+                errorDiv.textContent = 'Terjadi kesalahan. Silakan coba lagi.';
+                errorDiv.classList.remove('hidden');
+            } finally {
+                // Restore button state
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        }
+
+        // Start Quiz
+        function startQuiz() {
+            // Prepare questions
+            questions = Object.values(quizData.soal);
+            userAnswers = new Array(questions.length).fill(null);
+            
+            // Update UI
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('quizScreen').classList.remove('hidden');
+            document.getElementById('studentInfo').textContent = 
+                `${currentStudent.nama} - ${currentStudent.kelas} (NIS: ${currentStudent.nis})`;
+            
+            displayQuestion();
+        }
+
+        // Display Question
+        function displayQuestion() {
+            const question = questions[currentQuestionIndex];
+            const questionText = document.getElementById('questionText');
+            const optionsContainer = document.getElementById('optionsContainer');
+            const questionCounter = document.getElementById('questionCounter');
+            const progressBar = document.getElementById('progressBar');
+            
+            // Clear previous content
+            questionText.innerHTML = '';
+            optionsContainer.innerHTML = '';
+            
+            // Add question text
+            const questionParagraph = document.createElement('p');
+            questionParagraph.textContent = question.pertanyaan;
+            questionParagraph.className = 'notranslate';
+            questionParagraph.setAttribute('translate', 'no');
+            questionText.appendChild(questionParagraph);
+            
+            // Add image if exists
+            if (question.gambar && question.gambar.trim() !== '') {
+                const imageElement = document.createElement('img');
+                imageElement.src = question.gambar;
+                imageElement.alt = 'Gambar soal';
+                imageElement.className = 'question-image notranslate';
+                imageElement.setAttribute('translate', 'no');
+                imageElement.onerror = function() {
+                    this.style.display = 'none';
+                    console.log('Error loading image for question');
+                };
+                questionText.appendChild(imageElement);
+            }
+            
+            questionCounter.textContent = `${currentQuestionIndex + 1} / ${questions.length}`;
+            
+            // Update progress bar
+            const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+            progressBar.style.width = `${progress}%`;
+            
+            // Create options
+            const options = ['opsia', 'opsib', 'opsic', 'opsid'];
+            options.forEach((optionKey, index) => {
+                if (question[optionKey]) {
+                    const optionDiv = document.createElement('div');
+                    optionDiv.innerHTML = `
+                        <button type="button" 
+                                class="option-button w-full text-left p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all notranslate ${userAnswers[currentQuestionIndex] === index ? 'border-blue-500 bg-blue-50' : ''}"
+                                onclick="selectAnswer(${index})" translate="no">
+                            <span class="font-semibold text-blue-600">${String.fromCharCode(65 + index)}.</span>
+                            <span class="ml-2 text-gray-800">${question[optionKey]}</span>
+                        </button>
+                    `;
+                    optionsContainer.appendChild(optionDiv);
+                }
+            });
+            
+            updateNavigationButtons();
+        }
+
+        // Select Answer
+        function selectAnswer(answerIndex) {
+            userAnswers[currentQuestionIndex] = answerIndex;
+            displayQuestion(); // Refresh to show selection
+        }
+
+        // Update Navigation Buttons
+        function updateNavigationButtons() {
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            // Previous button
+            if (currentQuestionIndex > 0) {
+                prevBtn.classList.remove('hidden');
+            } else {
+                prevBtn.classList.add('hidden');
+            }
+            
+            // Next/Submit button
+            if (currentQuestionIndex === questions.length - 1) {
+                nextBtn.classList.add('hidden');
+                submitBtn.classList.remove('hidden');
+            } else {
+                nextBtn.classList.remove('hidden');
+                submitBtn.classList.add('hidden');
+            }
+        }
+
+        // Navigation Functions
+        function previousQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                displayQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                displayQuestion();
+            }
+        }
+
+        // Calculate Score
+        function calculateScore() {
+            let correctAnswers = 0;
+            
+            questions.forEach((question, index) => {
+                const userAnswer = userAnswers[index];
+                if (userAnswer !== null) {
+                    const correctAnswerLetter = question.kunci || question.jawaban;
+                    const correctAnswerIndex = correctAnswerLetter.charCodeAt(0) - 65; // A=0, B=1, C=2, D=3
+                    
+                    if (userAnswer === correctAnswerIndex) {
+                        correctAnswers++;
+                    }
+                }
+            });
+            
+            return correctAnswers;
+        }
+
+        // Submit Quiz
+        async function submitQuiz() {
+            // Show loading screen
+            document.getElementById('quizScreen').classList.add('hidden');
+            document.getElementById('loadingScreen').classList.remove('hidden');
+            
+            const score = calculateScore();
+            const percentage = Math.round((score / questions.length) * 100);
+            
+            // Prepare detailed answers
+            const detailedAnswers = [];
+            questions.forEach((question, index) => {
+                const userAnswer = userAnswers[index];
+                const correctAnswerLetter = question.kunci || question.jawaban;
+                const correctAnswerIndex = correctAnswerLetter.charCodeAt(0) - 65;
+                const isCorrect = userAnswer === correctAnswerIndex;
+                
+                detailedAnswers.push({
+                    soal_no: index + 1,
+                    pertanyaan: question.pertanyaan,
+                    tipe_soal: question.tipe_soal || 'text',
+                    gambar: question.gambar || '',
+                    jawaban_siswa: userAnswer !== null ? String.fromCharCode(65 + userAnswer) : 'Tidak dijawab',
+                    jawaban_benar: correctAnswerLetter,
+                    is_correct: isCorrect,
+                    opsi_a: question.opsia,
+                    opsi_b: question.opsib,
+                    opsi_c: question.opsic,
+                    opsi_d: question.opsid
+                });
+            });
+            
+            const timestamp = new Date().toISOString();
+            
+            // Save to Firebase - Hasil Ringkas
+            try {
+                await database.ref('hasil').push({
+                    nis: currentStudent.nis,
+                    nama: currentStudent.nama,
+                    kelas: currentStudent.kelas,
+                    hasil: `${score}/${questions.length}`,
+                    skor: percentage,
+                    created_at: timestamp,
+                    updated_at: timestamp
+                });
+            } catch (error) {
+                console.error('Error saving to Firebase hasil:', error);
+            }
+            
+            // Save to Firebase - Detail Jawaban
+            try {
+                await database.ref('detail_jawaban').push({
+                    nis: currentStudent.nis,
+                    nama: currentStudent.nama,
+                    kelas: currentStudent.kelas,
+                    absen: currentStudent.absen,
+                    total_soal: questions.length,
+                    jawaban_benar: score,
+                    skor_persen: percentage,
+                    detail_jawaban: detailedAnswers,
+                    waktu_mulai: timestamp,
+                    waktu_selesai: timestamp,
+                    created_at: timestamp
+                });
+            } catch (error) {
+                console.error('Error saving detailed answers to Firebase:', error);
+            }
+            
+            // Save to Firebase - Statistik Soal
+            try {
+                for (let i = 0; i < questions.length; i++) {
+                    const question = questions[i];
+                    const userAnswer = userAnswers[i];
+                    const correctAnswerLetter = question.kunci || question.jawaban;
+                    const correctAnswerIndex = correctAnswerLetter.charCodeAt(0) - 65;
+                    const isCorrect = userAnswer === correctAnswerIndex;
+                    
+                    // Update statistik per soal
+                    const soalRef = database.ref(`statistik_soal/soal_${i + 1}`);
+                    const snapshot = await soalRef.once('value');
+                    const currentStats = snapshot.val() || {
+                        pertanyaan: question.pertanyaan,
+                        tipe_soal: question.tipe_soal || 'text',
+                        gambar: question.gambar || '',
+                        total_dijawab: 0,
+                        total_benar: 0,
+                        jawaban_a: 0,
+                        jawaban_b: 0,
+                        jawaban_c: 0,
+                        jawaban_d: 0,
+                        tidak_dijawab: 0
+                    };
+                    
+                    // Update counters
+                    currentStats.total_dijawab += 1;
+                    if (isCorrect) currentStats.total_benar += 1;
+                    
+                    if (userAnswer !== null) {
+                        const answerKeys = ['jawaban_a', 'jawaban_b', 'jawaban_c', 'jawaban_d'];
+                        currentStats[answerKeys[userAnswer]] += 1;
+                    } else {
+                        currentStats.tidak_dijawab += 1;
+                    }
+                    
+                    // Calculate percentage
+                    currentStats.persentase_benar = Math.round((currentStats.total_benar / currentStats.total_dijawab) * 100);
+                    currentStats.updated_at = timestamp;
+                    
+                    await soalRef.set(currentStats);
+                }
+            } catch (error) {
+                console.error('Error saving question statistics:', error);
+            }
+            
+            // Send to Google Apps Script
+            try {
+                const formData = new FormData();
+                formData.append('NIS', currentStudent.nis);
+                formData.append('Absen', currentStudent.absen);
+                formData.append('Nama', currentStudent.nama);
+                formData.append('Kelas', currentStudent.kelas);
+                formData.append('Skor', percentage);
+                
+                await fetch('https://script.google.com/macros/s/AKfycbwwwX4Cxvl_4AxXfO5uT3Omyh-82TI5yUPidHCkiDsou-UfSekux9ffkVVz7m6kOj56AQ/exec', {
+                    method: 'POST',
+                    body: formData
+                });
+            } catch (error) {
+                console.error('Error sending to Google Apps Script:', error);
+            }
+            
+            quizCompleted = true;
+            
+            // Wait 2 seconds before showing results
+            setTimeout(() => {
+                document.getElementById('loadingScreen').classList.add('hidden');
+                showResults(score, percentage);
+            }, 2000);
+        }
+
+        // Show Results
+        function showResults(score, percentage) {
+            document.getElementById('quizScreen').classList.add('hidden');
+            document.getElementById('resultScreen').classList.remove('hidden');
+            
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('totalQuestions').textContent = `dari ${questions.length} soal benar`;
+            
+            const resultMessage = document.getElementById('resultMessage');
+            if (percentage >= 80) {
+                resultMessage.className = 'p-4 rounded-lg mb-6 bg-green-100 border border-green-400';
+                resultMessage.innerHTML = '<p class="font-semibold text-green-800">Excellent! Hasil yang sangat baik!</p>';
+            } else if (percentage >= 60) {
+                resultMessage.className = 'p-4 rounded-lg mb-6 bg-yellow-100 border border-yellow-400';
+                resultMessage.innerHTML = '<p class="font-semibold text-yellow-800">Good! Terus tingkatkan belajarnya!</p>';
+            } else {
+                resultMessage.className = 'p-4 rounded-lg mb-6 bg-red-100 border border-red-400';
+                resultMessage.innerHTML = '<p class="font-semibold text-red-800">Perlu belajar lebih giat lagi!</p>';
+            }
+        }
+
+        // Event Listeners
+        document.getElementById('loginForm').addEventListener('submit', handleLogin);
+        document.getElementById('prevBtn').addEventListener('click', previousQuestion);
+        document.getElementById('nextBtn').addEventListener('click', nextQuestion);
+        document.getElementById('submitBtn').addEventListener('click', submitQuiz);
+
+        // Initialize sample data in Firebase (run once)
+        async function initializeSampleData() {
+            try {
+                // Check if data already exists
+                const siswaSnapshot = await database.ref('siswa').once('value');
+                const soalSnapshot = await database.ref('soal').once('value');
+                
+                if (!siswaSnapshot.exists()) {
+                    // Add sample students
+                    await database.ref('siswa').set({
+                        "siswa_1": {
+                            "nis": "11111",
+                            "absen": "1",
+                            "nama": "Nina",
+                            "kelas": "7A",
+                            "created_at": new Date().toISOString(),
+                            "updated_at": new Date().toISOString()
+                        },
+                        "siswa_2": {
+                            "nis": "22222",
+                            "absen": "2",
+                            "nama": "Agus",
+                            "kelas": "7A",
+                            "created_at": new Date().toISOString(),
+                            "updated_at": new Date().toISOString()
+                        }
+                    });
+                    console.log('Sample student data added to Firebase');
+                }
+                
+                if (!soalSnapshot.exists()) {
+                    // Add sample questions
+                    await database.ref('soal').set({
+                        "soal_1": {
+                            "pertanyaan": "Siapa nama presiden pertama Indonesia?",
+                            "gambar": "",
+                            "tipe_soal": "text",
+                            "opsia": "Soekarno",
+                            "opsib": "Soeharto",
+                            "opsic": "Megawati",
+                            "opsid": "Jokowi",
+                            "kunci": "A",
+                            "created_at": new Date().toISOString(),
+                            "updated_at": new Date().toISOString()
+                        },
+                        "soal_3": {
+                            "pertanyaan": "Apa nama hewan yang terlihat pada gambar?",
+                            "gambar": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDMwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjBGOEZGIi8+CjxjaXJjbGUgY3g9IjE1MCIgY3k9IjEwMCIgcj0iNDAiIGZpbGw9IiNGRkE1MDAiLz4KPGNpcmNsZSBjeD0iMTQwIiBjeT0iOTAiIHI9IjMiIGZpbGw9IiMwMDAiLz4KPGNpcmNsZSBjeD0iMTYwIiBjeT0iOTAiIHI9IjMiIGZpbGw9IiMwMDAiLz4KPHBhdGggZD0iTTE0NSAxMDVMMTU1IDEwNUwxNTAgMTEwWiIgZmlsbD0iIzAwMCIvPgo8cGF0aCBkPSJNMTQwIDEyMFExNTAgMTMwIDE2MCAxMjAiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CjxlbGxpcHNlIGN4PSIxMjAiIGN5PSI4MCIgcng9IjE1IiByeT0iMjUiIGZpbGw9IiNGRkE1MDAiLz4KPGVsbGlwc2UgY3g9IjE4MCIgY3k9IjgwIiByeD0iMTUiIHJ5PSIyNSIgZmlsbD0iI0ZGQTUwMCIvPgo8dGV4dCB4PSIxNTAiIHk9IjE4MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0IiBmaWxsPSIjNjY2Ij5IZXdhbiBLdWNpbmc8L3RleHQ+Cjwvc3ZnPg==",
+                            "tipe_soal": "image",
+                            "opsia": "Kucing",
+                            "opsib": "Anjing",
+                            "opsic": "Kelinci",
+                            "opsid": "Hamster",
+                            "kunci": "A",
+                            "created_at": new Date().toISOString(),
+                            "updated_at": new Date().toISOString()
+                        }
+                    });
+                    console.log('Sample question data added to Firebase');
+                }
+            } catch (error) {
+                console.error('Error initializing sample data:', error);
+            }
+        }
+
+        // Initialize Security on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initSecurity();
+            // Initialize sample data on first load
+            initializeSampleData();
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9946beccf3f19c5d',t:'MTc2MTQ0ODA2Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
