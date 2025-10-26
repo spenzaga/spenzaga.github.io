@@ -343,7 +343,8 @@
 
         // Security Functions
         function recordViolation(violationType) {
-            if (quizCompleted) return;
+            // Only record violations if quiz is active (after login and before completion)
+            if (!currentStudent || quizCompleted) return;
             
             violationCount++;
             console.log(`Security violation detected: ${violationType} (Count: ${violationCount})`);
@@ -457,14 +458,14 @@
 
             // Detect tab switch
             document.addEventListener('visibilitychange', function() {
-                if (document.hidden && !quizCompleted) {
+                if (document.hidden && currentStudent && !quizCompleted) {
                     recordViolation('tab_switch');
                 }
             });
 
             // Monitor window focus
             window.addEventListener('blur', function() {
-                if (!quizCompleted) {
+                if (currentStudent && !quizCompleted) {
                     recordViolation('tab_switch');
                 }
             });
@@ -939,17 +940,17 @@
                     // Add sample students
                     await database.ref('siswa').set({
                         "siswa_1": {
-                            "nis": "11111",
+                            "nis": "12346",
                             "absen": "1",
-                            "nama": "Nina Larasati",
+                            "nama": "Nina",
                             "kelas": "7A",
                             "created_at": new Date().toISOString(),
                             "updated_at": new Date().toISOString()
                         },
                         "siswa_2": {
-                            "nis": "22222",
+                            "nis": "12345",
                             "absen": "2",
-                            "nama": "Dedi Mizwar",
+                            "nama": "Agus",
                             "kelas": "7A",
                             "created_at": new Date().toISOString(),
                             "updated_at": new Date().toISOString()
@@ -970,6 +971,18 @@
                             "opsic": "Megawati",
                             "opsid": "Jokowi",
                             "kunci": "A",
+                            "created_at": new Date().toISOString(),
+                            "updated_at": new Date().toISOString()
+                        },
+                        "soal_2": {
+                            "pertanyaan": "Ibu kota Jawa Tengah?",
+                            "gambar": "",
+                            "tipe_soal": "text",
+                            "opsia": "Jakarta",
+                            "opsib": "Semarang",
+                            "opsic": "Surabaya",
+                            "opsid": "Bali",
+                            "kunci": "B",
                             "created_at": new Date().toISOString(),
                             "updated_at": new Date().toISOString()
                         },
@@ -1000,5 +1013,5 @@
             initializeSampleData();
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9947b6dcf16fc9da',t:'MTc2MTQ1ODIyNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9947c102954240a3',t:'MTc2MTQ1ODY0Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
