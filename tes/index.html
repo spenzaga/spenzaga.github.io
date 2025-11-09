@@ -1,0 +1,874 @@
+<!doctype html>
+<html lang="id">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Computer Based Test</title>
+  <script src="/_sdk/data_sdk.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
+    html {
+      height: 100%;
+    }
+    .question-card {
+      transition: all 0.3s ease;
+    }
+    .option-button {
+      transition: all 0.2s ease;
+    }
+    .option-button:hover {
+      transform: translateX(8px);
+    }
+    .progress-bar {
+      transition: width 0.3s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .fade-in {
+      animation: fadeIn 0.5s ease;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    .pulse {
+      animation: pulse 0.5s ease;
+    }
+    .confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      background: #f0f;
+      position: absolute;
+      animation: confetti-fall 3s linear forwards;
+    }
+    @keyframes confetti-fall {
+      to {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+ </head>
+ <body>
+  <div id="app" class="min-h-full"></div>
+  <script>
+    const defaultConfig = {
+      background_color: "#f0f4f8",
+      surface_color: "#ffffff",
+      text_color: "#1e293b",
+      primary_action_color: "#3b82f6",
+      secondary_action_color: "#64748b",
+      font_family: "Inter",
+      font_size: 16,
+      test_title: "Ujian Pilihan Ganda",
+      test_description: "Jawab semua pertanyaan dengan teliti",
+      start_button_text: "Mulai Ujian",
+      submit_button_text: "Submit Jawaban",
+      view_results_text: "Lihat Hasil Ujian"
+    };
+
+    let currentRecordCount = 0;
+    let currentView = 'login';
+    let currentQuestionIndex = 0;
+    let userAnswers = {};
+    let studentName = '';
+    let testResults = [];
+    let isLoggedIn = false;
+
+    // Kredensial login (dalam aplikasi nyata, ini harus di backend)
+    const validCredentials = {
+      username: 'siswa',
+      password: 'ujian123'
+    };
+
+    const questions = [
+      {
+        id: 1,
+        question: "Apa ibu kota Indonesia?",
+        options: ["Bandung", "Jakarta", "Surabaya", "Medan"],
+        correct: 1,
+        image: null
+      },
+      {
+        id: 2,
+        question: "Berapa hasil dari 15 + 27?",
+        options: ["40", "42", "43", "45"],
+        correct: 1,
+        image: null
+      },
+      {
+        id: 3,
+        question: "Gambar di atas menunjukkan planet apa?",
+        options: ["Mars", "Saturnus", "Jupiter", "Neptunus"],
+        correct: 2,
+        image: `<svg viewBox="0 0 200 200" class="w-48 h-48 mx-auto mb-4">
+          <defs>
+            <radialGradient id="jupiterGrad" cx="40%" cy="40%">
+              <stop offset="0%" style="stop-color:#f4d4a8;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#d4a574;stop-opacity:1" />
+            </radialGradient>
+          </defs>
+          <circle cx="100" cy="100" r="80" fill="url(#jupiterGrad)"/>
+          <ellipse cx="100" cy="85" rx="75" ry="8" fill="#c89968" opacity="0.6"/>
+          <ellipse cx="100" cy="100" rx="75" ry="10" fill="#b88858" opacity="0.5"/>
+          <ellipse cx="100" cy="115" rx="75" ry="8" fill="#c89968" opacity="0.6"/>
+          <circle cx="130" cy="70" r="15" fill="#d4a574" opacity="0.8"/>
+        </svg>`
+      },
+      {
+        id: 4,
+        question: "Siapa penemu yang ditunjukkan pada gambar?",
+        options: ["Albert Einstein", "Thomas Edison", "Nikola Tesla", "Isaac Newton"],
+        correct: 1,
+        image: `<svg viewBox="0 0 200 200" class="w-48 h-48 mx-auto mb-4">
+          <circle cx="100" cy="100" r="70" fill="#ffd700" opacity="0.3"/>
+          <path d="M 100 40 L 100 20 M 100 180 L 100 160 M 40 100 L 20 100 M 180 100 L 160 100 M 55 55 L 40 40 M 145 55 L 160 40 M 55 145 L 40 160 M 145 145 L 160 160" stroke="#ffd700" stroke-width="4" stroke-linecap="round"/>
+          <path d="M 70 80 Q 100 60 130 80" fill="none" stroke="#333" stroke-width="3"/>
+          <circle cx="100" cy="100" r="25" fill="#fff" stroke="#333" stroke-width="3"/>
+          <path d="M 85 100 L 100 115 L 100 100 L 115 100" fill="none" stroke="#333" stroke-width="3" stroke-linecap="round"/>
+        </svg>`
+      },
+      {
+        id: 5,
+        question: "Simbol di atas adalah logo bahasa pemrograman apa?",
+        options: ["Python", "Java", "JavaScript", "C++"],
+        correct: 2,
+        image: `<svg viewBox="0 0 200 200" class="w-48 h-48 mx-auto mb-4">
+          <rect x="30" y="50" width="140" height="100" rx="10" fill="#f7df1e"/>
+          <text x="100" y="120" font-size="80" font-weight="bold" text-anchor="middle" fill="#323330" font-family="Arial, sans-serif">JS</text>
+        </svg>`
+      }
+    ];
+
+    const dataHandler = {
+      onDataChanged(data) {
+        testResults = data;
+        currentRecordCount = data.length;
+        if (currentView === 'results') {
+          renderResultsView();
+        }
+      }
+    };
+
+    async function onConfigChange(config) {
+      const customFont = config.font_family || defaultConfig.font_family;
+      const baseFontStack = 'system-ui, -apple-system, sans-serif';
+      const baseSize = config.font_size || defaultConfig.font_size;
+      
+      const backgroundColor = config.background_color || defaultConfig.background_color;
+      const surfaceColor = config.surface_color || defaultConfig.surface_color;
+      const textColor = config.text_color || defaultConfig.text_color;
+      const primaryColor = config.primary_action_color || defaultConfig.primary_action_color;
+      const secondaryColor = config.secondary_action_color || defaultConfig.secondary_action_color;
+
+      document.body.style.fontFamily = `${customFont}, ${baseFontStack}`;
+      document.body.style.backgroundColor = backgroundColor;
+      document.body.style.color = textColor;
+
+      const titleElements = document.querySelectorAll('.title-text');
+      titleElements.forEach(el => {
+        el.style.fontFamily = `${customFont}, ${baseFontStack}`;
+        el.style.fontSize = `${baseSize * 2}px`;
+        el.style.color = textColor;
+      });
+
+      const descriptionElements = document.querySelectorAll('.description-text');
+      descriptionElements.forEach(el => {
+        el.style.fontFamily = `${customFont}, ${baseFontStack}`;
+        el.style.fontSize = `${baseSize}px`;
+        el.style.color = textColor;
+      });
+
+      const questionElements = document.querySelectorAll('.question-text');
+      questionElements.forEach(el => {
+        el.style.fontFamily = `${customFont}, ${baseFontStack}`;
+        el.style.fontSize = `${baseSize * 1.25}px`;
+        el.style.color = textColor;
+      });
+
+      const labelElements = document.querySelectorAll('.label-text');
+      labelElements.forEach(el => {
+        el.style.fontFamily = `${customFont}, ${baseFontStack}`;
+        el.style.fontSize = `${baseSize * 0.875}px`;
+        el.style.color = textColor;
+      });
+
+      const cardElements = document.querySelectorAll('.card-surface');
+      cardElements.forEach(el => {
+        el.style.backgroundColor = surfaceColor;
+      });
+
+      const primaryButtons = document.querySelectorAll('.primary-button');
+      primaryButtons.forEach(el => {
+        el.style.backgroundColor = primaryColor;
+        el.style.fontFamily = `${customFont}, ${baseFontStack}`;
+        el.style.fontSize = `${baseSize}px`;
+      });
+
+      const secondaryButtons = document.querySelectorAll('.secondary-button');
+      secondaryButtons.forEach(el => {
+        el.style.backgroundColor = secondaryColor;
+        el.style.fontFamily = `${customFont}, ${baseFontStack}`;
+        el.style.fontSize = `${baseSize * 0.875}px`;
+      });
+
+      const optionButtons = document.querySelectorAll('.option-button');
+      optionButtons.forEach(el => {
+        el.style.backgroundColor = surfaceColor;
+        el.style.color = textColor;
+        el.style.fontFamily = `${customFont}, ${baseFontStack}`;
+        el.style.fontSize = `${baseSize}px`;
+      });
+
+      const progressBar = document.querySelector('.progress-bar');
+      if (progressBar) {
+        progressBar.style.backgroundColor = primaryColor;
+      }
+
+      const inputElements = document.querySelectorAll('input[type="text"]');
+      inputElements.forEach(el => {
+        el.style.fontFamily = `${customFont}, ${baseFontStack}`;
+        el.style.fontSize = `${baseSize}px`;
+        el.style.color = textColor;
+        el.style.backgroundColor = surfaceColor;
+      });
+    }
+
+    function renderLoginView() {
+      currentView = 'login';
+      const config = window.elementSdk.config;
+
+      const app = document.getElementById('app');
+      app.innerHTML = `
+        <div class="min-h-full flex items-center justify-center p-6">
+          <div class="card-surface max-w-md w-full rounded-2xl shadow-2xl p-8 fade-in">
+            <div class="text-center mb-8">
+              <div class="text-6xl mb-4">🔐</div>
+              <h1 class="title-text font-bold mb-3">Login Ujian</h1>
+              <p class="description-text opacity-80">Masukkan kredensial Anda</p>
+            </div>
+            
+            <div id="errorMessage" class="hidden mb-4 p-3 bg-red-100 border border-red-400 rounded-lg">
+              <p class="label-text text-red-700">Username atau password salah!</p>
+            </div>
+
+            <div class="mb-4">
+              <label for="username" class="label-text block mb-2 font-medium">Username</label>
+              <input 
+                type="text" 
+                id="username" 
+                placeholder="Masukkan username"
+                class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:outline-none transition-colors"
+              >
+            </div>
+
+            <div class="mb-6">
+              <label for="password" class="label-text block mb-2 font-medium">Password</label>
+              <input 
+                type="password" 
+                id="password" 
+                placeholder="Masukkan password"
+                class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:outline-none transition-colors"
+              >
+            </div>
+
+            <button 
+              id="loginBtn" 
+              class="primary-button w-full text-white py-4 rounded-lg font-semibold hover:opacity-90 transition-opacity"
+            >
+              Login
+            </button>
+
+            <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+              <p class="label-text text-center opacity-70">
+                <strong>Demo:</strong> username: <code>siswa</code> | password: <code>ujian123</code>
+              </p>
+            </div>
+          </div>
+        </div>
+      `;
+
+      onConfigChange(config);
+
+      const loginBtn = document.getElementById('loginBtn');
+      const usernameInput = document.getElementById('username');
+      const passwordInput = document.getElementById('password');
+      const errorMessage = document.getElementById('errorMessage');
+
+      const handleLogin = () => {
+        const username = usernameInput.value.trim();
+        const password = passwordInput.value.trim();
+
+        if (username === validCredentials.username && password === validCredentials.password) {
+          isLoggedIn = true;
+          errorMessage.classList.add('hidden');
+          if (isLoggedIn) {
+        renderWelcomeView();
+      } else {
+        renderLoginView();
+      }
+        } else {
+          errorMessage.classList.remove('hidden');
+          usernameInput.classList.add('pulse');
+          passwordInput.classList.add('pulse');
+          setTimeout(() => {
+            usernameInput.classList.remove('pulse');
+            passwordInput.classList.remove('pulse');
+          }, 500);
+        }
+      };
+
+      loginBtn.addEventListener('click', handleLogin);
+      passwordInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') handleLogin();
+      });
+    }
+
+    function renderWelcomeView() {
+      currentView = 'welcome';
+      const config = window.elementSdk.config;
+      const testTitle = config.test_title || defaultConfig.test_title;
+      const testDescription = config.test_description || defaultConfig.test_description;
+      const startButtonText = config.start_button_text || defaultConfig.start_button_text;
+      const viewResultsText = config.view_results_text || defaultConfig.view_results_text;
+
+      const app = document.getElementById('app');
+      app.innerHTML = `
+        <div class="min-h-full flex items-center justify-center p-6">
+          <div class="card-surface max-w-2xl w-full rounded-2xl shadow-2xl p-8 fade-in">
+            <div class="text-center mb-8">
+              <div class="text-6xl mb-4">📝</div>
+              <h1 class="title-text font-bold mb-3">${testTitle}</h1>
+              <p class="description-text opacity-80">${testDescription}</p>
+            </div>
+            
+            <div class="mb-6">
+              <label for="studentName" class="label-text block mb-2 font-medium">Nama Peserta</label>
+              <input 
+                type="text" 
+                id="studentName" 
+                placeholder="Masukkan nama Anda"
+                class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:outline-none transition-colors"
+              >
+            </div>
+
+            <div class="space-y-3">
+              <button 
+                id="startBtn" 
+                class="primary-button w-full text-white py-4 rounded-lg font-semibold hover:opacity-90 transition-opacity"
+              >
+                ${startButtonText}
+              </button>
+              
+              <button 
+                id="viewResultsBtn" 
+                class="secondary-button w-full text-white py-3 rounded-lg font-medium hover:opacity-90 transition-opacity"
+              >
+                ${viewResultsText}
+              </button>
+
+              <button 
+                id="logoutBtn" 
+                class="secondary-button w-full text-white py-3 rounded-lg font-medium hover:opacity-90 transition-opacity"
+              >
+                Logout
+              </button>
+            </div>
+
+            <div class="mt-6 text-center">
+              <p class="label-text opacity-70">
+                📊 Total Soal: ${questions.length} | ⏱️ Tidak ada batas waktu
+              </p>
+            </div>
+          </div>
+        </div>
+      `;
+
+      onConfigChange(config);
+
+      document.getElementById('startBtn').addEventListener('click', () => {
+        const nameInput = document.getElementById('studentName');
+        if (nameInput.value.trim()) {
+          studentName = nameInput.value.trim();
+          currentQuestionIndex = 0;
+          userAnswers = {};
+          renderQuestionView();
+        } else {
+          nameInput.classList.add('pulse');
+          nameInput.style.borderColor = '#ef4444';
+          setTimeout(() => {
+            nameInput.classList.remove('pulse');
+            nameInput.style.borderColor = '';
+          }, 500);
+        }
+      });
+
+      document.getElementById('viewResultsBtn').addEventListener('click', () => {
+        renderResultsView();
+      });
+
+      document.getElementById('logoutBtn').addEventListener('click', () => {
+        isLoggedIn = false;
+        renderLoginView();
+      });
+    }
+
+    function renderQuestionView() {
+      currentView = 'question';
+      const config = window.elementSdk.config;
+      const submitButtonText = config.submit_button_text || defaultConfig.submit_button_text;
+      const question = questions[currentQuestionIndex];
+      const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+
+      const app = document.getElementById('app');
+      app.innerHTML = `
+        <div class="min-h-full p-6">
+          <div class="max-w-3xl mx-auto">
+            <div class="card-surface rounded-2xl shadow-2xl p-8 fade-in">
+              <div class="mb-6">
+                <div class="flex justify-between items-center mb-2">
+                  <span class="label-text font-medium">Soal ${currentQuestionIndex + 1} dari ${questions.length}</span>
+                  <span class="label-text font-medium">${Math.round(progress)}%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                  <div class="progress-bar h-full rounded-full transition-all" style="width: ${progress}%"></div>
+                </div>
+              </div>
+
+              <div class="mb-8">
+                ${question.image ? question.image : ''}
+                <h2 class="question-text font-bold mb-6">${question.question}</h2>
+                
+                <div class="space-y-3" id="optionsContainer">
+                  ${question.options.map((option, index) => `
+                    <button 
+                      class="option-button w-full text-left px-6 py-4 rounded-xl border-2 border-gray-200 hover:border-blue-400 transition-all"
+                      data-index="${index}"
+                    >
+                      <span class="font-semibold mr-3">${String.fromCharCode(65 + index)}.</span>
+                      ${option}
+                    </button>
+                  `).join('')}
+                </div>
+              </div>
+
+              <div class="flex gap-3">
+                ${currentQuestionIndex > 0 ? `
+                  <button 
+                    id="prevBtn" 
+                    class="secondary-button flex-1 text-white py-3 rounded-lg font-medium hover:opacity-90 transition-opacity"
+                  >
+                    ← Sebelumnya
+                  </button>
+                ` : ''}
+                
+                ${currentQuestionIndex < questions.length - 1 ? `
+                  <button 
+                    id="nextBtn" 
+                    class="primary-button flex-1 text-white py-3 rounded-lg font-medium hover:opacity-90 transition-opacity"
+                  >
+                    Selanjutnya →
+                  </button>
+                ` : `
+                  <button 
+                    id="submitBtn" 
+                    class="primary-button flex-1 text-white py-3 rounded-lg font-medium hover:opacity-90 transition-opacity"
+                  >
+                    ${submitButtonText}
+                  </button>
+                `}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      onConfigChange(config);
+
+      const optionButtons = document.querySelectorAll('.option-button');
+      optionButtons.forEach(btn => {
+        const index = parseInt(btn.dataset.index);
+        if (userAnswers[question.id] === index) {
+          btn.style.borderColor = '#3b82f6';
+          btn.style.backgroundColor = '#dbeafe';
+        }
+
+        btn.addEventListener('click', () => {
+          userAnswers[question.id] = index;
+          optionButtons.forEach(b => {
+            b.style.borderColor = '';
+            b.style.backgroundColor = '';
+          });
+          btn.style.borderColor = '#3b82f6';
+          btn.style.backgroundColor = '#dbeafe';
+        });
+      });
+
+      const prevBtn = document.getElementById('prevBtn');
+      if (prevBtn) {
+        prevBtn.addEventListener('click', () => {
+          currentQuestionIndex--;
+          renderQuestionView();
+        });
+      }
+
+      const nextBtn = document.getElementById('nextBtn');
+      if (nextBtn) {
+        nextBtn.addEventListener('click', () => {
+          currentQuestionIndex++;
+          renderQuestionView();
+        });
+      }
+
+      const submitBtn = document.getElementById('submitBtn');
+      if (submitBtn) {
+        submitBtn.addEventListener('click', async () => {
+          if (currentRecordCount >= 999) {
+            showMessage('Batas maksimum 999 hasil ujian telah tercapai. Silakan hapus beberapa hasil terlebih dahulu.');
+            return;
+          }
+
+          submitBtn.disabled = true;
+          submitBtn.textContent = 'Menyimpan...';
+
+          let correctCount = 0;
+          questions.forEach(q => {
+            if (userAnswers[q.id] === q.correct) {
+              correctCount++;
+            }
+          });
+
+          const score = Math.round((correctCount / questions.length) * 100);
+
+          const result = await window.dataSdk.create({
+            id: Date.now().toString(),
+            student_name: studentName,
+            score: score,
+            total_questions: questions.length,
+            correct_answers: correctCount,
+            completed_at: new Date().toISOString()
+          });
+
+          if (result.isOk) {
+            renderScoreView(score, correctCount);
+          } else {
+            showMessage('Gagal menyimpan hasil ujian. Silakan coba lagi.');
+            submitBtn.disabled = false;
+            submitBtn.textContent = submitButtonText;
+          }
+        });
+      }
+    }
+
+    function createConfetti() {
+      const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ffa500', '#ff1493'];
+      const confettiCount = 100;
+      
+      for (let i = 0; i < confettiCount; i++) {
+        setTimeout(() => {
+          const confetti = document.createElement('div');
+          confetti.className = 'confetti';
+          confetti.style.left = Math.random() * 100 + '%';
+          confetti.style.top = '-10px';
+          confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+          confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+          confetti.style.animationDelay = Math.random() * 0.5 + 's';
+          confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+          document.body.appendChild(confetti);
+          
+          setTimeout(() => confetti.remove(), 3000);
+        }, i * 30);
+      }
+    }
+
+    function renderScoreView(score, correctCount) {
+      currentView = 'score';
+      const config = window.elementSdk.config;
+      const emoji = score >= 80 ? '🎉' : score >= 60 ? '👍' : '💪';
+      const message = score >= 80 ? 'Luar Biasa!' : score >= 60 ? 'Bagus!' : 'Tetap Semangat!';
+
+      // Trigger confetti animation
+      if (score >= 60) {
+        createConfetti();
+      }
+
+      const reviewHTML = questions.map((q, index) => {
+        const userAnswer = userAnswers[q.id];
+        const isCorrect = userAnswer === q.correct;
+        
+        return `
+          <div class="card-surface border-2 ${isCorrect ? 'border-green-300 bg-green-50' : 'border-red-300 bg-red-50'} rounded-xl p-5 mb-4 text-left">
+            <div class="flex items-start gap-3 mb-3">
+              <div class="text-2xl">${isCorrect ? '✅' : '❌'}</div>
+              <div class="flex-1">
+                <h3 class="question-text font-bold mb-2">Soal ${index + 1}: ${q.question}</h3>
+                <div class="space-y-2">
+                  <p class="label-text">
+                    <strong>Jawaban Anda:</strong> 
+                    <span class="${isCorrect ? 'text-green-700' : 'text-red-700'} font-semibold">
+                      ${userAnswer !== undefined ? q.options[userAnswer] : 'Tidak dijawab'}
+                    </span>
+                  </p>
+                  ${!isCorrect ? `
+                    <p class="label-text">
+                      <strong>Jawaban Benar:</strong> 
+                      <span class="text-green-700 font-semibold">${q.options[q.correct]}</span>
+                    </p>
+                  ` : ''}
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const app = document.getElementById('app');
+      app.innerHTML = `
+        <div class="min-h-full p-6">
+          <div class="max-w-4xl mx-auto">
+            <div class="card-surface rounded-2xl shadow-2xl p-8 fade-in text-center mb-6">
+              <div class="text-8xl mb-4">${emoji}</div>
+              <h1 class="title-text font-bold mb-2">${message}</h1>
+              <p class="description-text opacity-80 mb-8">Ujian telah selesai</p>
+
+              <div class="card-surface rounded-xl p-6 mb-8 border-2 border-gray-100">
+                <div class="text-6xl font-bold mb-2" style="color: ${config.primary_action_color || defaultConfig.primary_action_color}">${score}</div>
+                <p class="label-text opacity-70">Nilai Anda</p>
+              </div>
+
+              <div class="grid grid-cols-2 gap-4 mb-8">
+                <div class="card-surface rounded-lg p-4 border border-gray-100">
+                  <div class="text-3xl font-bold mb-1">${correctCount}</div>
+                  <p class="label-text opacity-70">Jawaban Benar</p>
+                </div>
+                <div class="card-surface rounded-lg p-4 border border-gray-100">
+                  <div class="text-3xl font-bold mb-1">${questions.length - correctCount}</div>
+                  <p class="label-text opacity-70">Jawaban Salah</p>
+                </div>
+              </div>
+
+              <div class="space-y-3">
+                <button 
+                  id="retakeBtn" 
+                  class="primary-button w-full text-white py-4 rounded-lg font-semibold hover:opacity-90 transition-opacity"
+                >
+                  Ulangi Ujian
+                </button>
+                <button 
+                  id="homeBtn" 
+                  class="secondary-button w-full text-white py-3 rounded-lg font-medium hover:opacity-90 transition-opacity"
+                >
+                  Kembali ke Beranda
+                </button>
+              </div>
+            </div>
+
+            <div class="card-surface rounded-2xl shadow-2xl p-8">
+              <h2 class="title-text font-bold mb-6 text-center">Pembahasan Jawaban</h2>
+              ${reviewHTML}
+            </div>
+          </div>
+        </div>
+      `;
+
+      onConfigChange(config);
+
+      document.getElementById('retakeBtn').addEventListener('click', () => {
+        currentQuestionIndex = 0;
+        userAnswers = {};
+        renderQuestionView();
+      });
+
+      document.getElementById('homeBtn').addEventListener('click', () => {
+        if (isLoggedIn) {
+        renderWelcomeView();
+      } else {
+        renderLoginView();
+      }
+      });
+    }
+
+    function renderResultsView() {
+      currentView = 'results';
+      const config = window.elementSdk.config;
+
+      const sortedResults = [...testResults].sort((a, b) => 
+        new Date(b.completed_at) - new Date(a.completed_at)
+      );
+
+      const app = document.getElementById('app');
+      app.innerHTML = `
+        <div class="min-h-full p-6">
+          <div class="max-w-4xl mx-auto">
+            <div class="card-surface rounded-2xl shadow-2xl p-8 fade-in">
+              <div class="flex items-center justify-between mb-6">
+                <div>
+                  <h1 class="title-text font-bold mb-2">Hasil Ujian</h1>
+                  <p class="description-text opacity-80">Total: ${testResults.length} hasil</p>
+                </div>
+                <button 
+                  id="backBtn" 
+                  class="secondary-button text-white px-6 py-3 rounded-lg font-medium hover:opacity-90 transition-opacity"
+                >
+                  ← Kembali
+                </button>
+              </div>
+
+              ${sortedResults.length === 0 ? `
+                <div class="text-center py-12">
+                  <div class="text-6xl mb-4">📊</div>
+                  <p class="description-text opacity-70">Belum ada hasil ujian</p>
+                </div>
+              ` : `
+                <div class="space-y-3">
+                  ${sortedResults.map(result => {
+                    const date = new Date(result.completed_at);
+                    const dateStr = date.toLocaleDateString('id-ID', { 
+                      day: 'numeric', 
+                      month: 'short', 
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    });
+                    const scoreColor = result.score >= 80 ? '#10b981' : result.score >= 60 ? '#f59e0b' : '#ef4444';
+                    
+                    return `
+                      <div class="card-surface border-2 border-gray-100 rounded-xl p-5 hover:border-blue-300 transition-colors">
+                        <div class="flex items-center justify-between">
+                          <div class="flex-1">
+                            <h3 class="question-text font-bold mb-1">${result.student_name}</h3>
+                            <p class="label-text opacity-70">${dateStr}</p>
+                          </div>
+                          <div class="text-right">
+                            <div class="text-4xl font-bold mb-1" style="color: ${scoreColor}">${result.score}</div>
+                            <p class="label-text opacity-70">${result.correct_answers}/${result.total_questions} benar</p>
+                          </div>
+                        </div>
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+              `}
+            </div>
+          </div>
+        </div>
+      `;
+
+      onConfigChange(config);
+
+      document.getElementById('backBtn').addEventListener('click', () => {
+        if (isLoggedIn) {
+        renderWelcomeView();
+      } else {
+        renderLoginView();
+      }
+      });
+    }
+
+    function showMessage(text) {
+      const toast = document.createElement('div');
+      toast.className = 'fixed top-6 left-1/2 transform -translate-x-1/2 card-surface px-6 py-4 rounded-lg shadow-2xl fade-in z-50';
+      toast.style.backgroundColor = window.elementSdk.config.surface_color || defaultConfig.surface_color;
+      toast.innerHTML = `<p class="label-text font-medium">${text}</p>`;
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    async function init() {
+      await window.elementSdk.init({
+        defaultConfig,
+        onConfigChange,
+        mapToCapabilities: (config) => ({
+          recolorables: [
+            {
+              get: () => config.background_color || defaultConfig.background_color,
+              set: (value) => {
+                config.background_color = value;
+                window.elementSdk.setConfig({ background_color: value });
+              }
+            },
+            {
+              get: () => config.surface_color || defaultConfig.surface_color,
+              set: (value) => {
+                config.surface_color = value;
+                window.elementSdk.setConfig({ surface_color: value });
+              }
+            },
+            {
+              get: () => config.text_color || defaultConfig.text_color,
+              set: (value) => {
+                config.text_color = value;
+                window.elementSdk.setConfig({ text_color: value });
+              }
+            },
+            {
+              get: () => config.primary_action_color || defaultConfig.primary_action_color,
+              set: (value) => {
+                config.primary_action_color = value;
+                window.elementSdk.setConfig({ primary_action_color: value });
+              }
+            },
+            {
+              get: () => config.secondary_action_color || defaultConfig.secondary_action_color,
+              set: (value) => {
+                config.secondary_action_color = value;
+                window.elementSdk.setConfig({ secondary_action_color: value });
+              }
+            }
+          ],
+          borderables: [],
+          fontEditable: {
+            get: () => config.font_family || defaultConfig.font_family,
+            set: (value) => {
+              config.font_family = value;
+              window.elementSdk.setConfig({ font_family: value });
+            }
+          },
+          fontSizeable: {
+            get: () => config.font_size || defaultConfig.font_size,
+            set: (value) => {
+              config.font_size = value;
+              window.elementSdk.setConfig({ font_size: value });
+            }
+          }
+        }),
+        mapToEditPanelValues: (config) => new Map([
+          ["test_title", config.test_title || defaultConfig.test_title],
+          ["test_description", config.test_description || defaultConfig.test_description],
+          ["start_button_text", config.start_button_text || defaultConfig.start_button_text],
+          ["submit_button_text", config.submit_button_text || defaultConfig.submit_button_text],
+          ["view_results_text", config.view_results_text || defaultConfig.view_results_text]
+        ])
+      });
+
+      const initResult = await window.dataSdk.init(dataHandler);
+      if (!initResult.isOk) {
+        console.error("Failed to initialize data SDK");
+      }
+
+      if (isLoggedIn) {
+        renderWelcomeView();
+      } else {
+        renderLoginView();
+      }
+    }
+
+    init();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99bd0029e7850d7e',t:'MTc2MjY4ODA2My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
