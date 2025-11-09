@@ -1,6 +1,6 @@
-var CACHE_NAME = 'DK Resume';
+var CACHE_NAME = 'Spenzaga Apps';
 var urlsToCache = [
-  'https://didikkamseno.github.io/index.html'
+  'https://spenzaga.github.io/index.html'
 ];
 
 self.addEventListener('install', function(event) {

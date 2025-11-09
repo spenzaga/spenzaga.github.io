@@ -1,8 +1,8 @@
 
 {
-  "name": "DK Resume",
-  "short_name": "DK Resume",
-  "description": "Didik Kamseno-Resume",
+  "name": "Spenzaga",
+  "short_name": "Spenzaga",
+  "description": "Spenzaga Link",
   "default_locale": "en",
   "start_url": "./index.html",
   "scope": "./",
