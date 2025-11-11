@@ -1,13 +1,13 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CBT (Computer Based Test) Spenzaga</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
-    <style>
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aplikasi Kuis Siswa</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+  <style>
         body {
             box-sizing: border-box;
             user-select: none;
@@ -50,8 +50,9 @@
         /* Question image styling */
         .question-image {
             max-width: 100%;
+            width: 100%;
             height: auto;
-            max-height: 300px;
+            max-height: 400px;
             object-fit: contain;
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -61,17 +62,24 @@
             margin-right: auto;
         }
         
+        @media (max-width: 1024px) {
+            .question-image {
+                max-height: 350px;
+                margin: 14px 0;
+            }
+        }
+        
         @media (max-width: 768px) {
             .question-image {
-                max-height: 200px;
+                max-height: 280px;
                 margin: 12px 0;
             }
         }
         
         @media (max-width: 480px) {
             .question-image {
-                max-height: 150px;
-                margin: 8px 0;
+                max-height: 200px;
+                margin: 10px 0;
             }
         }
         
@@ -119,171 +127,404 @@
             box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
         }
         
-        .progress-bar {
-            transition: width 0.5s ease;
+        .nav-button {
+            transition: all 0.3s ease;
+        }
+        
+        .nav-button:hover {
+            transform: scale(1.1);
+        }
+        
+        .nav-button-answered {
+            background-color: #10b981;
+            color: white;
+        }
+        
+        .nav-button-current {
+            background-color: #3b82f6;
+            color: white;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+        }
+        
+        .nav-button-unanswered {
+            background-color: #e5e7eb;
+            color: #6b7280;
+        }
+        
+        .timer-warning {
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .timer-critical {
+            animation: blink 0.5s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; color: #dc2626; }
+            50% { opacity: 0.5; color: #ef4444; }
+        }
+        
+        /* Confetti Animation */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background-color: #f0f;
+            z-index: 9999;
+            pointer-events: none;
+        }
+        
+        @keyframes confetti-fall-left {
+            0% {
+                transform: translateX(0) translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(100vw) translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+        
+        @keyframes confetti-fall-right {
+            0% {
+                transform: translateX(0) translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(-100vw) translateY(100vh) rotate(-720deg);
+                opacity: 0;
+            }
+        }
+        
+        @keyframes confetti-fall-center {
+            0% {
+                transform: translateX(0) translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(0) translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        @keyframes confetti-burst-left {
+            0% {
+                transform: translateX(0) translateY(0) rotate(0deg) scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: translateX(-50vw) translateY(30vh) rotate(180deg) scale(1.2);
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(-80vw) translateY(100vh) rotate(360deg) scale(0.5);
+                opacity: 0;
+            }
+        }
+        
+        @keyframes confetti-burst-right {
+            0% {
+                transform: translateX(0) translateY(0) rotate(0deg) scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: translateX(50vw) translateY(30vh) rotate(-180deg) scale(1.2);
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(80vw) translateY(100vh) rotate(-360deg) scale(0.5);
+                opacity: 0;
+            }
+        }
+        
+        /* Floating Navigation Button */
+        .floating-nav-btn {
+            position: fixed;
+            top: 50%;
+            right: 24px;
+            transform: translateY(-50%);
+            z-index: 40;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+        }
+        
+        .floating-nav-btn:hover {
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Floating Navigation Panel */
+        .floating-nav-panel {
+            position: fixed;
+            top: 50%;
+            right: 90px;
+            transform: translateY(-50%);
+            z-index: 39;
+            max-width: 320px;
+            max-height: 400px;
+            overflow-y: auto;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+            transform-origin: center right;
+        }
+        
+        .floating-nav-panel.hidden {
+            opacity: 0;
+            transform: translateY(-50%) scale(0.8);
+            pointer-events: none;
+        }
+        
+        .floating-nav-panel:not(.hidden) {
+            opacity: 1;
+            transform: translateY(-50%) scale(1);
+        }
+        
+        @media (max-width: 640px) {
+            .floating-nav-btn {
+                top: 50%;
+                bottom: auto;
+                right: 16px;
+                transform: translateY(-50%);
+            }
+            
+            .floating-nav-btn:hover {
+                transform: translateY(-50%) scale(1.1);
+            }
+            
+            .floating-nav-panel {
+                top: 50%;
+                bottom: auto;
+                right: 80px;
+                transform: translateY(-50%);
+                max-width: calc(100vw - 100px);
+            }
+            
+            .floating-nav-panel.hidden {
+                transform: translateY(-50%) scale(0.8);
+            }
+            
+            .floating-nav-panel:not(.hidden) {
+                transform: translateY(-50%) scale(1);
+            }
         }
     </style>
-</head>
-<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-full notranslate" translate="no">
-    <!-- Security Warning -->
-    <div class="security-warning">
-        <div>
-            <h1>⚠️ PERINGATAN KEAMANAN ⚠️</h1>
-            <p>Aplikasi kuis telah mendeteksi aktivitas mencurigakan.<br>Tutup developer tools dan refresh halaman.</p>
-        </div>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="/_sdk/element_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-full notranslate" translate="no"><!-- Security Warning -->
+  <div class="security-warning">
+   <div>
+    <h1>⚠️ PERINGATAN KEAMANAN ⚠️</h1>
+    <p>Aplikasi kuis telah mendeteksi aktivitas mencurigakan.<br>
+     Tutup developer tools dan refresh halaman.</p>
+   </div>
+  </div>
+  <main class="quiz-container min-h-full"><!-- Login Screen -->
+   <div id="loginScreen" class="flex items-center justify-center min-h-full p-4">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
+     <div class="text-center mb-8">
+      <div class="bg-blue-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
+       <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+       </svg>
+      </div>
+      <h1 class="text-3xl font-bold text-gray-800 mb-2">Kuis Online</h1>
+      <p class="text-gray-600">Masukkan NIS untuk memulai kuis</p>
+     </div>
+     <form id="loginForm" class="space-y-6">
+      <div><label for="nisInput" class="block text-sm font-medium text-gray-700 mb-2">Nomor Induk Siswa (NIS)</label> <input type="text" id="nisInput" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" placeholder="Masukkan NIS Anda">
+      </div><button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors"> Masuk Kuis </button>
+     </form>
+     <div id="loginError" class="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg hidden">
+      NIS tidak ditemukan atau Anda sudah mengerjakan kuis ini.
+     </div>
     </div>
-
-    <main class="quiz-container min-h-full">
-        <!-- Login Screen -->
-        <div id="loginScreen" class="flex items-center justify-center min-h-full p-4">
-            <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
-                <div class="text-center mb-8">
-                    <div class="bg-blue-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                    </div>
-                    <h1 class="text-3xl font-bold text-gray-800 mb-2">CBT SPENZAGA</h1>
-                    <p class="text-gray-600">Masukkan PASSCODE untuk memulai kuis</p>
-                </div>
-                
-                <form id="loginForm" class="space-y-6">
-                    <div>
-                        <label for="nisInput" class="block text-sm font-medium text-gray-700 mb-2">PASSCODE </label>
-                        <input type="text" id="nisInput" required 
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                               placeholder="Masukkan PASSCODE Anda">
-                    </div>                   
-                    <button type="submit" 
-                            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors">
-                        Masuk Kuis
-                    </button>
-                </form>
-                
-                <div id="loginError" class="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg hidden">
-                    PASSCODE tidak ditemukan atau Anda sudah mengerjakan kuis ini.
-                </div>
-            </div>
+   </div><!-- Confirmation Screen -->
+   <div id="confirmationScreen" class="hidden flex items-center justify-center min-h-full p-4">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
+     <div class="text-center mb-8">
+      <div class="bg-green-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
+       <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+       </svg>
+      </div>
+      <h1 class="text-3xl font-bold text-gray-800 mb-2">Konfirmasi Data</h1>
+      <p class="text-gray-600">Pastikan data Anda sudah benar</p>
+     </div>
+     <div class="space-y-4 mb-6">
+      <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+       <div class="grid grid-cols-3 gap-4">
+        <div class="text-center">
+         <p class="text-sm text-gray-600 mb-1">Absen</p>
+         <p id="confirmAbsen" class="text-2xl font-bold text-blue-600">-</p>
         </div>
-
-        <!-- Quiz Screen -->
-        <div id="quizScreen" class="hidden min-h-full p-4">
-            <div class="max-w-4xl mx-auto">
-                <!-- Header -->
-                <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <div>
-                            <h2 class="text-2xl font-bold text-gray-800">Kuis Online</h2>
-                            <p id="studentInfo" class="text-gray-600"></p>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-sm text-gray-500">Soal</div>
-                            <div id="questionCounter" class="text-2xl font-bold text-blue-600">1 / 3</div>
-                        </div>
-                    </div>
-                    
-                    <!-- Progress Bar -->
-                    <div class="w-full bg-gray-200 rounded-full h-2">
-                        <div id="progressBar" class="progress-bar bg-blue-600 h-2 rounded-full" style="width: 50%"></div>
-                    </div>
-                </div>
-
-                <!-- Question Card -->
-                <div id="questionCard" class="bg-white rounded-2xl shadow-lg p-8 mb-6">
-                    <div class="quiz-question">
-                        <h3 id="questionText" class="text-xl font-semibold text-gray-800 mb-6 leading-relaxed"></h3>
-                        
-                        <div id="optionsContainer" class="space-y-4">
-                            <!-- Options will be inserted here -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Navigation -->
-                <div class="flex justify-between">
-                    <button id="prevBtn" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors hidden">
-                        ← Sebelumnya
-                    </button>
-                    <button id="nextBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors ml-auto">
-                        Selanjutnya →
-                    </button>
-                    <button id="submitBtn" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors ml-auto hidden">
-                        Selesai Kuis
-                    </button>
-                </div>
-            </div>
+        <div class="text-center border-l border-r border-blue-200">
+         <p class="text-sm text-gray-600 mb-1">NIS</p>
+         <p id="confirmNIS" class="text-2xl font-bold text-blue-600">-</p>
         </div>
-
-        <!-- Violation Warning Modal -->
-        <div id="violationModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md text-center">
-                <div class="bg-red-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
-                    <svg class="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                    </svg>
-                </div>
-                
-                <h2 class="text-2xl font-bold text-red-600 mb-4">⚠️ PERINGATAN KEAMANAN ⚠️</h2>
-                <p id="violationMessage" class="text-gray-700 mb-6 font-medium"></p>
-                
-                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-                    <p class="text-sm text-yellow-800">
-                        <span class="font-semibold">Pelanggaran:</span> <span id="violationCounter" class="text-red-600 font-bold">1</span> dari 5<br>
-                        <span class="text-xs">Jika mencapai 5 pelanggaran, kuis akan otomatis berakhir!</span>
-                    </p>
-                </div>
-                
-                <button id="continueQuizBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors">
-                    Lanjutkan Kuis
-                </button>
-            </div>
+        <div class="text-center">
+         <p class="text-sm text-gray-600 mb-1">Kelas</p>
+         <p id="confirmKelas" class="text-2xl font-bold text-blue-600">-</p>
         </div>
-
-        <!-- Loading Screen -->
-        <div id="loadingScreen" class="hidden flex items-center justify-center min-h-full p-4">
-            <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md text-center">
-                <div class="bg-blue-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
-                    <svg class="w-10 h-10 text-blue-600 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                    </svg>
-                </div>
-                
-                <h2 class="text-2xl font-bold text-gray-800 mb-4">Menyimpan Jawaban</h2>
-                <p class="text-gray-600 mb-6">Jawaban sedang disimpan ke database...</p>
-                
-                <div class="flex justify-center">
-                    <div class="flex space-x-1">
-                        <div class="w-2 h-2 bg-blue-600 rounded-full animate-bounce"></div>
-                        <div class="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
-                        <div class="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
-                    </div>
-                </div>
-            </div>
+       </div>
+       <div class="mt-4 pt-4 border-t border-blue-200 text-center">
+        <p class="text-sm text-gray-600 mb-1">Nama Lengkap</p>
+        <p id="confirmNama" class="text-xl font-bold text-gray-800">-</p>
+       </div>
+      </div>
+      <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+       <div class="flex items-start">
+        <svg class="w-6 h-6 text-yellow-600 mr-3 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+        </svg>
+        <div>
+         <h3 class="font-semibold text-yellow-800 mb-2">Pernyataan Kejujuran</h3>
+         <p class="text-sm text-yellow-700 leading-relaxed">Saya berkomitmen untuk mengerjakan tes ini dengan jujur, tanpa bantuan orang lain atau sumber lain yang tidak diizinkan. Saya memahami bahwa pelanggaran akan dicatat oleh sistem.</p>
         </div>
-
-        <!-- Result Screen -->
-        <div id="resultScreen" class="hidden flex items-center justify-center min-h-full p-4">
-            <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md text-center">
-                <div class="bg-green-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
-                    <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                </div>
-                
-                <h2 class="text-3xl font-bold text-gray-800 mb-4">Kuis Selesai!</h2>
-                <div id="finalScore" class="text-6xl font-bold text-blue-600 mb-2">0</div>
-                <p id="totalQuestions" class="text-gray-600 mb-6">dari 10 soal benar</p>
-                
-                <div id="resultMessage" class="p-4 rounded-lg mb-6">
-                    <p class="font-semibold"></p>
-                </div>
-                
-                <p class="text-sm text-gray-500">Hasil telah disimpan secara otomatis</p>
-            </div>
+       </div>
+      </div>
+      <div class="flex items-start bg-gray-50 border border-gray-200 rounded-lg p-4"><input type="checkbox" id="agreeCheckbox" class="mt-1 mr-3 w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"> <label for="agreeCheckbox" class="text-sm text-gray-700 cursor-pointer"> Saya menyetujui pernyataan di atas dan siap mengerjakan tes dengan jujur </label>
+      </div>
+     </div>
+     <div class="flex gap-3"><button id="backToLoginFromConfirm" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-4 rounded-lg transition-colors"> Kembali </button> <button id="startQuizBtn" disabled class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"> Mulai Kuis </button>
+     </div>
+    </div>
+   </div><!-- Quiz Screen -->
+   <div id="quizScreen" class="hidden min-h-full p-4">
+    <div class="max-w-4xl mx-auto"><!-- Header -->
+     <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+      <div class="flex justify-between items-center mb-4">
+       <div>
+        <h2 class="text-2xl font-bold text-gray-800">Kuis Online</h2>
+        <p id="studentInfo" class="text-gray-600"></p>
+       </div>
+       <div class="text-right">
+        <div class="text-sm text-gray-500">
+         Waktu Tersisa
         </div>
-    </main>
-
-    <script>
+        <div id="timerDisplay" class="text-2xl font-bold text-blue-600">
+         45:00
+        </div>
+        <div class="text-sm text-gray-500 mt-2">
+         Soal
+        </div>
+        <div id="questionCounter" class="text-xl font-bold text-blue-600">
+         1 / 3
+        </div>
+       </div>
+      </div><!-- Blue Line Separator -->
+      <div class="w-full h-1 bg-blue-600 rounded-full mt-4"></div>
+     </div><!-- Question Card -->
+     <div class="bg-white rounded-2xl shadow-lg p-8 mb-6">
+      <div class="quiz-question">
+       <h3 id="questionText" class="text-xl font-semibold text-gray-800 mb-6 leading-relaxed"></h3>
+       <div id="optionsContainer" class="space-y-4"></div>
+      </div>
+     </div><!-- Navigation -->
+     <div class="flex justify-between"><button id="prevBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors hidden"> ← Sebelumnya </button> <button id="nextBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors ml-auto"> Selanjutnya → </button> <button id="submitBtn" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors ml-auto hidden"> Selesai Kuis </button>
+     </div>
+    </div><!-- Floating Navigation Button --> <button id="floatingNavBtn" type="button" class="floating-nav-btn bg-blue-600 hover:bg-blue-700 text-white rounded-full w-14 h-14 flex items-center justify-center">
+     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+     </svg></button> <!-- Floating Navigation Panel -->
+    <div id="floatingNavPanel" class="floating-nav-panel hidden bg-white rounded-2xl p-4">
+     <div class="flex justify-between items-center mb-3">
+      <h3 class="text-sm font-semibold text-gray-800">Navigasi Soal</h3><button id="closeFloatingNav" type="button" class="text-gray-400 hover:text-gray-600">
+       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+       </svg></button>
+     </div>
+     <div id="floatingQuestionNavigation" class="grid grid-cols-5 gap-2"><!-- Question navigation buttons will be inserted here -->
+     </div>
+    </div>
+   </div><!-- Violation Warning Modal -->
+   <div id="violationModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md text-center">
+     <div class="bg-red-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
+      <svg class="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+      </svg>
+     </div>
+     <h2 class="text-2xl font-bold text-red-600 mb-4">⚠️ PERINGATAN KEAMANAN ⚠️</h2>
+     <p id="violationMessage" class="text-gray-700 mb-6 font-medium"></p>
+     <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+      <p class="text-sm text-yellow-800"><span class="font-semibold">Pelanggaran:</span> <span id="violationCounter" class="text-red-600 font-bold">1</span> dari 5<br><span class="text-xs">Jika mencapai 5 pelanggaran, kuis akan otomatis berakhir!</span></p>
+     </div><button id="continueQuizBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors"> Lanjutkan Kuis </button>
+    </div>
+   </div><!-- Confirmation Modal -->
+   <div id="confirmationModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md text-center">
+     <div class="bg-blue-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
+      <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      </svg>
+     </div>
+     <h2 class="text-2xl font-bold text-gray-800 mb-4">Konfirmasi Selesai Kuis</h2>
+     <p class="text-gray-600 mb-6">Apakah Anda yakin ingin mengakhiri kuis?</p>
+     <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+      <p class="text-sm text-yellow-800"><span class="font-semibold">Soal Terjawab:</span> <span id="answeredCount" class="font-bold">0</span> dari <span id="totalQuestionsCount">0</span><br><span class="text-xs">Pastikan semua soal sudah dijawab sebelum mengakhiri kuis!</span></p>
+     </div>
+     <div class="flex gap-3"><button id="cancelSubmitBtn" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-4 rounded-lg transition-colors"> Batal </button> <button id="confirmSubmitBtn" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors"> Ya, Selesai </button>
+     </div>
+    </div>
+   </div><!-- Loading Screen -->
+   <div id="loadingScreen" class="hidden flex items-center justify-center min-h-full p-4">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md text-center">
+     <div class="bg-blue-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
+      <svg class="w-10 h-10 text-blue-600 animate-spin" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+      </svg>
+     </div>
+     <h2 class="text-2xl font-bold text-gray-800 mb-4">Menyimpan Jawaban</h2>
+     <p class="text-gray-600 mb-6">Jawaban sedang disimpan ke database...</p>
+     <div class="flex justify-center">
+      <div class="flex space-x-1">
+       <div class="w-2 h-2 bg-blue-600 rounded-full animate-bounce"></div>
+       <div class="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+       <div class="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+      </div>
+     </div>
+    </div>
+   </div><!-- Review Screen -->
+   <div id="reviewScreen" class="hidden min-h-full p-4">
+    <div class="max-w-4xl mx-auto"><!-- Review Header -->
+     <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+      <div class="flex justify-between items-center">
+       <div>
+        <h2 class="text-2xl font-bold text-gray-800">Review Jawaban</h2>
+        <p id="reviewStudentInfo" class="text-gray-600"></p>
+       </div>
+       <div class="text-right">
+        <div class="text-sm text-gray-500">
+         Kembali otomatis dalam
+        </div>
+        <div id="reviewTimer" class="text-xl font-bold text-blue-600">
+         2:00
+        </div>
+       </div>
+      </div>
+     </div><!-- Review Content -->
+     <div id="reviewContent" class="space-y-6"><!-- Review items will be inserted here -->
+     </div>
+    </div>
+   </div><!-- Result Screen -->
+   <div id="resultScreen" class="hidden flex items-center justify-center min-h-full p-4">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md text-center">
+     <div class="bg-green-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
+      <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      </svg>
+     </div>
+     <h2 class="text-3xl font-bold text-gray-800 mb-4">Kuis Selesai!</h2>
+     <div id="finalScore" class="text-6xl font-bold text-blue-600 mb-2">
+      0
+     </div>
+     <p id="totalQuestions" class="text-gray-600 mb-6">dari 3 soal benar</p>
+     <div id="resultMessage" class="p-4 rounded-lg mb-6">
+      <p class="font-semibold"></p>
+     </div><button id="reviewBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors mb-4"> 📝 Review Jawaban </button>
+     <p class="text-sm text-gray-500">Hasil telah disimpan secara otomatis</p>
+    </div>
+   </div>
+  </main>
+  <script>
         // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyDAXMd9cAPtkgjo7R4xEZY18IGOJMxsJ3g",
@@ -339,6 +580,56 @@
         let quizCompleted = false;
         let violationCount = 0;
         const maxViolations = 5;
+        let timerInterval = null;
+        let timeRemaining = 45 * 60; // 45 minutes in seconds
+        const maxTime = 45 * 60;
+
+        // Timer Functions
+        function startTimer() {
+            const timerDisplay = document.getElementById('timerDisplay');
+            
+            timerInterval = setInterval(() => {
+                if (quizCompleted) {
+                    clearInterval(timerInterval);
+                    return;
+                }
+                
+                timeRemaining--;
+                
+                // Update display
+                const minutes = Math.floor(timeRemaining / 60);
+                const seconds = timeRemaining % 60;
+                timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                
+                // Change color based on time remaining
+                if (timeRemaining <= 60) {
+                    // Last 1 minute - critical (red, blinking)
+                    timerDisplay.className = 'text-2xl font-bold timer-critical';
+                } else if (timeRemaining <= 300) {
+                    // Last 5 minutes - warning (orange, pulsing)
+                    timerDisplay.className = 'text-2xl font-bold text-orange-600 timer-warning';
+                } else if (timeRemaining <= 600) {
+                    // Last 10 minutes - caution (yellow)
+                    timerDisplay.className = 'text-2xl font-bold text-yellow-600';
+                } else {
+                    // Normal (blue)
+                    timerDisplay.className = 'text-2xl font-bold text-blue-600';
+                }
+                
+                // Time's up - auto submit
+                if (timeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    forceSubmitQuiz('Waktu pengerjaan habis (45 menit)');
+                }
+            }, 1000);
+        }
+        
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
 
         // Security Functions
         function recordViolation(violationType) {
@@ -389,6 +680,8 @@
         }
         
         async function forceSubmitQuiz(reason) {
+            // Stop timer
+            stopTimer();
             quizCompleted = true;
             
             // Show loading screen
@@ -566,7 +859,7 @@
                 }
                 
                 if (!foundStudent) {
-                    errorDiv.textContent = 'PASSCODE tidak ditemukan dalam database.';
+                    errorDiv.textContent = 'NIS tidak ditemukan dalam database.';
                     errorDiv.classList.remove('hidden');
                     return;
                 }
@@ -581,7 +874,7 @@
                 
                 currentStudent = foundStudent;
                 errorDiv.classList.add('hidden');
-                startQuiz();
+                showConfirmationScreen();
                 
             } catch (error) {
                 console.error('Login error:', error);
@@ -594,19 +887,113 @@
             }
         }
 
+        // Show Confirmation Screen
+        function showConfirmationScreen() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('confirmationScreen').classList.remove('hidden');
+            
+            // Fill in student data
+            document.getElementById('confirmAbsen').textContent = currentStudent.absen;
+            document.getElementById('confirmNIS').textContent = currentStudent.nis;
+            document.getElementById('confirmKelas').textContent = currentStudent.kelas;
+            document.getElementById('confirmNama').textContent = currentStudent.nama;
+            
+            // Reset checkbox
+            document.getElementById('agreeCheckbox').checked = false;
+            document.getElementById('startQuizBtn').disabled = true;
+        }
+
+        // Back to Login from Confirmation
+        function backToLoginFromConfirm() {
+            document.getElementById('confirmationScreen').classList.add('hidden');
+            document.getElementById('loginScreen').classList.remove('hidden');
+            currentStudent = null;
+        }
+
+        // Handle Checkbox Change
+        function handleCheckboxChange() {
+            const checkbox = document.getElementById('agreeCheckbox');
+            const startBtn = document.getElementById('startQuizBtn');
+            startBtn.disabled = !checkbox.checked;
+        }
+
         // Start Quiz
         function startQuiz() {
-            // Prepare questions
-            questions = Object.values(quizData.soal);
+            // Prepare questions - sort by key to maintain database order
+            const soalKeys = Object.keys(quizData.soal).sort((a, b) => {
+                // Extract number from key (e.g., "soal_1" -> 1)
+                const numA = parseInt(a.split('_')[1]);
+                const numB = parseInt(b.split('_')[1]);
+                return numA - numB;
+            });
+            
+            questions = soalKeys.map(key => ({
+                ...quizData.soal[key],
+                _key: key,
+                _number: parseInt(key.split('_')[1])
+            }));
+            
             userAnswers = new Array(questions.length).fill(null);
             
-            // Update UI
+            // Update UI - hide confirmation screen and show quiz screen
+            document.getElementById('confirmationScreen').classList.add('hidden');
             document.getElementById('loginScreen').classList.add('hidden');
             document.getElementById('quizScreen').classList.remove('hidden');
             document.getElementById('studentInfo').textContent = 
-                `${currentStudent.nama} - ${currentStudent.kelas} (PASSCODE: ${currentStudent.nis})`;
+                `${currentStudent.nama} - ${currentStudent.kelas} (NIS: ${currentStudent.nis})`;
             
+            // Start timer
+            startTimer();
+            
+            createQuestionNavigation();
             displayQuestion();
+        }
+        
+        // Create Question Navigation
+        function createQuestionNavigation() {
+            const floatingNavContainer = document.getElementById('floatingQuestionNavigation');
+            floatingNavContainer.innerHTML = '';
+            
+            questions.forEach((question, index) => {
+                // Create button for floating navigation
+                const floatingNavButton = document.createElement('button');
+                floatingNavButton.type = 'button';
+                floatingNavButton.textContent = question._number || (index + 1);
+                floatingNavButton.className = 'nav-button w-10 h-10 rounded-lg font-semibold transition-all';
+                floatingNavButton.onclick = () => {
+                    goToQuestion(index);
+                    closeFloatingNav();
+                };
+                floatingNavContainer.appendChild(floatingNavButton);
+            });
+            
+            updateQuestionNavigation();
+        }
+        
+        // Update Question Navigation
+        function updateQuestionNavigation() {
+            const floatingNavButtons = document.querySelectorAll('#floatingQuestionNavigation button');
+            
+            // Update floating navigation
+            floatingNavButtons.forEach((button, index) => {
+                button.className = 'nav-button w-10 h-10 rounded-lg font-semibold transition-all';
+                
+                if (index === currentQuestionIndex) {
+                    button.classList.add('nav-button-current');
+                } else if (userAnswers[index] !== null) {
+                    button.classList.add('nav-button-answered');
+                } else {
+                    button.classList.add('nav-button-unanswered');
+                }
+            });
+        }
+        
+        // Go to specific question
+        function goToQuestion(index) {
+            if (index >= 0 && index < questions.length) {
+                currentQuestionIndex = index;
+                displayQuestion();
+            }
         }
 
         // Display Question
@@ -615,20 +1002,12 @@
             const questionText = document.getElementById('questionText');
             const optionsContainer = document.getElementById('optionsContainer');
             const questionCounter = document.getElementById('questionCounter');
-            const progressBar = document.getElementById('progressBar');
             
             // Clear previous content
             questionText.innerHTML = '';
             optionsContainer.innerHTML = '';
             
-            // Add question text
-            const questionParagraph = document.createElement('p');
-            questionParagraph.textContent = question.pertanyaan;
-            questionParagraph.className = 'notranslate';
-            questionParagraph.setAttribute('translate', 'no');
-            questionText.appendChild(questionParagraph);
-            
-            // Add image if exists
+            // Add image first if exists
             if (question.gambar && question.gambar.trim() !== '') {
                 const imageElement = document.createElement('img');
                 imageElement.src = question.gambar;
@@ -642,11 +1021,14 @@
                 questionText.appendChild(imageElement);
             }
             
-            questionCounter.textContent = `${currentQuestionIndex + 1} / ${questions.length}`;
+            // Add question text after image
+            const questionParagraph = document.createElement('p');
+            questionParagraph.textContent = question.pertanyaan;
+            questionParagraph.className = 'notranslate';
+            questionParagraph.setAttribute('translate', 'no');
+            questionText.appendChild(questionParagraph);
             
-            // Update progress bar
-            const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
-            progressBar.style.width = `${progress}%`;
+            questionCounter.textContent = `${questions.length}`;
             
             // Create options
             const options = ['opsia', 'opsib', 'opsic', 'opsid'];
@@ -665,6 +1047,7 @@
                 }
             });
             
+            updateQuestionNavigation();
             updateNavigationButtons();
         }
 
@@ -733,6 +1116,12 @@
 
         // Submit Quiz Data (shared function)
         async function submitQuizData(score, percentage, reason = null) {
+            // Calculate time used
+            const timeUsed = maxTime - timeRemaining;
+            const minutesUsed = Math.floor(timeUsed / 60);
+            const secondsUsed = timeUsed % 60;
+            const timeUsedFormatted = `${minutesUsed}:${secondsUsed.toString().padStart(2, '0')}`;
+            
             // Prepare detailed answers
             const detailedAnswers = [];
             questions.forEach((question, index) => {
@@ -766,6 +1155,8 @@
                     kelas: currentStudent.kelas,
                     hasil: `${score}/${questions.length}`,
                     skor: percentage,
+                    waktu_pengerjaan: timeUsedFormatted,
+                    waktu_detik: timeUsed,
                     pelanggaran: violationCount,
                     alasan_berakhir: reason || 'Selesai normal',
                     created_at: timestamp,
@@ -785,6 +1176,8 @@
                     total_soal: questions.length,
                     jawaban_benar: score,
                     skor_persen: percentage,
+                    waktu_pengerjaan: timeUsedFormatted,
+                    waktu_detik: timeUsed,
                     total_pelanggaran: violationCount,
                     alasan_berakhir: reason || 'Selesai normal',
                     detail_jawaban: detailedAnswers,
@@ -861,9 +1254,30 @@
             }
         }
 
+        // Show Confirmation Modal
+        function showConfirmationModal() {
+            const modal = document.getElementById('confirmationModal');
+            const answeredCount = userAnswers.filter(answer => answer !== null).length;
+            
+            document.getElementById('answeredCount').textContent = answeredCount;
+            document.getElementById('totalQuestionsCount').textContent = questions.length;
+            
+            modal.classList.remove('hidden');
+        }
+        
+        // Hide Confirmation Modal
+        function hideConfirmationModal() {
+            document.getElementById('confirmationModal').classList.add('hidden');
+        }
+        
         // Submit Quiz (normal completion)
         async function submitQuiz() {
+            // Stop timer
+            stopTimer();
+            quizCompleted = true;
+            
             // Show loading screen
+            document.getElementById('confirmationModal').classList.add('hidden');
             document.getElementById('quizScreen').classList.add('hidden');
             document.getElementById('loadingScreen').classList.remove('hidden');
             
@@ -871,7 +1285,6 @@
             const percentage = Math.round((score / questions.length) * 100);
             
             await submitQuizData(score, percentage);
-            quizCompleted = true;
             
             // Wait 2 seconds before showing results
             setTimeout(() => {
@@ -880,13 +1293,67 @@
             }, 2000);
         }
 
+        // Confetti Effect
+        function createConfetti() {
+            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ffa500', '#ff1493'];
+            const animations = ['confetti-fall-left', 'confetti-fall-right', 'confetti-fall-center', 'confetti-burst-left', 'confetti-burst-right'];
+            const confettiCount = 200;
+            
+            for (let i = 0; i < confettiCount; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    
+                    // Random position
+                    const startPosition = Math.random();
+                    if (startPosition < 0.33) {
+                        // Start from left
+                        confetti.style.left = '0%';
+                        confetti.style.top = Math.random() * 30 + '%';
+                    } else if (startPosition < 0.66) {
+                        // Start from right
+                        confetti.style.left = '100%';
+                        confetti.style.top = Math.random() * 30 + '%';
+                    } else {
+                        // Start from top center
+                        confetti.style.left = (Math.random() * 60 + 20) + '%';
+                        confetti.style.top = '0%';
+                    }
+                    
+                    // Random color
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    
+                    // Random size
+                    const size = Math.random() * 8 + 6;
+                    confetti.style.width = size + 'px';
+                    confetti.style.height = size + 'px';
+                    
+                    // Random animation
+                    const animation = animations[Math.floor(Math.random() * animations.length)];
+                    confetti.style.animation = `${animation} ${Math.random() * 2 + 2}s ease-out forwards`;
+                    
+                    document.body.appendChild(confetti);
+                    
+                    // Remove confetti after animation
+                    setTimeout(() => {
+                        confetti.remove();
+                    }, 5000);
+                }, i * 20);
+            }
+        }
+        
         // Show Results
         function showResults(score, percentage, reason = null) {
             document.getElementById('quizScreen').classList.add('hidden');
             document.getElementById('resultScreen').classList.remove('hidden');
             
-            document.getElementById('finalScore').textContent = score;
-            document.getElementById('totalQuestions').textContent = `dari ${questions.length} soal benar`;
+            document.getElementById('finalScore').textContent = percentage;
+            document.getElementById('totalQuestions').textContent = `Kamu telah menjawab ${score} soal dengan benar`;
+            
+            // Trigger confetti for excellent scores
+            if (percentage >= 80) {
+                createConfetti();
+            }
             
             const resultMessage = document.getElementById('resultMessage');
             
@@ -921,12 +1388,188 @@
             }
         }
 
+        // Show Review Screen
+        function showReviewScreen() {
+            document.getElementById('resultScreen').classList.add('hidden');
+            document.getElementById('reviewScreen').classList.remove('hidden');
+            
+            document.getElementById('reviewStudentInfo').textContent = 
+                `${currentStudent.nama} - ${currentStudent.kelas} (NIS: ${currentStudent.nis})`;
+            
+            // Start 2-minute countdown timer
+            startReviewTimer();
+            
+            const reviewContent = document.getElementById('reviewContent');
+            reviewContent.innerHTML = '';
+            
+            questions.forEach((question, index) => {
+                const userAnswer = userAnswers[index];
+                const correctAnswerLetter = question.kunci || question.jawaban;
+                const correctAnswerIndex = correctAnswerLetter.charCodeAt(0) - 65;
+                const isCorrect = userAnswer === correctAnswerIndex;
+                
+                const reviewCard = document.createElement('div');
+                reviewCard.className = 'bg-white rounded-2xl shadow-lg p-6';
+                
+                let reviewHTML = `
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="text-lg font-bold text-gray-800">Soal ${index + 1}</h3>
+                        <span class="px-3 py-1 rounded-full text-sm font-semibold ${isCorrect ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                            ${isCorrect ? '✓ Benar' : '✗ Salah'}
+                        </span>
+                    </div>
+                `;
+                
+                // Add image if exists
+                if (question.gambar && question.gambar.trim() !== '') {
+                    reviewHTML += `
+                        <img src="${question.gambar}" 
+                             alt="Gambar soal ${index + 1}" 
+                             class="question-image notranslate mb-4"
+                             onerror="this.style.display='none'">
+                    `;
+                }
+                
+                reviewHTML += `
+                    <p class="text-gray-700 mb-4 font-medium">${question.pertanyaan}</p>
+                    
+                    <div class="space-y-2 mb-4">
+                `;
+                
+                const options = ['opsia', 'opsib', 'opsic', 'opsid'];
+                options.forEach((optionKey, optIndex) => {
+                    if (question[optionKey]) {
+                        let optionClass = 'bg-gray-50 border-gray-200';
+                        let optionIcon = '';
+                        
+                        if (optIndex === correctAnswerIndex) {
+                            optionClass = 'bg-green-50 border-green-500';
+                            optionIcon = '<span class="text-green-600 font-bold">✓ Jawaban Benar</span>';
+                        } else if (optIndex === userAnswer && !isCorrect) {
+                            optionClass = 'bg-red-50 border-red-500';
+                            optionIcon = '<span class="text-red-600 font-bold">✗ Jawaban Anda</span>';
+                        }
+                        
+                        reviewHTML += `
+                            <div class="p-3 border-2 ${optionClass} rounded-lg">
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <span class="font-semibold text-blue-600">${String.fromCharCode(65 + optIndex)}.</span>
+                                        <span class="ml-2 text-gray-800">${question[optionKey]}</span>
+                                    </div>
+                                    ${optionIcon}
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+                
+                reviewHTML += `
+                    </div>
+                    
+                    ${userAnswer === null ? '<p class="text-orange-600 font-semibold">⚠️ Soal ini tidak dijawab</p>' : ''}
+                `;
+                
+                reviewCard.innerHTML = reviewHTML;
+                reviewContent.appendChild(reviewCard);
+            });
+        }
+
+        // Review Timer
+        let reviewTimerInterval = null;
+        let reviewTimeRemaining = 60; // 1 minute in seconds
+        
+        function startReviewTimer() {
+            reviewTimeRemaining = 60; // Reset to 1 minute
+            const reviewTimerDisplay = document.getElementById('reviewTimer');
+            
+            // Clear any existing interval
+            if (reviewTimerInterval) {
+                clearInterval(reviewTimerInterval);
+            }
+            
+            reviewTimerInterval = setInterval(() => {
+                reviewTimeRemaining--;
+                
+                // Update display
+                const minutes = Math.floor(reviewTimeRemaining / 60);
+                const seconds = reviewTimeRemaining % 60;
+                reviewTimerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                
+                // Change color based on time remaining
+                if (reviewTimeRemaining <= 30) {
+                    reviewTimerDisplay.className = 'text-xl font-bold text-red-600 timer-warning';
+                } else if (reviewTimeRemaining <= 60) {
+                    reviewTimerDisplay.className = 'text-xl font-bold text-orange-600';
+                } else {
+                    reviewTimerDisplay.className = 'text-xl font-bold text-blue-600';
+                }
+                
+                // Time's up - auto return to login
+                if (reviewTimeRemaining <= 0) {
+                    clearInterval(reviewTimerInterval);
+                    backToLogin();
+                }
+            }, 1000);
+        }
+        
+        function stopReviewTimer() {
+            if (reviewTimerInterval) {
+                clearInterval(reviewTimerInterval);
+                reviewTimerInterval = null;
+            }
+        }
+        
+        // Back to Login
+        function backToLogin() {
+            // Stop review timer
+            stopReviewTimer();
+            
+            // Reset all variables
+            currentStudent = null;
+            questions = [];
+            currentQuestionIndex = 0;
+            userAnswers = [];
+            quizCompleted = false;
+            violationCount = 0;
+            timeRemaining = 45 * 60;
+            reviewTimeRemaining = 60;
+            
+            // Clear input
+            document.getElementById('nisInput').value = '';
+            
+            // Show login screen
+            document.getElementById('reviewScreen').classList.add('hidden');
+            document.getElementById('resultScreen').classList.add('hidden');
+            document.getElementById('quizScreen').classList.add('hidden');
+            document.getElementById('loginScreen').classList.remove('hidden');
+        }
+
+        // Floating Navigation Functions
+        function toggleFloatingNav() {
+            const floatingPanel = document.getElementById('floatingNavPanel');
+            floatingPanel.classList.toggle('hidden');
+        }
+        
+        function closeFloatingNav() {
+            const floatingPanel = document.getElementById('floatingNavPanel');
+            floatingPanel.classList.add('hidden');
+        }
+
         // Event Listeners
         document.getElementById('loginForm').addEventListener('submit', handleLogin);
+        document.getElementById('agreeCheckbox').addEventListener('change', handleCheckboxChange);
+        document.getElementById('backToLoginFromConfirm').addEventListener('click', backToLoginFromConfirm);
+        document.getElementById('startQuizBtn').addEventListener('click', startQuiz);
         document.getElementById('prevBtn').addEventListener('click', previousQuestion);
         document.getElementById('nextBtn').addEventListener('click', nextQuestion);
-        document.getElementById('submitBtn').addEventListener('click', submitQuiz);
+        document.getElementById('submitBtn').addEventListener('click', showConfirmationModal);
         document.getElementById('continueQuizBtn').addEventListener('click', hideViolationWarning);
+        document.getElementById('cancelSubmitBtn').addEventListener('click', hideConfirmationModal);
+        document.getElementById('confirmSubmitBtn').addEventListener('click', submitQuiz);
+        document.getElementById('floatingNavBtn').addEventListener('click', toggleFloatingNav);
+        document.getElementById('closeFloatingNav').addEventListener('click', closeFloatingNav);
+        document.getElementById('reviewBtn').addEventListener('click', showReviewScreen);
 
         // Initialize sample data in Firebase (run once)
         async function initializeSampleData() {
@@ -939,17 +1582,17 @@
                     // Add sample students
                     await database.ref('siswa').set({
                         "siswa_1": {
-                            "nis": "12345",
+                            "nis": "12346",
                             "absen": "1",
-                            "nama": "Didik Kamseno",
+                            "nama": "Nina",
                             "kelas": "7A",
                             "created_at": new Date().toISOString(),
                             "updated_at": new Date().toISOString()
                         },
                         "siswa_2": {
-                            "nis": "12346",
+                            "nis": "12345",
                             "absen": "2",
-                            "nama": "Someone else",
+                            "nama": "Agus",
                             "kelas": "7A",
                             "created_at": new Date().toISOString(),
                             "updated_at": new Date().toISOString()
@@ -974,6 +1617,18 @@
                             "updated_at": new Date().toISOString()
                         },
                         "soal_2": {
+                            "pertanyaan": "Ibu kota Jawa Tengah?",
+                            "gambar": "",
+                            "tipe_soal": "text",
+                            "opsia": "Jakarta",
+                            "opsib": "Semarang",
+                            "opsic": "Surabaya",
+                            "opsid": "Bali",
+                            "kunci": "B",
+                            "created_at": new Date().toISOString(),
+                            "updated_at": new Date().toISOString()
+                        },
+                        "soal_3": {
                             "pertanyaan": "Apa nama hewan yang terlihat pada gambar?",
                             "gambar": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDMwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjBGOEZGIi8+CjxjaXJjbGUgY3g9IjE1MCIgY3k9IjEwMCIgcj0iNDAiIGZpbGw9IiNGRkE1MDAiLz4KPGNpcmNsZSBjeD0iMTQwIiBjeT0iOTAiIHI9IjMiIGZpbGw9IiMwMDAiLz4KPGNpcmNsZSBjeD0iMTYwIiBjeT0iOTAiIHI9IjMiIGZpbGw9IiMwMDAiLz4KPHBhdGggZD0iTTE0NSAxMDVMMTU1IDEwNUwxNTAgMTEwWiIgZmlsbD0iIzAwMCIvPgo8cGF0aCBkPSJNMTQwIDEyMFExNTAgMTMwIDE2MCAxMjAiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CjxlbGxpcHNlIGN4PSIxMjAiIGN5PSI4MCIgcng9IjE1IiByeT0iMjUiIGZpbGw9IiNGRkE1MDAiLz4KPGVsbGlwc2UgY3g9IjE4MCIgY3k9IjgwIiByeD0iMTUiIHJ5PSIyNSIgZmlsbD0iI0ZGQTUwMCIvPgo8dGV4dCB4PSIxNTAiIHk9IjE4MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0IiBmaWxsPSIjNjY2Ij5IZXdhbiBLdWNpbmc8L3RleHQ+Cjwvc3ZnPg==",
                             "tipe_soal": "image",
@@ -1000,9 +1655,5 @@
             initializeSampleData();
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9947c102954240a3',t:'MTc2MTQ1ODY0Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99c91570f719577a',t:'MTc2MjgxNDc2NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
-
-
-
-
