@@ -1,0 +1,2875 @@
+<!doctype html>
+<html lang="id">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard CBT Spenzaga</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-spin {
+      animation: spin 1s linear infinite;
+    }
+
+    .animate-slide-in {
+      animation: slideIn 0.5s ease-out;
+    }
+
+    .sort-indicator::after {
+      content: '⇅';
+      position: absolute;
+      right: 8px;
+      opacity: 0.5;
+      font-size: 12px;
+    }
+
+    .sort-asc::after {
+      content: '▲';
+      opacity: 1;
+      color: #10b981;
+    }
+
+    .sort-desc::after {
+      content: '▼';
+      opacity: 1;
+      color: #ef4444;
+    }
+
+    .gradient-bg {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .hover-lift:hover {
+      transform: translateY(-2px);
+    }
+
+    .table-hover-row:hover {
+      background: linear-gradient(90deg, #f8fafc 0%, #e2e8f0 100%);
+      transform: translateX(4px);
+      box-shadow: -4px 0 0 0 #667eea, 0 4px 12px rgba(102, 126, 234, 0.1);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #6b7280;
+    }
+
+    .success-message {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      padding: 16px 24px;
+      border-radius: 12px;
+      margin-bottom: 24px;
+      font-weight: 500;
+      box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.3);
+      animation: slideIn 0.3s ease-out;
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="min-h-full flex justify-center items-center p-8 gradient-bg font-sans"><!-- Login Form -->
+  <div id="login-container" class="min-h-full flex justify-center items-center p-4 sm:p-8 gradient-bg relative overflow-hidden"><!-- Animated Background Elements -->
+   <div class="absolute inset-0 overflow-hidden">
+    <div class="absolute -top-40 -right-40 w-80 h-80 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
+    <div class="absolute -bottom-40 -left-40 w-96 h-96 bg-white/5 rounded-full blur-3xl animate-pulse" style="animation-delay: 1s;"></div>
+    <div class="absolute top-1/2 left-1/4 w-32 h-32 bg-white/5 rounded-full blur-2xl animate-pulse" style="animation-delay: 2s;"></div>
+   </div>
+   <div class="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl p-8 sm:p-12 w-full max-w-md relative z-10 border border-white/20"><!-- Logo/Header Section -->
+    <div class="text-center mb-10">
+     <div class="relative inline-block mb-6">
+      <div class="w-20 h-20 mx-auto bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg transform rotate-3 hover:rotate-0 transition-transform duration-300"><span class="text-3xl">🎓</span>
+      </div>
+      <div class="absolute -top-2 -right-2 w-6 h-6 bg-emerald-400 rounded-full animate-bounce"></div>
+     </div>
+     <h1 class="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-3">Admin Dashboard</h1>
+     <p class="text-gray-600 text-lg">Sistem Manajemen Siswa &amp; Soal</p>
+     <div class="w-16 h-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full mx-auto mt-4"></div>
+    </div>
+    <form id="login-form" class="space-y-6"><!-- Username Field -->
+     <div class="space-y-3"><label for="username" class="block text-sm font-semibold text-gray-700 flex items-center gap-2"> <span class="text-indigo-500">👤</span> Username </label>
+      <div class="relative"><input type="text" id="username" required class="w-full px-5 py-4 pl-12 border-2 border-gray-200 rounded-xl text-base font-medium text-gray-700 bg-white/80 backdrop-blur-sm transition-all duration-300 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 focus:bg-white hover:border-indigo-300" placeholder="Masukkan username Anda">
+       <div class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+        </svg>
+       </div>
+      </div>
+     </div><!-- Password Field -->
+     <div class="space-y-3"><label for="password" class="block text-sm font-semibold text-gray-700 flex items-center gap-2"> <span class="text-indigo-500">🔒</span> Password </label>
+      <div class="relative"><input type="password" id="password" required class="w-full px-5 py-4 pl-12 pr-12 border-2 border-gray-200 rounded-xl text-base font-medium text-gray-700 bg-white/80 backdrop-blur-sm transition-all duration-300 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 focus:bg-white hover:border-indigo-300" placeholder="Masukkan password Anda">
+       <div class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+        </svg>
+       </div><button type="button" id="toggle-password" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors duration-200">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24" id="eye-icon"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+        </svg></button>
+      </div>
+     </div><!-- Login Button --> <button type="submit" id="login-btn" class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-4 px-6 rounded-xl text-base font-semibold cursor-pointer transition-all duration-300 shadow-lg hover:shadow-xl hover:from-indigo-600 hover:to-purple-700 transform hover:-translate-y-1 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none"> <span id="login-btn-text" class="flex items-center justify-center gap-2"> <span>🚀</span> Masuk ke Dashboard </span> </button>
+    </form><!-- Error Message -->
+    <div id="login-error" class="bg-gradient-to-r from-red-500 to-red-600 text-white p-4 rounded-xl mt-6 text-center font-medium shadow-lg hidden transform transition-all duration-300">
+     <div class="flex items-center justify-center gap-2"><span>⚠️</span> <span id="error-text"></span>
+     </div>
+    </div><!-- Footer -->
+    <div class="text-center mt-8 pt-6 border-t border-gray-200">
+     <p class="text-sm text-gray-500 flex items-center justify-center gap-2"><span>🔐</span> Sistem Keamanan Terjamin</p>
+     <div class="flex justify-center gap-4 mt-3">
+      <div class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+      <div class="w-2 h-2 bg-indigo-400 rounded-full animate-pulse" style="animation-delay: 0.5s;"></div>
+      <div class="w-2 h-2 bg-purple-400 rounded-full animate-pulse" style="animation-delay: 1s;"></div>
+     </div>
+    </div>
+   </div>
+  </div><!-- Main Dashboard -->
+  <main id="dashboard-container" class="bg-white rounded-3xl shadow-2xl w-full max-w-7xl overflow-hidden animate-slide-in" style="display: none;">
+   <header class="gradient-bg text-white p-10">
+    <div class="flex justify-between items-center gap-5 flex-wrap">
+     <div class="flex-1">
+      <h1 id="table-title" class="text-4xl font-bold mb-4">📊 Dashboard CBT Spenzaga</h1>
+      <p class="text-lg opacity-95">CBT - Computer Based Test  - SMP Negeri 1 Purbalingga</p>
+     </div>
+     <div class="flex gap-3 items-center flex-wrap"><button id="crud-menu-btn" class="bg-emerald-500/20 text-white px-5 py-3 border-2 border-emerald-400/40 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-300 flex items-center gap-2 hover:bg-emerald-500/30 hover-lift"> 👥 Kelola Siswa </button> <button id="soal-menu-btn" class="bg-amber-500/20 text-white px-5 py-3 border-2 border-amber-400/40 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-300 flex items-center gap-2 hover:bg-amber-500/30 hover-lift"> 📝 Kelola Soal </button> <button id="analisis-menu-btn" class="bg-purple-500/20 text-white px-5 py-3 border-2 border-purple-400/40 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-300 flex items-center gap-2 hover:bg-purple-500/30 hover-lift"> 📊 Analisis Butir </button> <button id="logout-btn" class="bg-red-500/20 text-white px-5 py-3 border-2 border-red-400/40 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-300 flex items-center gap-2 hover:bg-red-500/30 hover-lift"> 🚪 Logout </button>
+     </div>
+    </div>
+   </header>
+   <div class="p-10">
+    <div id="loading" class="text-center py-20 text-indigo-600">
+     <div class="w-16 h-16 border-4 border-gray-200 border-t-indigo-600 rounded-full animate-spin mx-auto mb-6"></div>
+     <div class="text-xl font-medium text-indigo-600">
+      Memuat data dari Firebase...
+     </div>
+    </div>
+    <div id="error" class="bg-red-500 text-white p-6 rounded-xl mb-6 text-center font-medium shadow-lg hidden"></div>
+    <div id="table-container" class="hidden space-y-6"><!-- Filter & Export Controls -->
+     <div class="bg-white rounded-2xl p-6 shadow-lg border-2 border-indigo-100 flex justify-between items-center gap-4 flex-wrap">
+      <div class="flex items-center gap-4"><span class="text-gray-700 font-semibold">🔍 Filter Kelas:</span> <select id="class-filter" class="px-4 py-2 border-2 border-indigo-100 rounded-lg text-sm font-medium text-gray-700 bg-white transition-all duration-200 outline-none focus:border-indigo-500"> <option value="all">Semua Kelas</option> </select>
+      </div>
+      <div class="flex items-center gap-4"><button id="export-excel-btn" class="bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-300 shadow-lg hover:shadow-xl hover-lift flex items-center gap-2"> 📊 Export Excel </button>
+       <div class="bg-indigo-100 text-indigo-700 px-4 py-2 rounded-lg font-semibold text-sm" id="count-badge">
+        Total: 0 Siswa
+       </div>
+      </div>
+     </div><!-- Statistics -->
+     <div class="bg-white rounded-2xl p-6 shadow-lg border-2 border-indigo-100" id="stats-bar"></div><!-- Data Table -->
+     <div class="bg-white rounded-2xl shadow-lg border-2 border-indigo-100 overflow-hidden">
+      <div class="overflow-x-auto">
+       <table class="w-full border-collapse bg-white">
+        <thead class="gradient-bg text-white">
+         <tr>
+          <th class="px-6 py-5 text-left font-semibold text-sm uppercase tracking-wide cursor-pointer select-none relative transition-colors duration-200 hover:bg-white/10 sort-indicator">Absen</th>
+          <th class="px-6 py-5 text-left font-semibold text-sm uppercase tracking-wide cursor-pointer select-none relative transition-colors duration-200 hover:bg-white/10 sort-indicator">NIS</th>
+          <th class="px-6 py-5 text-left font-semibold text-sm uppercase tracking-wide cursor-pointer select-none relative transition-colors duration-200 hover:bg-white/10 sort-indicator">Nama</th>
+          <th class="px-6 py-5 text-left font-semibold text-sm uppercase tracking-wide cursor-pointer select-none relative transition-colors duration-200 hover:bg-white/10 sort-indicator">Kelas</th>
+          <th class="px-6 py-5 text-left font-semibold text-sm uppercase tracking-wide cursor-pointer select-none relative transition-colors duration-200 hover:bg-white/10 sort-indicator">Skor</th>
+         </tr>
+        </thead>
+        <tbody id="table-body">
+        </tbody>
+       </table>
+      </div>
+     </div>
+    </div>
+   </div>
+  </main><!-- CRUD Siswa Container -->
+  <main id="crud-container" class="bg-white rounded-3xl shadow-2xl w-full max-w-7xl overflow-hidden" style="display: none;">
+   <header class="gradient-bg text-white p-10">
+    <div class="flex justify-between items-center gap-5 flex-wrap">
+     <div class="flex-1">
+      <h1 class="text-4xl font-bold mb-4">👥 Kelola Data Siswa</h1>
+      <p class="text-lg opacity-95">Tambah, Edit, dan Hapus Data Siswa</p>
+     </div>
+     <div class="flex gap-3 items-center flex-wrap"><button id="back-to-dashboard-btn" class="bg-white/15 text-white px-5 py-3 border-2 border-white/25 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-300 flex items-center gap-2 hover:bg-indigo-500/30 hover-lift"> 📊 Dashboard </button> <button id="soal-menu-btn-from-crud" class="bg-amber-500/20 text-white px-5 py-3 border-2 border-amber-400/40 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-300 flex items-center gap-2 hover:bg-amber-500/30 hover-lift"> 📝 Kelola Soal </button> <button id="analisis-menu-btn-from-crud" class="bg-purple-500/20 text-white px-5 py-3 border-2 border-purple-400/40 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-300 flex items-center gap-2 hover:bg-purple-500/30 hover-lift"> 📊 Analisis Butir </button> <button id="logout-btn-crud" class="bg-red-500/20 text-white px-5 py-3 border-2 border-red-400/40 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-300 flex items-center gap-2 hover:bg-red-500/30 hover-lift"> 🚪 Logout </button>
+     </div>
+    </div>
+   </header>
+   <div class="p-10"><!-- Add Student Form -->
+    <div class="bg-white rounded-2xl p-8 mb-8 shadow-lg border-2 border-indigo-100">
+     <h2 class="text-2xl font-semibold text-indigo-600 mb-5">➕ Tambah Siswa Baru</h2>
+     <form id="add-student-form" class="space-y-5">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+       <div class="space-y-2"><label for="add-absen" class="block text-sm font-semibold text-gray-700">Absen</label> <input type="number" id="add-absen" name="absen" required class="w-full px-4 py-3 border-2 border-indigo-100 rounded-xl text-base font-medium text-gray-700 bg-white transition-all duration-300 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100" placeholder="Nomor absen">
+       </div>
+       <div class="space-y-2"><label for="add-nis" class="block text-sm font-semibold text-gray-700">NIS</label> <input type="text" id="add-nis" name="nis" required class="w-full px-4 py-3 border-2 border-indigo-100 rounded-xl text-base font-medium text-gray-700 bg-white transition-all duration-300 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100" placeholder="Nomor Induk Siswa">
+       </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+       <div class="space-y-2"><label for="add-nama" class="block text-sm font-semibold text-gray-700">Nama Lengkap</label> <input type="text" id="add-nama" name="nama" required class="w-full px-4 py-3 border-2 border-indigo-100 rounded-xl text-base font-medium text-gray-700 bg-white transition-all duration-300 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100" placeholder="Nama lengkap siswa">
+       </div>
+       <div class="space-y-2"><label for="add-kelas" class="block text-sm font-semibold text-gray-700">Kelas</label> <input type="text" id="add-kelas" name="kelas" required class="w-full px-4 py-3 border-2 border-indigo-100 rounded-xl text-base font-medium text-gray-700 bg-white transition-all duration-300 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100" placeholder="Contoh: XII IPA 1">
+       </div>
+      </div><button type="submit" class="bg-indigo-600 text-white py-3 px-6 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-300 shadow-lg hover:shadow-xl hover-lift flex items-center justify-center gap-2 disabled:bg-gray-300 disabled:cursor-not-allowed"> <span id="add-btn-text">➕ Tambah Siswa</span> </button>
+     </form>
+    </div><!-- Students List -->
+    <div class="bg-white rounded-2xl p-8 shadow-lg border-2 border-indigo-100">
+     <div class="flex justify-between items-center mb-6 gap-4 flex-wrap">
+      <h2 class="text-2xl font-semibold text-indigo-600 m-0">📋 Daftar Siswa</h2>
+      <div class="flex items-center gap-3 flex-wrap"><button id="export-siswa-btn" class="bg-blue-500 text-white px-4 py-3 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-300 shadow-lg hover:shadow-xl hover-lift flex items-center gap-2"> 📤 Export Excel </button> <label for="import-siswa-file" class="bg-green-500 text-white px-4 py-3 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-300 shadow-lg hover:shadow-xl hover-lift flex items-center gap-2"> 📥 Import Excel <input type="file" id="import-siswa-file" accept=".xlsx,.xls" class="hidden"> </label> <input type="text" id="search-input" placeholder="🔍 Cari siswa..." class="px-4 py-3 border-2 border-indigo-100 rounded-lg text-sm font-medium text-gray-700 bg-white transition-all duration-200 outline-none min-w-64 focus:border-indigo-500">
+      </div>
+     </div><!-- Sort Controls untuk Siswa -->
+     <div class="bg-white rounded-2xl p-6 mb-6 shadow-lg border-2 border-indigo-100">
+      <div class="flex justify-between items-center gap-4 flex-wrap">
+       <div class="flex items-center gap-4 flex-wrap"><span class="text-gray-700 font-semibold">📊 Sort Data Siswa:</span> <select id="sort-kelas-select" class="px-4 py-2 border-2 border-indigo-100 rounded-lg text-sm font-medium text-gray-700 bg-white transition-all duration-200 outline-none focus:border-indigo-500"> <option value="all">Semua Kelas</option> </select> <select id="sort-absen-select" class="px-4 py-2 border-2 border-indigo-100 rounded-lg text-sm font-medium text-gray-700 bg-white transition-all duration-200 outline-none focus:border-indigo-500"> <option value="all">Semua Absen</option> </select> <button id="reset-sort-btn" class="bg-gray-500 text-white px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-300 shadow-lg hover:shadow-xl hover-lift flex items-center gap-2"> 🔄 Reset </button>
+       </div>
+       <div class="bg-indigo-100 text-indigo-700 px-4 py-2 rounded-lg font-semibold text-sm" id="siswa-count-badge">
+        Total: 0 Siswa
+       </div>
+      </div>
+     </div>
+     <div id="crud-loading" class="text-center py-15 text-indigo-600">
+      <div class="w-12 h-12 border-4 border-gray-200 border-t-indigo-600 rounded-full animate-spin mx-auto mb-5"></div>
+      <div class="text-lg font-medium text-indigo-600">
+       Memuat data siswa...
+      </div>
+     </div>
+     <div id="crud-error" class="bg-red-500 text-white p-5 rounded-xl mb-5 text-center font-medium shadow-lg hidden"></div>
+     <div id="siswa-table-container" class="hidden">
+      <div class="overflow-x-auto rounded-xl border-2 border-indigo-100 shadow-lg">
+       <table class="w-full border-collapse bg-white">
+        <thead class="gradient-bg text-white">
+         <tr>
+          <th class="px-4 py-5 text-left font-semibold text-sm uppercase tracking-wide">Absen</th>
+          <th class="px-4 py-5 text-left font-semibold text-sm uppercase tracking-wide">NIS</th>
+          <th class="px-4 py-5 text-left font-semibold text-sm uppercase tracking-wide">Nama</th>
+          <th class="px-4 py-5 text-left font-semibold text-sm uppercase tracking-wide">Kelas</th>
+          <th class="px-4 py-5 text-left font-semibold text-sm uppercase tracking-wide w-38">Aksi</th>
+         </tr>
+        </thead>
+        <tbody id="siswa-table-body">
+        </tbody>
+       </table>
+      </div>
+     </div>
+    </div>
+   </div>
+  </main><!-- CRUD Soal Container -->
+  <main id="soal-container" class="bg-white rounded-3xl shadow-2xl w-full max-w-7xl overflow-hidden" style="display: none;">
+   <header class="gradient-bg text-white p-10">
+    <div class="flex justify-between items-center gap-5 flex-wrap">
+     <div class="flex-1">
+      <h1 class="text-4xl font-bold mb-4">📝 Kelola Data Soal</h1>
+      <p class="text-lg opacity-95">Tambah, Edit, dan Hapus Soal Ujian</p>
+     </div>
+     <div class="flex gap-3 items-center flex-wrap"><button id="back-to-dashboard-btn-soal" class="bg-white/15 text-white px-5 py-3 border-2 border-white/25 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-300 flex items-center gap-2 hover:bg-indigo-500/30 hover-lift"> 📊 Dashboard </button> <button id="crud-menu-btn-from-soal" class="bg-emerald-500/20 text-white px-5 py-3 border-2 border-emerald-400/40 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-300 flex items-center gap-2 hover:bg-emerald-500/30 hover-lift"> 👥 Kelola Siswa </button> <button id="analisis-menu-btn-from-soal" class="bg-purple-500/20 text-white px-5 py-3 border-2 border-purple-400/40 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-300 flex items-center gap-2 hover:bg-purple-500/30 hover-lift"> 📊 Analisis Butir </button> <button id="logout-btn-soal" class="bg-red-500/20 text-white px-5 py-3 border-2 border-red-400/40 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-300 flex items-center gap-2 hover:bg-red-500/30 hover-lift"> 🚪 Logout </button>
+     </div>
+    </div>
+   </header>
+   <div class="p-10"><!-- Add Soal Form -->
+    <div class="bg-white rounded-2xl p-8 mb-8 shadow-lg border-2 border-indigo-100">
+     <h2 class="text-2xl font-semibold text-indigo-600 mb-6">➕ Tambah Soal Baru</h2>
+     <form id="add-soal-form" class="space-y-6">
+      <div class="space-y-2"><label for="add-pertanyaan" class="block text-sm font-semibold text-gray-700">Pertanyaan</label> <textarea id="add-pertanyaan" name="pertanyaan" required class="w-full px-4 py-3 border-2 border-indigo-100 rounded-xl text-base font-medium text-gray-700 bg-white transition-all duration-300 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 resize-none" placeholder="Masukkan pertanyaan soal..." rows="3"></textarea>
+      </div>
+      <div class="space-y-2"><label for="add-gambar" class="block text-sm font-semibold text-gray-700">URL Gambar (Opsional)</label> <input type="url" id="add-gambar" name="gambar" class="w-full px-4 py-3 border-2 border-indigo-100 rounded-xl text-base font-medium text-gray-700 bg-white transition-all duration-300 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100" placeholder="https://example.com/gambar.jpg">
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+       <div class="space-y-2"><label for="add-opsia" class="block text-sm font-semibold text-gray-700">Opsi A</label> <input type="text" id="add-opsia" name="opsia" required class="w-full px-4 py-3 border-2 border-indigo-100 rounded-xl text-base font-medium text-gray-700 bg-white transition-all duration-300 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100" placeholder="Pilihan A">
+       </div>
+       <div class="space-y-2"><label for="add-opsib" class="block text-sm font-semibold text-gray-700">Opsi B</label> <input type="text" id="add-opsib" name="opsib" required class="w-full px-4 py-3 border-2 border-indigo-100 rounded-xl text-base font-medium text-gray-700 bg-white transition-all duration-300 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100" placeholder="Pilihan B">
+       </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+       <div class="space-y-2"><label for="add-opsic" class="block text-sm font-semibold text-gray-700">Opsi C</label> <input type="text" id="add-opsic" name="opsic" required class="w-full px-4 py-3 border-2 border-indigo-100 rounded-xl text-base font-medium text-gray-700 bg-white transition-all duration-300 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100" placeholder="Pilihan C">
+       </div>
+       <div class="space-y-2"><label for="add-opsid" class="block text-sm font-semibold text-gray-700">Opsi D</label> <input type="text" id="add-opsid" name="opsid" required class="w-full px-4 py-3 border-2 border-indigo-100 rounded-xl text-base font-medium text-gray-700 bg-white transition-all duration-300 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100" placeholder="Pilihan D">
+       </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+       <div class="space-y-2"><label for="add-kunci" class="block text-sm font-semibold text-gray-700">Kunci Jawaban</label> <select id="add-kunci" name="kunci" required class="w-full px-4 py-3 border-2 border-indigo-100 rounded-xl text-base font-medium text-gray-700 bg-white transition-all duration-300 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"> <option value="">Pilih kunci jawaban</option> <option value="A">A</option> <option value="B">B</option> <option value="C">C</option> <option value="D">D</option> </select>
+       </div>
+       <div class="space-y-2"><label for="add-tipe-soal" class="block text-sm font-semibold text-gray-700">Tipe Soal</label> <select id="add-tipe-soal" name="tipe_soal" required class="w-full px-4 py-3 border-2 border-indigo-100 rounded-xl text-base font-medium text-gray-700 bg-white transition-all duration-300 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"> <option value="">Pilih tipe soal</option> <option value="image">🖼️ Image</option> <option value="text">📝 Text</option> </select>
+       </div>
+      </div><button type="submit" class="bg-indigo-600 text-white py-3 px-6 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-300 shadow-lg hover:shadow-xl hover-lift flex items-center justify-center gap-2 disabled:bg-gray-300 disabled:cursor-not-allowed"> <span id="add-soal-btn-text">➕ Tambah Soal</span> </button>
+     </form>
+    </div><!-- Soal List -->
+    <div class="bg-white rounded-2xl p-8 shadow-lg border-2 border-indigo-100">
+     <div class="flex justify-between items-center mb-6 gap-4 flex-wrap">
+      <h2 class="text-2xl font-semibold text-indigo-600 m-0">📋 Daftar Soal</h2>
+      <div class="flex items-center gap-3 flex-wrap"><button id="export-soal-btn" class="bg-blue-500 text-white px-4 py-3 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-300 shadow-lg hover:shadow-xl hover-lift flex items-center gap-2"> 📤 Export Excel </button> <label for="import-soal-file" class="bg-green-500 text-white px-4 py-3 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-300 shadow-lg hover:shadow-xl hover-lift flex items-center gap-2"> 📥 Import Excel <input type="file" id="import-soal-file" accept=".xlsx,.xls" class="hidden"> </label> <button id="update-numbering-btn" class="bg-emerald-500 text-white px-4 py-3 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-300 shadow-lg hover:shadow-xl hover-lift flex items-center gap-2"> 🔢 Update Nomor Urut </button> <input type="text" id="search-soal-input" placeholder="🔍 Cari soal..." class="px-4 py-3 border-2 border-indigo-100 rounded-lg text-sm font-medium text-gray-700 bg-white transition-all duration-200 outline-none min-w-64 focus:border-indigo-500">
+      </div>
+     </div>
+     <div id="soal-loading" class="text-center py-15 text-indigo-600">
+      <div class="w-12 h-12 border-4 border-gray-200 border-t-indigo-600 rounded-full animate-spin mx-auto mb-5"></div>
+      <div class="text-lg font-medium text-indigo-600">
+       Memuat data soal...
+      </div>
+     </div>
+     <div id="soal-error" class="bg-red-500 text-white p-5 rounded-xl mb-5 text-center font-medium shadow-lg hidden"></div>
+     <div id="soal-table-container" class="hidden">
+      <div class="overflow-x-auto rounded-xl border-2 border-indigo-100 shadow-lg">
+       <table class="w-full border-collapse bg-white">
+        <thead class="gradient-bg text-white">
+         <tr>
+          <th class="px-4 py-5 text-center font-semibold text-sm uppercase tracking-wide w-16">No</th>
+          <th class="px-4 py-5 text-left font-semibold text-sm uppercase tracking-wide w-2/5">Pertanyaan</th>
+          <th class="px-4 py-5 text-center font-semibold text-sm uppercase tracking-wide w-1/6">Gambar</th>
+          <th class="px-4 py-5 text-center font-semibold text-sm uppercase tracking-wide w-1/12">Kunci</th>
+          <th class="px-4 py-5 text-center font-semibold text-sm uppercase tracking-wide w-1/6">Tipe Soal</th>
+          <th class="px-4 py-5 text-center font-semibold text-sm uppercase tracking-wide w-1/5">Aksi</th>
+         </tr>
+        </thead>
+        <tbody id="soal-table-body">
+        </tbody>
+       </table>
+      </div>
+     </div>
+    </div>
+   </div>
+  </main><!-- Edit Siswa Modal -->
+  <div id="edit-modal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50" style="display: none;">
+   <div class="bg-white rounded-2xl p-8 w-full max-w-3xl mx-4 max-h-90vh overflow-y-auto">
+    <div class="flex justify-between items-center mb-6 pb-4 border-b-2 border-indigo-100">
+     <h3 class="text-2xl font-bold text-indigo-600">✏️ Edit Data Siswa</h3><button class="text-gray-400 hover:text-gray-600 text-3xl font-bold" id="close-edit-modal">×</button>
+    </div>
+    <form id="edit-student-form" class="space-y-6"><input type="hidden" id="edit-student-id">
+     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div class="space-y-2"><label for="edit-absen" class="block text-sm font-semibold text-gray-700">Absen</label> <input type="number" id="edit-absen" name="absen" required class="w-full px-4 py-3 border-2 border-indigo-100 rounded-xl text-base font-medium text-gray-700 bg-white transition-all duration-300 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100">
+      </div>
+      <div class="space-y-2"><label for="edit-nis" class="block text-sm font-semibold text-gray-700">NIS</label> <input type="text" id="edit-nis" name="nis" required class="w-full px-4 py-3 border-2 border-indigo-100 rounded-xl text-base font-medium text-gray-700 bg-white transition-all duration-300 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100">
+      </div>
+     </div>
+     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div class="space-y-2"><label for="edit-nama" class="block text-sm font-semibold text-gray-700">Nama Lengkap</label> <input type="text" id="edit-nama" name="nama" required class="w-full px-4 py-3 border-2 border-indigo-100 rounded-xl text-base font-medium text-gray-700 bg-white transition-all duration-300 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100">
+      </div>
+      <div class="space-y-2"><label for="edit-kelas" class="block text-sm font-semibold text-gray-700">Kelas</label> <input type="text" id="edit-kelas" name="kelas" required class="w-full px-4 py-3 border-2 border-indigo-100 rounded-xl text-base font-medium text-gray-700 bg-white transition-all duration-300 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100">
+      </div>
+     </div>
+     <div class="flex justify-end gap-3 pt-6 border-t-2 border-indigo-100"><button type="button" class="bg-gray-100 text-gray-700 px-6 py-3 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-300 hover:bg-gray-200 hover-lift" id="cancel-edit-btn"> Batal </button> <button type="submit" class="bg-indigo-600 text-white px-6 py-3 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-300 shadow-lg hover:shadow-xl hover-lift flex items-center gap-2 disabled:bg-gray-300 disabled:cursor-not-allowed"> <span id="edit-btn-text">💾 Simpan Perubahan</span> </button>
+     </div>
+    </form>
+   </div>
+  </div><!-- Delete Siswa Modal -->
+  <div id="delete-modal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50" style="display: none;">
+   <div class="bg-white rounded-2xl p-8 w-full max-w-lg mx-4">
+    <div class="flex justify-between items-center mb-6 pb-4 border-b-2 border-red-100">
+     <h3 class="text-2xl font-bold text-red-600">🗑️ Hapus Data Siswa</h3><button class="text-gray-400 hover:text-gray-600 text-3xl font-bold" id="close-delete-modal">×</button>
+    </div>
+    <div class="space-y-6">
+     <p class="text-gray-700 text-lg">Apakah Anda yakin ingin menghapus data siswa ini?</p>
+     <div class="bg-gray-50 rounded-xl p-6 space-y-3">
+      <div class="flex items-center gap-3"><span class="text-gray-500 font-semibold">Nama:</span> <span id="delete-student-name" class="text-gray-700 font-medium"></span>
+      </div>
+      <div class="flex items-center gap-3"><span class="text-gray-500 font-semibold">NIS:</span> <span id="delete-student-nis" class="text-indigo-600 font-bold"></span>
+      </div>
+      <div class="flex items-center gap-3"><span class="text-gray-500 font-semibold">Kelas:</span> <span id="delete-student-kelas" class="text-gray-700 font-medium"></span>
+      </div>
+     </div>
+     <div class="bg-red-50 border-2 border-red-200 rounded-xl p-4">
+      <p class="text-red-600 font-semibold">⚠️ Tindakan ini tidak dapat dibatalkan!</p>
+     </div>
+    </div>
+    <div class="flex justify-end gap-3 pt-6 border-t-2 border-red-100"><button type="button" class="bg-gray-100 text-gray-700 px-6 py-3 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-300 hover:bg-gray-200 hover-lift" id="cancel-delete-btn"> Batal </button> <button type="button" class="bg-red-500 text-white px-6 py-3 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-300 shadow-lg hover:shadow-xl hover-lift flex items-center gap-2 disabled:bg-gray-300 disabled:cursor-not-allowed" id="confirm-delete-btn"> <span id="delete-btn-text">🗑️ Hapus</span> </button>
+    </div>
+   </div>
+  </div><!-- Edit Soal Modal -->
+  <div id="edit-soal-modal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-2 sm:p-4" style="display: none;">
+   <div class="bg-white rounded-2xl p-4 sm:p-6 lg:p-8 w-full max-w-xs sm:max-w-lg md:max-w-2xl lg:max-w-4xl xl:max-w-5xl mx-2 sm:mx-4 max-h-[95vh] overflow-y-auto">
+    <div class="flex justify-between items-center mb-4 sm:mb-6 pb-3 sm:pb-4 border-b-2 border-indigo-100">
+     <h3 class="text-lg sm:text-xl lg:text-2xl font-bold text-indigo-600">✏️ Edit Data Soal</h3><button class="text-gray-400 hover:text-gray-600 text-2xl sm:text-3xl font-bold" id="close-edit-soal-modal">×</button>
+    </div>
+    <form id="edit-soal-form" class="space-y-4 sm:space-y-6"><input type="hidden" id="edit-soal-id">
+     <div class="space-y-4 sm:space-y-6">
+      <div class="space-y-2"><label for="edit-pertanyaan" class="block text-sm font-semibold text-gray-700">Pertanyaan</label> <textarea id="edit-pertanyaan" name="pertanyaan" required rows="3" class="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-indigo-100 rounded-xl text-sm sm:text-base font-medium text-gray-700 bg-white transition-all duration-300 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 resize-none"></textarea>
+      </div>
+      <div class="space-y-2"><label for="edit-gambar" class="block text-sm font-semibold text-gray-700">URL Gambar (Opsional)</label> <input type="url" id="edit-gambar" name="gambar" class="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-indigo-100 rounded-xl text-sm sm:text-base font-medium text-gray-700 bg-white transition-all duration-300 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100">
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-5">
+       <div class="space-y-2"><label for="edit-opsia" class="block text-sm font-semibold text-gray-700">Opsi A</label> <input type="text" id="edit-opsia" name="opsia" required class="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-indigo-100 rounded-xl text-sm sm:text-base font-medium text-gray-700 bg-white transition-all duration-300 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100">
+       </div>
+       <div class="space-y-2"><label for="edit-opsib" class="block text-sm font-semibold text-gray-700">Opsi B</label> <input type="text" id="edit-opsib" name="opsib" required class="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-indigo-100 rounded-xl text-sm sm:text-base font-medium text-gray-700 bg-white transition-all duration-300 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100">
+       </div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-5">
+       <div class="space-y-2"><label for="edit-opsic" class="block text-sm font-semibold text-gray-700">Opsi C</label> <input type="text" id="edit-opsic" name="opsic" required class="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-indigo-100 rounded-xl text-sm sm:text-base font-medium text-gray-700 bg-white transition-all duration-300 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100">
+       </div>
+       <div class="space-y-2"><label for="edit-opsid" class="block text-sm font-semibold text-gray-700">Opsi D</label> <input type="text" id="edit-opsid" name="opsid" required class="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-indigo-100 rounded-xl text-sm sm:text-base font-medium text-gray-700 bg-white transition-all duration-300 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100">
+       </div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-5">
+       <div class="space-y-2"><label for="edit-kunci" class="block text-sm font-semibold text-gray-700">Kunci Jawaban</label> <select id="edit-kunci" name="kunci" required class="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-indigo-100 rounded-xl text-sm sm:text-base font-medium text-gray-700 bg-white transition-all duration-300 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"> <option value="A">A</option> <option value="B">B</option> <option value="C">C</option> <option value="D">D</option> </select>
+       </div>
+       <div class="space-y-2"><label for="edit-tipe-soal" class="block text-sm font-semibold text-gray-700">Tipe Soal</label> <select id="edit-tipe-soal" name="tipe_soal" required class="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-indigo-100 rounded-xl text-sm sm:text-base font-medium text-gray-700 bg-white transition-all duration-300 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"> <option value="image">🖼️ Image</option> <option value="text">📝 Text</option> </select>
+       </div>
+      </div>
+     </div>
+     <div class="flex flex-col sm:flex-row justify-end gap-3 pt-4 sm:pt-6 border-t-2 border-indigo-100"><button type="button" class="w-full sm:w-auto bg-gray-100 text-gray-700 px-4 sm:px-6 py-3 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-300 hover:bg-gray-200 hover-lift order-2 sm:order-1" id="cancel-edit-soal-btn"> Batal </button> <button type="submit" class="w-full sm:w-auto bg-indigo-600 text-white px-4 sm:px-6 py-3 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-300 shadow-lg hover:shadow-xl hover-lift flex items-center justify-center gap-2 disabled:bg-gray-300 disabled:cursor-not-allowed order-1 sm:order-2"> <span id="edit-soal-btn-text">💾 Simpan Perubahan</span> </button>
+     </div>
+    </form>
+   </div>
+  </div><!-- Delete Soal Modal -->
+  <div id="delete-soal-modal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50" style="display: none;">
+   <div class="bg-white rounded-2xl p-8 w-full max-w-lg mx-4">
+    <div class="flex justify-between items-center mb-6 pb-4 border-b-2 border-red-100">
+     <h3 class="text-2xl font-bold text-red-600">🗑️ Hapus Data Soal</h3><button class="text-gray-400 hover:text-gray-600 text-3xl font-bold" id="close-delete-soal-modal">×</button>
+    </div>
+    <div class="space-y-6">
+     <p class="text-gray-700 text-lg">Apakah Anda yakin ingin menghapus soal ini?</p>
+     <div class="bg-gray-50 rounded-xl p-6 space-y-3">
+      <div class="flex items-start gap-3"><span class="text-gray-500 font-semibold min-w-fit">Pertanyaan:</span> <span id="delete-soal-pertanyaan" class="text-gray-700 font-medium"></span>
+      </div>
+      <div class="flex items-center gap-3"><span class="text-gray-500 font-semibold">Kunci Jawaban:</span> <span id="delete-soal-kunci" class="text-indigo-600 font-bold text-lg"></span>
+      </div>
+      <div class="flex items-center gap-3"><span class="text-gray-500 font-semibold">Tipe Soal:</span> <span id="delete-soal-tipe" class="text-gray-700 font-medium"></span>
+      </div>
+     </div>
+     <div class="bg-red-50 border-2 border-red-200 rounded-xl p-4">
+      <p class="text-red-600 font-semibold">⚠️ Tindakan ini tidak dapat dibatalkan!</p>
+     </div>
+    </div>
+    <div class="flex justify-end gap-3 pt-6 border-t-2 border-red-100"><button type="button" class="bg-gray-100 text-gray-700 px-6 py-3 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-300 hover:bg-gray-200 hover-lift" id="cancel-delete-soal-btn"> Batal </button> <button type="button" class="bg-red-500 text-white px-6 py-3 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-300 shadow-lg hover:shadow-xl hover-lift flex items-center gap-2 disabled:bg-gray-300 disabled:cursor-not-allowed" id="confirm-delete-soal-btn"> <span id="delete-soal-btn-text">🗑️ Hapus</span> </button>
+    </div>
+   </div>
+  </div><!-- Analisis Butir Soal Container -->
+  <main id="analisis-container" class="bg-white rounded-3xl shadow-2xl w-full max-w-7xl overflow-hidden" style="display: none;">
+   <header class="gradient-bg text-white p-10">
+    <div class="flex justify-between items-center gap-5 flex-wrap">
+     <div class="flex-1">
+      <h1 class="text-4xl font-bold mb-4">📊 Analisis Butir Soal</h1>
+      <p class="text-lg opacity-95">Analisis Tingkat Kesukaran Soal Berdasarkan Jawaban Siswa</p>
+     </div>
+     <div class="flex gap-3 items-center flex-wrap"><button id="back-to-dashboard-btn-analisis" class="bg-white/15 text-white px-5 py-3 border-2 border-white/25 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-300 flex items-center gap-2 hover:bg-indigo-500/30 hover-lift"> 📊 Dashboard </button> <button id="crud-menu-btn-from-analisis" class="bg-emerald-500/20 text-white px-5 py-3 border-2 border-emerald-400/40 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-300 flex items-center gap-2 hover:bg-emerald-500/30 hover-lift"> 👥 Kelola Siswa </button> <button id="soal-menu-btn-from-analisis" class="bg-amber-500/20 text-white px-5 py-3 border-2 border-amber-400/40 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-300 flex items-center gap-2 hover:bg-amber-500/30 hover-lift"> 📝 Kelola Soal </button> <button id="logout-btn-analisis" class="bg-red-500/20 text-white px-5 py-3 border-2 border-red-400/40 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-300 flex items-center gap-2 hover:bg-red-500/30 hover-lift"> 🚪 Logout </button>
+     </div>
+    </div>
+   </header>
+   <div class="p-10"><!-- Statistik Umum -->
+    <div class="bg-white rounded-2xl p-8 mb-8 shadow-lg border-2 border-purple-100">
+     <h2 class="text-2xl font-semibold text-purple-600 mb-6">📈 Statistik Umum Analisis</h2>
+     <div id="analisis-stats" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"><!-- Stats akan diisi oleh JavaScript -->
+     </div>
+    </div><!-- Filter dan Export -->
+    <div class="bg-white rounded-2xl p-6 mb-8 shadow-lg border-2 border-purple-100">
+     <div class="flex justify-between items-center gap-4 flex-wrap">
+      <div class="flex items-center gap-4 flex-wrap"><span class="text-gray-700 font-semibold">🔍 Filter Kategori:</span> <select id="kategori-filter" class="px-4 py-2 border-2 border-purple-100 rounded-lg text-sm font-medium text-gray-700 bg-white transition-all duration-200 outline-none focus:border-purple-500"> <option value="all">Semua Kategori</option> <option value="mudah">Terlalu Mudah (&gt; 0.70)</option> <option value="sedang">Cukup/Sedang (0.30 - 0.70)</option> <option value="sukar">Terlalu Sukar (&lt; 0.30)</option> </select> <button id="refresh-analisis-btn" class="bg-purple-500 text-white px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-300 shadow-lg hover:shadow-xl hover-lift flex items-center gap-2"> 🔄 Refresh Data </button>
+      </div>
+      <div class="flex items-center gap-4 flex-wrap"><button id="export-analisis-btn" class="bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-300 shadow-lg hover:shadow-xl hover-lift flex items-center gap-2"> 📊 Export Excel </button>
+       <div class="bg-purple-100 text-purple-700 px-4 py-2 rounded-lg font-semibold text-sm" id="analisis-count-badge">
+        Total: 0 Soal
+       </div>
+      </div>
+     </div>
+    </div><!-- Loading dan Error -->
+    <div id="analisis-loading" class="text-center py-20 text-purple-600">
+     <div class="w-16 h-16 border-4 border-gray-200 border-t-purple-600 rounded-full animate-spin mx-auto mb-6"></div>
+     <div class="text-xl font-medium text-purple-600">
+      Menganalisis data jawaban siswa...
+     </div>
+    </div>
+    <div id="analisis-error" class="bg-red-500 text-white p-6 rounded-xl mb-6 text-center font-medium shadow-lg hidden"></div><!-- Tabel Analisis -->
+    <div id="analisis-table-container" class="hidden">
+     <div class="bg-white rounded-2xl shadow-lg border-2 border-purple-100 overflow-hidden">
+      <div class="overflow-x-auto">
+       <table class="w-full border-collapse bg-white">
+        <thead class="gradient-bg text-white">
+         <tr>
+          <th class="px-4 py-5 text-center font-semibold text-sm uppercase tracking-wide w-16">No</th>
+          <th class="px-4 py-5 text-left font-semibold text-sm uppercase tracking-wide w-2/5">Pertanyaan</th>
+          <th class="px-4 py-5 text-center font-semibold text-sm uppercase tracking-wide w-1/12">Kunci</th>
+          <th class="px-4 py-5 text-center font-semibold text-sm uppercase tracking-wide w-1/8">Benar</th>
+          <th class="px-4 py-5 text-center font-semibold text-sm uppercase tracking-wide w-1/8">Total</th>
+          <th class="px-4 py-5 text-center font-semibold text-sm uppercase tracking-wide w-1/8">Indeks</th>
+          <th class="px-4 py-5 text-center font-semibold text-sm uppercase tracking-wide w-1/6">Kategori</th>
+         </tr>
+        </thead>
+        <tbody id="analisis-table-body">
+        </tbody>
+       </table>
+      </div>
+     </div>
+    </div>
+   </div>
+  </main>
+  <script>
+    // Configuration
+    const defaultConfig = {
+      table_title: "📊 Dashboard CBT Spenzaga",
+      primary_color: "#667eea",
+      secondary_color: "#764ba2"
+    };
+
+    let config = { ...defaultConfig };
+
+    // Element SDK Integration
+    async function onConfigChange(newConfig) {
+      config = { ...config, ...newConfig };
+      
+      const titleElement = document.getElementById('table-title');
+      if (titleElement) {
+        titleElement.textContent = config.table_title || defaultConfig.table_title;
+      }
+    }
+
+    function mapToCapabilities(config) {
+      return {
+        recolorables: [
+          {
+            get: () => config.primary_color || defaultConfig.primary_color,
+            set: (value) => {
+              config.primary_color = value;
+              if (window.elementSdk) {
+                window.elementSdk.setConfig({ primary_color: value });
+              }
+            }
+          },
+          {
+            get: () => config.secondary_color || defaultConfig.secondary_color,
+            set: (value) => {
+              config.secondary_color = value;
+              if (window.elementSdk) {
+                window.elementSdk.setConfig({ secondary_color: value });
+              }
+            }
+          }
+        ],
+        borderables: [],
+        fontEditable: undefined,
+        fontSizeable: undefined
+      };
+    }
+
+    function mapToEditPanelValues(config) {
+      return new Map([
+        ["table_title", config.table_title || defaultConfig.table_title]
+      ]);
+    }
+
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange,
+        mapToCapabilities,
+        mapToEditPanelValues
+      });
+    }
+
+    // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDAXMd9cAPtkgjo7R4xEZY18IGOJMxsJ3g",
+            authDomain: "view-count-1287b.firebaseapp.com",
+            databaseURL: "https://view-count-1287b-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "view-count-1287b",
+            storageBucket: "view-count-1287b.firebasestorage.app",
+            messagingSenderId: "264930996114",
+            appId: "1:264930996114:web:6f7b6ed38a73e992529b4b",
+            measurementId: "G-99YYF6TG0P"
+        };
+
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    // Global Variables
+    let currentStudents = [];
+    let allStudents = [];
+    let sortColumn = null;
+    let sortDirection = 'asc';
+    let selectedClass = 'all';
+    let isLoggedIn = false;
+
+    // CRUD Variables
+    let allSiswa = [];
+    let filteredSiswa = [];
+    let currentEditId = null;
+    let currentDeleteId = null;
+    let allSoal = [];
+    let filteredSoal = [];
+    let currentEditSoalId = null;
+    let currentDeleteSoalId = null;
+    let selectedSortKelas = 'all';
+    let selectedSortAbsen = 'all';
+
+    // Analisis Variables
+    let allAnalisisData = [];
+    let filteredAnalisisData = [];
+    let selectedKategoriFilter = 'all';
+
+    // Utility Functions
+    function showError(message) {
+      const errorDiv = document.getElementById('error');
+      errorDiv.textContent = message;
+      errorDiv.style.display = 'block';
+      document.getElementById('loading').style.display = 'none';
+    }
+
+    function showEmptyState() {
+      const tableBody = document.getElementById('table-body');
+      tableBody.innerHTML = `
+        <tr>
+          <td colspan="6">
+            <div class="empty-state">
+              <div class="text-5xl mb-4">📋</div>
+              <div class="text-lg font-medium">Belum ada data siswa</div>
+            </div>
+          </td>
+        </tr>
+      `;
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('table-container').style.display = 'block';
+    }
+
+    function showSuccessMessage(message) {
+      const container = document.getElementById('dashboard-container');
+      const existingMessage = container.querySelector('.success-message');
+      if (existingMessage) {
+        existingMessage.remove();
+      }
+
+      const successDiv = document.createElement('div');
+      successDiv.className = 'success-message';
+      successDiv.textContent = message;
+      
+      const header = container.querySelector('header');
+      if (header && header.nextElementSibling) {
+        header.nextElementSibling.insertBefore(successDiv, header.nextElementSibling.firstChild);
+      }
+
+      setTimeout(() => {
+        if (successDiv && successDiv.parentNode) {
+          successDiv.remove();
+        }
+      }, 4000);
+    }
+
+    // Statistics Functions
+    function calculateStats(students) {
+      const total = students.length;
+      const totalScore = students.reduce((sum, s) => sum + (parseFloat(s.skor) || 0), 0);
+      const avgScore = total > 0 ? (totalScore / total).toFixed(1) : 0;
+      const maxScore = total > 0 ? Math.max(...students.map(s => parseFloat(s.skor) || 0)) : 0;
+      const minScore = total > 0 ? Math.min(...students.map(s => parseFloat(s.skor) || 0)) : 0;
+      
+      return { total, avgScore, maxScore, minScore };
+    }
+
+    function renderStats(stats) {
+      const statsBar = document.getElementById('stats-bar');
+      statsBar.innerHTML = `
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-xl shadow-lg hover-lift transition-all duration-300">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-blue-100 text-sm font-medium mb-1">Total Siswa</div>
+                <div class="text-3xl font-bold">${stats.total}</div>
+              </div>
+              <div class="text-4xl opacity-80">👥</div>
+            </div>
+          </div>
+          <div class="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white p-6 rounded-xl shadow-lg hover-lift transition-all duration-300">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-emerald-100 text-sm font-medium mb-1">Rata-rata Skor</div>
+                <div class="text-3xl font-bold">${stats.avgScore}</div>
+              </div>
+              <div class="text-4xl opacity-80">📈</div>
+            </div>
+          </div>
+          <div class="bg-gradient-to-r from-amber-500 to-amber-600 text-white p-6 rounded-xl shadow-lg hover-lift transition-all duration-300">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-amber-100 text-sm font-medium mb-1">Skor Tertinggi</div>
+                <div class="text-3xl font-bold">${stats.maxScore}</div>
+              </div>
+              <div class="text-4xl opacity-80">🏆</div>
+            </div>
+          </div>
+          <div class="bg-gradient-to-r from-red-500 to-red-600 text-white p-6 rounded-xl shadow-lg hover-lift transition-all duration-300">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-red-100 text-sm font-medium mb-1">Skor Terendah</div>
+                <div class="text-3xl font-bold">${stats.minScore}</div>
+              </div>
+              <div class="text-4xl opacity-80">📊</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Sorting Functions
+    function sortStudents(column) {
+      if (sortColumn === column) {
+        sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+      } else {
+        sortColumn = column;
+        sortDirection = 'asc';
+      }
+
+      const sorted = [...currentStudents].sort((a, b) => {
+        let valA, valB;
+
+        if (column === 'absen') {
+          valA = parseInt(a.absen) || 0;
+          valB = parseInt(b.absen) || 0;
+        } else if (column === 'skor') {
+          valA = parseFloat(a.skor) || 0;
+          valB = parseFloat(b.skor) || 0;
+        } else {
+          valA = (a[column] || '').toString().toLowerCase();
+          valB = (b[column] || '').toString().toLowerCase();
+        }
+
+        if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
+        if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
+        return 0;
+      });
+
+      currentStudents = sorted;
+      updateTableHeaders();
+      renderTableRows(sorted);
+      
+      const stats = calculateStats(sorted);
+      renderStats(stats);
+    }
+
+    function updateTableHeaders() {
+      const headers = document.querySelectorAll('th');
+      headers.forEach(th => {
+        th.classList.remove('sort-asc', 'sort-desc');
+      });
+
+      const columnMap = { 'absen': 0, 'nis': 1, 'nama': 2, 'kelas': 3, 'skor': 4 };
+
+      if (sortColumn && columnMap[sortColumn] !== undefined) {
+        const headerIndex = columnMap[sortColumn];
+        headers[headerIndex].classList.add(sortDirection === 'asc' ? 'sort-asc' : 'sort-desc');
+      }
+    }
+
+    function setupSortHandlers() {
+      const headers = document.querySelectorAll('#table-container th');
+      const columns = ['absen', 'nis', 'nama', 'kelas', 'skor'];
+      
+      headers.forEach((th, index) => {
+        if (index < columns.length) {
+          th.replaceWith(th.cloneNode(true));
+          const newTh = document.querySelectorAll('#table-container th')[index];
+          
+          newTh.addEventListener('click', () => {
+            sortStudents(columns[index]);
+          });
+          
+          newTh.style.cursor = 'pointer';
+        }
+      });
+    }
+
+    // Rendering Functions
+    function renderTableRows(students) {
+      const tableBody = document.getElementById('table-body');
+      tableBody.innerHTML = '';
+
+      students.forEach((student) => {
+        const row = document.createElement('tr');
+        row.className = 'table-hover-row transition-all duration-300 border-b border-gray-100';
+        
+        const skorValue = student.skor !== undefined && student.skor !== null ? student.skor : '-';
+        const skorClass = skorValue !== '-' ? 
+          (parseFloat(skorValue) >= 80 ? 'text-emerald-600 font-bold' : 
+           parseFloat(skorValue) >= 60 ? 'text-amber-600 font-bold' : 
+           'text-red-500 font-bold') : 'text-gray-400';
+
+        row.innerHTML = `
+          <td class="px-6 py-4 text-indigo-600 font-bold text-lg">${student.absen || '-'}</td>
+          <td class="px-6 py-4 text-purple-600 font-bold text-base">${student.nis || '-'}</td>
+          <td class="px-6 py-4 text-gray-800 font-medium">${student.nama || '-'}</td>
+          <td class="px-6 py-4 text-gray-600 font-medium">
+            <span class="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-sm font-semibold">
+              ${student.kelas || '-'}
+            </span>
+          </td>
+          <td class="px-6 py-4 ${skorClass} text-lg font-bold">${skorValue}</td>
+        `;
+        tableBody.appendChild(row);
+      });
+
+      const countBadge = document.getElementById('count-badge');
+      if (countBadge) {
+        countBadge.textContent = `Total: ${students.length} Siswa`;
+      }
+    }
+
+    // Filter Functions
+    function populateClassFilter(students) {
+      const classes = [...new Set(students.map(s => s.kelas))].sort();
+      const classFilter = document.getElementById('class-filter');
+      
+      classFilter.innerHTML = '<option value="all">Semua Kelas</option>';
+      classes.forEach(kelas => {
+        if (kelas && kelas !== '-') {
+          const option = document.createElement('option');
+          option.value = kelas;
+          option.textContent = kelas;
+          classFilter.appendChild(option);
+        }
+      });
+
+      classFilter.addEventListener('change', (e) => {
+        selectedClass = e.target.value;
+        filterAndRenderStudents();
+      });
+    }
+
+    function filterAndRenderStudents() {
+      let filtered = allStudents;
+      
+      if (selectedClass !== 'all') {
+        filtered = allStudents.filter(s => s.kelas === selectedClass);
+      }
+
+      currentStudents = filtered;
+      
+      if (sortColumn) {
+        const tempSortColumn = sortColumn;
+        const tempSortDirection = sortDirection;
+        sortColumn = null;
+        sortDirection = 'asc';
+        sortStudents(tempSortColumn);
+        sortDirection = tempSortDirection;
+        sortStudents(tempSortColumn);
+      } else {
+        renderTableRows(filtered);
+        const stats = calculateStats(filtered);
+        renderStats(stats);
+        updateTableHeaders();
+      }
+    }
+
+    // Excel Export Functions
+    function exportSoalToExcel() {
+      const exportBtn = document.getElementById('export-soal-btn');
+      
+      if (!allSoal || allSoal.length === 0) {
+        showSuccessMessageSoal('❌ Tidak ada data soal untuk diekspor!');
+        return;
+      }
+
+      if (typeof XLSX === 'undefined') {
+        showSuccessMessageSoal('❌ Library Excel tidak tersedia! Silakan refresh halaman.');
+        return;
+      }
+
+      exportBtn.disabled = true;
+      const originalText = exportBtn.innerHTML;
+      exportBtn.innerHTML = '⏳ Memproses...';
+
+      setTimeout(() => {
+        try {
+          // Urutkan soal berdasarkan nomor urut
+          const sortedSoal = [...allSoal].sort((a, b) => (a.nomor_urut || 0) - (b.nomor_urut || 0));
+          
+          const dataToExport = sortedSoal.map((soal, index) => ({
+            'No': soal.nomor_urut || (index + 1),
+            'Pertanyaan': soal.pertanyaan || '',
+            'URL_Gambar': soal.gambar || '',
+            'Opsi_A': soal.opsia || '',
+            'Opsi_B': soal.opsib || '',
+            'Opsi_C': soal.opsic || '',
+            'Opsi_D': soal.opsid || '',
+            'Kunci_Jawaban': soal.kunci || '',
+            'Tipe_Soal': soal.tipe_soal || 'text'
+          }));
+
+          const summaryData = [
+            {},
+            { 'No': '=== INFORMASI EXPORT ===' },
+            { 'No': 'Total Soal', 'Pertanyaan': allSoal.length },
+            { 'No': 'Tanggal Export', 'Pertanyaan': new Date().toLocaleDateString('id-ID') },
+            { 'No': 'Waktu Export', 'Pertanyaan': new Date().toLocaleTimeString('id-ID') },
+            {},
+            { 'No': '=== PANDUAN IMPORT ===' },
+            { 'No': '1. Jangan ubah nama kolom', 'Pertanyaan': 'Kolom harus tetap sama persis' },
+            { 'No': '2. Kunci_Jawaban', 'Pertanyaan': 'Hanya boleh A, B, C, atau D' },
+            { 'No': '3. Tipe_Soal', 'Pertanyaan': 'Hanya boleh "text" atau "image"' },
+            { 'No': '4. URL_Gambar', 'Pertanyaan': 'Boleh kosong jika tidak ada gambar' },
+            { 'No': '5. Semua kolom wajib diisi', 'Pertanyaan': 'Kecuali URL_Gambar yang opsional' }
+          ];
+
+          const allData = [...dataToExport, ...summaryData];
+          const ws = XLSX.utils.json_to_sheet(allData);
+          
+          // Set column widths
+          ws['!cols'] = [
+            { wch: 6 },   // No
+            { wch: 50 },  // Pertanyaan
+            { wch: 30 },  // URL_Gambar
+            { wch: 25 },  // Opsi_A
+            { wch: 25 },  // Opsi_B
+            { wch: 25 },  // Opsi_C
+            { wch: 25 },  // Opsi_D
+            { wch: 8 },   // Kunci_Jawaban
+            { wch: 12 }   // Tipe_Soal
+          ];
+
+          const wb = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(wb, ws, 'Data Soal');
+
+          const now = new Date();
+          const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
+          const timeStr = now.toTimeString().slice(0, 8).replace(/:/g, '');
+          const filename = `Data_Soal_${dateStr}_${timeStr}.xlsx`;
+
+          const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+          const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = filename;
+          link.style.display = 'none';
+          
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          
+          setTimeout(() => window.URL.revokeObjectURL(url), 2000);
+
+          exportBtn.innerHTML = '✅ Berhasil!';
+          showSuccessMessageSoal(`✅ File "${filename}" berhasil diunduh! Total: ${allSoal.length} soal`);
+
+        } catch (error) {
+          console.error('Export error:', error);
+          exportBtn.innerHTML = '❌ Gagal';
+          showSuccessMessageSoal('❌ Gagal mengekspor data soal! ' + error.message);
+        }
+
+        setTimeout(() => {
+          exportBtn.innerHTML = originalText;
+          exportBtn.disabled = false;
+        }, 3000);
+      }, 200);
+    }
+
+    function importSoalFromExcel(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      if (typeof XLSX === 'undefined') {
+        showSuccessMessageSoal('❌ Library Excel tidak tersedia! Silakan refresh halaman.');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const sheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[sheetName];
+          const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+          if (!jsonData || jsonData.length === 0) {
+            showSuccessMessageSoal('❌ File Excel kosong atau tidak valid!');
+            return;
+          }
+
+          // Filter data yang valid (skip baris panduan dan summary)
+          const validData = jsonData.filter(row => {
+            return row.No && 
+                   typeof row.No === 'number' && 
+                   row.Pertanyaan && 
+                   row.Opsi_A && 
+                   row.Opsi_B && 
+                   row.Opsi_C && 
+                   row.Opsi_D && 
+                   row.Kunci_Jawaban && 
+                   row.Tipe_Soal &&
+                   !row.Pertanyaan.toString().includes('===');
+          });
+
+          if (validData.length === 0) {
+            showSuccessMessageSoal('❌ Tidak ada data soal yang valid dalam file Excel!');
+            return;
+          }
+
+          // Validasi format data
+          const errors = [];
+          validData.forEach((row, index) => {
+            const rowNum = index + 1;
+            
+            if (!['A', 'B', 'C', 'D'].includes(row.Kunci_Jawaban)) {
+              errors.push(`Baris ${rowNum}: Kunci jawaban harus A, B, C, atau D`);
+            }
+            
+            if (!['text', 'image'].includes(row.Tipe_Soal)) {
+              errors.push(`Baris ${rowNum}: Tipe soal harus "text" atau "image"`);
+            }
+            
+            if (!row.Pertanyaan.toString().trim()) {
+              errors.push(`Baris ${rowNum}: Pertanyaan tidak boleh kosong`);
+            }
+          });
+
+          if (errors.length > 0) {
+            showSuccessMessageSoal('❌ Format data tidak valid:\n' + errors.slice(0, 5).join('\n') + 
+              (errors.length > 5 ? `\n... dan ${errors.length - 5} error lainnya` : ''));
+            return;
+          }
+
+          // Konfirmasi import
+          if (!confirm(`Akan mengimpor ${validData.length} soal. Data soal yang ada akan ditambahkan (tidak dihapus). Lanjutkan?`)) {
+            return;
+          }
+
+          // Import data ke Firebase
+          let successCount = 0;
+          let errorCount = 0;
+          const totalData = validData.length;
+
+          showSuccessMessageSoal(`⏳ Mengimpor ${totalData} soal...`);
+
+          const importPromises = validData.map(row => {
+            const soalData = {
+              nomor_urut: parseInt(row.No) || 0,
+              pertanyaan: row.Pertanyaan.toString().trim(),
+              gambar: row.URL_Gambar ? row.URL_Gambar.toString().trim() : '',
+              opsia: row.Opsi_A.toString().trim(),
+              opsib: row.Opsi_B.toString().trim(),
+              opsic: row.Opsi_C.toString().trim(),
+              opsid: row.Opsi_D.toString().trim(),
+              kunci: row.Kunci_Jawaban.toString().trim(),
+              tipe_soal: row.Tipe_Soal.toString().trim()
+            };
+
+            return database.ref('/soal').push(soalData)
+              .then(() => {
+                successCount++;
+              })
+              .catch(error => {
+                console.error('Error importing row:', error);
+                errorCount++;
+              });
+          });
+
+          Promise.all(importPromises)
+            .then(() => {
+              if (successCount > 0) {
+                showSuccessMessageSoal(`✅ Import berhasil! ${successCount} soal ditambahkan${errorCount > 0 ? `, ${errorCount} gagal` : ''}`);
+                loadSoalData();
+              } else {
+                showSuccessMessageSoal('❌ Semua data gagal diimpor!');
+              }
+            })
+            .catch(error => {
+              console.error('Import error:', error);
+              showSuccessMessageSoal('❌ Gagal mengimpor data soal!');
+            });
+
+        } catch (error) {
+          console.error('File processing error:', error);
+          showSuccessMessageSoal('❌ Gagal memproses file Excel! Pastikan format file benar.');
+        }
+      };
+
+      reader.readAsArrayBuffer(file);
+      
+      // Reset input file
+      event.target.value = '';
+    }
+
+    function exportToExcel() {
+      const exportBtn = document.getElementById('export-excel-btn');
+      
+      if (!currentStudents || currentStudents.length === 0) {
+        showSuccessMessage('❌ Tidak ada data siswa untuk diekspor!');
+        return;
+      }
+
+      if (typeof XLSX === 'undefined') {
+        showSuccessMessage('❌ Library Excel tidak tersedia! Silakan refresh halaman.');
+        return;
+      }
+
+      exportBtn.disabled = true;
+      const originalText = exportBtn.innerHTML;
+      exportBtn.innerHTML = '⏳ Memproses...';
+
+      setTimeout(() => {
+        try {
+          const dataToExport = currentStudents.map((student, index) => ({
+            'No': index + 1,
+            'Absen': student.absen?.toString() || '-',
+            'NIS': student.nis?.toString() || '-',
+            'Nama_Lengkap': student.nama?.toString() || '-',
+            'Kelas': student.kelas?.toString() || '-',
+            'Skor_Persen': student.skor !== undefined && student.skor !== null ? parseFloat(student.skor) : '-'
+          }));
+
+          const stats = calculateStats(currentStudents);
+          const summaryData = [
+            {},
+            { 'No': '=== RINGKASAN STATISTIK ===' },
+            { 'No': 'Total Siswa', 'Absen': stats.total },
+            { 'No': 'Rata-rata Skor', 'Absen': stats.avgScore },
+            { 'No': 'Skor Tertinggi', 'Absen': stats.maxScore },
+            { 'No': 'Skor Terendah', 'Absen': stats.minScore },
+            { 'No': 'Filter Kelas', 'Absen': selectedClass === 'all' ? 'Semua Kelas' : selectedClass },
+            {},
+            { 'No': 'Tanggal Export', 'Absen': new Date().toLocaleDateString('id-ID') },
+            { 'No': 'Waktu Export', 'Absen': new Date().toLocaleTimeString('id-ID') }
+          ];
+
+          const allData = [...dataToExport, ...summaryData];
+          const ws = XLSX.utils.json_to_sheet(allData);
+          
+          ws['!cols'] = [
+            { wch: 6 }, { wch: 10 }, { wch: 18 }, { wch: 35 }, { wch: 15 }, { wch: 12 }
+          ];
+
+          const wb = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(wb, ws, 'Rekapitulasi Skor');
+
+          const now = new Date();
+          const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
+          const timeStr = now.toTimeString().slice(0, 8).replace(/:/g, '');
+          const filterText = selectedClass === 'all' ? 'Semua_Kelas' : selectedClass.replace(/\s+/g, '_');
+          const filename = `Rekapitulasi_Skor_${filterText}_${dateStr}_${timeStr}.xlsx`;
+
+          const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+          const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = filename;
+          link.style.display = 'none';
+          
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          
+          setTimeout(() => window.URL.revokeObjectURL(url), 2000);
+
+          exportBtn.innerHTML = '✅ Berhasil!';
+          showSuccessMessage(`✅ File "${filename}" berhasil diunduh! Total: ${stats.total} siswa`);
+
+        } catch (error) {
+          console.error('Export error:', error);
+          exportBtn.innerHTML = '❌ Gagal';
+          showSuccessMessage('❌ Gagal mengekspor data Excel! ' + error.message);
+        }
+
+        setTimeout(() => {
+          exportBtn.innerHTML = originalText;
+          exportBtn.disabled = false;
+        }, 3000);
+      }, 200);
+    }
+
+    function exportSiswaToExcel() {
+      const exportBtn = document.getElementById('export-siswa-btn');
+      
+      if (!filteredSiswa || filteredSiswa.length === 0) {
+        showSuccessMessageCrud('❌ Tidak ada data siswa untuk diekspor!');
+        return;
+      }
+
+      if (typeof XLSX === 'undefined') {
+        showSuccessMessageCrud('❌ Library Excel tidak tersedia! Silakan refresh halaman.');
+        return;
+      }
+
+      exportBtn.disabled = true;
+      const originalText = exportBtn.innerHTML;
+      exportBtn.innerHTML = '⏳ Memproses...';
+
+      setTimeout(() => {
+        try {
+          // Urutkan siswa berdasarkan absen
+          const sortedSiswa = [...filteredSiswa].sort((a, b) => (parseInt(a.absen) || 0) - (parseInt(b.absen) || 0));
+          
+          const dataToExport = sortedSiswa.map((siswa, index) => ({
+            'No': index + 1,
+            'Absen': parseInt(siswa.absen) || '',
+            'NIS': siswa.nis || '',
+            'Nama_Lengkap': siswa.nama || '',
+            'Kelas': siswa.kelas || ''
+          }));
+
+          const summaryData = [
+            {},
+            { 'No': '=== INFORMASI EXPORT ===' },
+            { 'No': 'Total Siswa', 'Absen': filteredSiswa.length },
+            { 'No': 'Filter Kelas', 'Absen': selectedSortKelas === 'all' ? 'Semua Kelas' : selectedSortKelas },
+            { 'No': 'Filter Absen', 'Absen': selectedSortAbsen === 'all' ? 'Semua Absen' : `Absen ${selectedSortAbsen}` },
+            { 'No': 'Tanggal Export', 'Absen': new Date().toLocaleDateString('id-ID') },
+            { 'No': 'Waktu Export', 'Absen': new Date().toLocaleTimeString('id-ID') },
+            {},
+            { 'No': '=== PANDUAN IMPORT ===' },
+            { 'No': '1. Jangan ubah nama kolom', 'Absen': 'Kolom harus tetap sama persis' },
+            { 'No': '2. Absen harus angka', 'Absen': 'Nomor absen harus berupa angka positif' },
+            { 'No': '3. NIS harus unik', 'Absen': 'Tidak boleh ada NIS yang sama' },
+            { 'No': '4. Semua kolom wajib diisi', 'Absen': 'Absen, NIS, Nama, dan Kelas harus diisi' },
+            { 'No': '5. Format Kelas', 'Absen': 'Contoh: XII IPA 1, XI IPS 2, X MIPA 3' }
+          ];
+
+          const allData = [...dataToExport, ...summaryData];
+          const ws = XLSX.utils.json_to_sheet(allData);
+          
+          // Set column widths
+          ws['!cols'] = [
+            { wch: 6 },   // No
+            { wch: 10 },  // Absen
+            { wch: 18 },  // NIS
+            { wch: 35 },  // Nama_Lengkap
+            { wch: 15 }   // Kelas
+          ];
+
+          const wb = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(wb, ws, 'Data Siswa');
+
+          const now = new Date();
+          const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
+          const timeStr = now.toTimeString().slice(0, 8).replace(/:/g, '');
+          const filterText = selectedSortKelas === 'all' ? 'Semua_Kelas' : selectedSortKelas.replace(/\s+/g, '_');
+          const filename = `Data_Siswa_${filterText}_${dateStr}_${timeStr}.xlsx`;
+
+          const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+          const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = filename;
+          link.style.display = 'none';
+          
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          
+          setTimeout(() => window.URL.revokeObjectURL(url), 2000);
+
+          exportBtn.innerHTML = '✅ Berhasil!';
+          showSuccessMessageCrud(`✅ File "${filename}" berhasil diunduh! Total: ${filteredSiswa.length} siswa`);
+
+        } catch (error) {
+          console.error('Export error:', error);
+          exportBtn.innerHTML = '❌ Gagal';
+          showSuccessMessageCrud('❌ Gagal mengekspor data siswa! ' + error.message);
+        }
+
+        setTimeout(() => {
+          exportBtn.innerHTML = originalText;
+          exportBtn.disabled = false;
+        }, 3000);
+      }, 200);
+    }
+
+    function importSiswaFromExcel(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      if (typeof XLSX === 'undefined') {
+        showSuccessMessageCrud('❌ Library Excel tidak tersedia! Silakan refresh halaman.');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const sheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[sheetName];
+          const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+          if (!jsonData || jsonData.length === 0) {
+            showSuccessMessageCrud('❌ File Excel kosong atau tidak valid!');
+            return;
+          }
+
+          // Filter data yang valid (skip baris panduan dan summary)
+          const validData = jsonData.filter(row => {
+            return row.No && 
+                   typeof row.No === 'number' && 
+                   row.Absen && 
+                   row.NIS && 
+                   row.Nama_Lengkap && 
+                   row.Kelas &&
+                   !row.Nama_Lengkap.toString().includes('===');
+          });
+
+          if (validData.length === 0) {
+            showSuccessMessageCrud('❌ Tidak ada data siswa yang valid dalam file Excel!');
+            return;
+          }
+
+          // Validasi format data
+          const errors = [];
+          const existingNIS = allSiswa.map(s => s.nis?.toString().toLowerCase());
+          const newNISList = [];
+
+          validData.forEach((row, index) => {
+            const rowNum = index + 1;
+            
+            // Validasi absen
+            if (isNaN(row.Absen) || parseInt(row.Absen) <= 0) {
+              errors.push(`Baris ${rowNum}: Absen harus berupa angka positif`);
+            }
+            
+            // Validasi NIS unik
+            const nisLower = row.NIS.toString().toLowerCase();
+            if (existingNIS.includes(nisLower)) {
+              errors.push(`Baris ${rowNum}: NIS "${row.NIS}" sudah ada dalam database`);
+            }
+            if (newNISList.includes(nisLower)) {
+              errors.push(`Baris ${rowNum}: NIS "${row.NIS}" duplikat dalam file import`);
+            }
+            newNISList.push(nisLower);
+            
+            // Validasi field kosong
+            if (!row.Nama_Lengkap.toString().trim()) {
+              errors.push(`Baris ${rowNum}: Nama lengkap tidak boleh kosong`);
+            }
+            if (!row.Kelas.toString().trim()) {
+              errors.push(`Baris ${rowNum}: Kelas tidak boleh kosong`);
+            }
+          });
+
+          if (errors.length > 0) {
+            showSuccessMessageCrud('❌ Format data tidak valid:\n' + errors.slice(0, 5).join('\n') + 
+              (errors.length > 5 ? `\n... dan ${errors.length - 5} error lainnya` : ''));
+            return;
+          }
+
+          // Konfirmasi import
+          if (!confirm(`Akan mengimpor ${validData.length} siswa. Data siswa yang ada akan ditambahkan (tidak dihapus). Lanjutkan?`)) {
+            return;
+          }
+
+          // Import data ke Firebase
+          let successCount = 0;
+          let errorCount = 0;
+          const totalData = validData.length;
+
+          showSuccessMessageCrud(`⏳ Mengimpor ${totalData} siswa...`);
+
+          const importPromises = validData.map(row => {
+            const siswaData = {
+              absen: parseInt(row.Absen),
+              nis: row.NIS.toString().trim(),
+              nama: row.Nama_Lengkap.toString().trim(),
+              kelas: row.Kelas.toString().trim()
+            };
+
+            return database.ref('/siswa').push(siswaData)
+              .then(() => {
+                successCount++;
+              })
+              .catch(error => {
+                console.error('Error importing row:', error);
+                errorCount++;
+              });
+          });
+
+          Promise.all(importPromises)
+            .then(() => {
+              if (successCount > 0) {
+                showSuccessMessageCrud(`✅ Import berhasil! ${successCount} siswa ditambahkan${errorCount > 0 ? `, ${errorCount} gagal` : ''}`);
+                loadSiswaData();
+              } else {
+                showSuccessMessageCrud('❌ Semua data gagal diimpor!');
+              }
+            })
+            .catch(error => {
+              console.error('Import error:', error);
+              showSuccessMessageCrud('❌ Gagal mengimpor data siswa!');
+            });
+
+        } catch (error) {
+          console.error('File processing error:', error);
+          showSuccessMessageCrud('❌ Gagal memproses file Excel! Pastikan format file benar.');
+        }
+      };
+
+      reader.readAsArrayBuffer(file);
+      
+      // Reset input file
+      event.target.value = '';
+    }
+
+    // Data Loading Functions
+    function loadStudentData() {
+      database.ref('/detail_jawaban').once('value')
+        .then(snapshot => {
+          const data = snapshot.val();
+          
+          if (!data) {
+            showEmptyState();
+            return;
+          }
+
+          const students = [];
+          
+          Object.keys(data).forEach(key => {
+            const item = data[key];
+            
+            if (typeof item === 'object' && item !== null) {
+              students.push({
+                absen: item.absen || item.no_absen || item.id || key,
+                nis: item.nis || item.nomor_induk || item.student_id || '-',
+                nama: item.nama || item.name || item.student_name || '-',
+                kelas: item.kelas || item.class || item.grade || '-',
+                skor: item.skor_persen !== undefined ? item.skor_persen : (item.skor !== undefined ? item.skor : 0)
+              });
+            }
+          });
+
+          if (students.length === 0) {
+            showEmptyState();
+          } else {
+            students.sort((a, b) => {
+              const absenA = parseInt(a.absen) || 0;
+              const absenB = parseInt(b.absen) || 0;
+              return absenA - absenB;
+            });
+            
+            renderTable(students);
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching data:', error);
+          showError('❌ Gagal memuat data dari Firebase. Silakan periksa koneksi dan coba lagi.');
+        });
+    }
+
+    function renderTable(students) {
+      allStudents = students;
+      currentStudents = students;
+      
+      populateClassFilter(students);
+      renderTableRows(students);
+
+      const stats = calculateStats(students);
+      renderStats(stats);
+
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('table-container').style.display = 'block';
+      
+      setupSortHandlers();
+      
+      const exportBtn = document.getElementById('export-excel-btn');
+      exportBtn.addEventListener('click', exportToExcel);
+      
+      onConfigChange(config);
+    }
+
+    // Navigation Functions
+    function hideAllContainers() {
+      document.getElementById('login-container').style.display = 'none';
+      document.getElementById('dashboard-container').style.display = 'none';
+      document.getElementById('crud-container').style.display = 'none';
+      document.getElementById('soal-container').style.display = 'none';
+      document.getElementById('analisis-container').style.display = 'none';
+      
+      // Hide modals
+      document.getElementById('edit-modal').style.display = 'none';
+      document.getElementById('delete-modal').style.display = 'none';
+      document.getElementById('edit-soal-modal').style.display = 'none';
+      document.getElementById('delete-soal-modal').style.display = 'none';
+      
+      // Clear success messages
+      const successMessages = document.querySelectorAll('.success-message');
+      successMessages.forEach(msg => msg.remove());
+    }
+
+    function showLogin() {
+      hideAllContainers();
+      document.getElementById('login-container').style.display = 'flex';
+    }
+
+    function showDashboard() {
+      hideAllContainers();
+      document.getElementById('dashboard-container').style.display = 'block';
+      loadStudentData();
+    }
+
+    function showCrudMenu() {
+      hideAllContainers();
+      document.getElementById('crud-container').style.display = 'block';
+      loadSiswaData();
+    }
+
+    function showSoalMenu() {
+      hideAllContainers();
+      document.getElementById('soal-container').style.display = 'block';
+      loadSoalData();
+    }
+
+    function showAnalisisMenu() {
+      hideAllContainers();
+      document.getElementById('analisis-container').style.display = 'block';
+      loadAnalisisData();
+    }
+
+    function showLoginError(message) {
+      const errorDiv = document.getElementById('login-error');
+      const errorText = document.getElementById('error-text');
+      errorText.textContent = message;
+      errorDiv.style.display = 'block';
+      setTimeout(() => {
+        errorDiv.style.display = 'none';
+      }, 5000);
+    }
+
+    function setupPasswordToggle() {
+      const toggleBtn = document.getElementById('toggle-password');
+      const passwordInput = document.getElementById('password');
+      const eyeIcon = document.getElementById('eye-icon');
+      
+      if (toggleBtn && passwordInput && eyeIcon) {
+        toggleBtn.addEventListener('click', () => {
+          const isPassword = passwordInput.type === 'password';
+          passwordInput.type = isPassword ? 'text' : 'password';
+          
+          if (isPassword) {
+            // Show password - eye with slash
+            eyeIcon.innerHTML = `
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"></path>
+            `;
+          } else {
+            // Hide password - normal eye
+            eyeIcon.innerHTML = `
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+            `;
+          }
+        });
+      }
+    }
+
+    function handleLogin(event) {
+      event.preventDefault();
+      
+      const loginBtn = document.getElementById('login-btn');
+      const loginBtnText = document.getElementById('login-btn-text');
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
+
+      if (!username || !password) {
+        showLoginError('❌ Username dan password harus diisi!');
+        return;
+      }
+
+      loginBtn.disabled = true;
+      loginBtnText.textContent = '⏳ Memverifikasi...';
+
+      database.ref('/admin').once('value')
+        .then(snapshot => {
+          const adminData = snapshot.val();
+          
+          if (!adminData) {
+            showLoginError('❌ Data admin tidak ditemukan!');
+            return;
+          }
+
+          let loginSuccess = false;
+
+          Object.keys(adminData).forEach(key => {
+            const admin = adminData[key];
+            if (typeof admin === 'object' && admin !== null) {
+              const adminUsername = admin.username || admin.user || key;
+              const adminPassword = admin.password || admin.pass;
+              
+              if (adminUsername === username && adminPassword === password) {
+                loginSuccess = true;
+              }
+            }
+          });
+
+          if (loginSuccess) {
+            isLoggedIn = true;
+            sessionStorage.setItem('adminLoggedIn', 'true');
+            showDashboard();
+          } else {
+            showLoginError('❌ Username atau password salah!');
+          }
+        })
+        .catch(error => {
+          console.error('Login error:', error);
+          showLoginError('❌ Gagal memverifikasi login!');
+        })
+        .finally(() => {
+          loginBtn.disabled = false;
+          loginBtnText.textContent = '🚀 Masuk';
+        });
+    }
+
+    function handleLogout() {
+      isLoggedIn = false;
+      sessionStorage.removeItem('adminLoggedIn');
+      
+      document.getElementById('username').value = '';
+      document.getElementById('password').value = '';
+      document.getElementById('login-error').style.display = 'none';
+      
+      showLogin();
+    }
+
+    // CRUD Siswa Functions
+    function showCrudError(message) {
+      const errorDiv = document.getElementById('crud-error');
+      errorDiv.textContent = message;
+      errorDiv.style.display = 'block';
+      document.getElementById('crud-loading').style.display = 'none';
+    }
+
+    function showSuccessMessageCrud(message) {
+      const container = document.getElementById('crud-container');
+      const existingMessage = container.querySelector('.success-message');
+      if (existingMessage) {
+        existingMessage.remove();
+      }
+
+      const successDiv = document.createElement('div');
+      successDiv.className = 'success-message';
+      successDiv.textContent = message;
+      
+      const header = container.querySelector('header');
+      if (header && header.nextElementSibling) {
+        header.nextElementSibling.insertBefore(successDiv, header.nextElementSibling.firstChild);
+      }
+
+      setTimeout(() => {
+        if (successDiv && successDiv.parentNode) {
+          successDiv.remove();
+        }
+      }, 4000);
+    }
+
+    function loadSiswaData() {
+      document.getElementById('crud-loading').style.display = 'block';
+      document.getElementById('siswa-table-container').style.display = 'none';
+      document.getElementById('crud-error').style.display = 'none';
+
+      database.ref('/siswa').once('value')
+        .then(snapshot => {
+          const data = snapshot.val();
+          
+          if (!data) {
+            allSiswa = [];
+            filteredSiswa = [];
+            populateSortDropdowns([]);
+            renderSiswaTable([]);
+            return;
+          }
+
+          const siswaList = [];
+          Object.keys(data).forEach(key => {
+            const siswa = data[key];
+            if (typeof siswa === 'object' && siswa !== null) {
+              siswaList.push({
+                id: key,
+                absen: siswa.absen || '',
+                nis: siswa.nis || '',
+                nama: siswa.nama || '',
+                kelas: siswa.kelas || ''
+              });
+            }
+          });
+
+          siswaList.sort((a, b) => {
+            const absenA = parseInt(a.absen) || 0;
+            const absenB = parseInt(b.absen) || 0;
+            return absenA - absenB;
+          });
+
+          allSiswa = siswaList;
+          filteredSiswa = siswaList;
+          populateSortDropdowns(siswaList);
+          renderSiswaTable(siswaList);
+        })
+        .catch(error => {
+          console.error('Error loading siswa data:', error);
+          showCrudError('❌ Gagal memuat data siswa dari Firebase!');
+        });
+    }
+
+    function populateSortDropdowns(siswaList) {
+      // Populate Kelas dropdown
+      const kelasSet = new Set();
+      const absenSet = new Set();
+      
+      siswaList.forEach(siswa => {
+        if (siswa.kelas && siswa.kelas.trim()) {
+          kelasSet.add(siswa.kelas.trim());
+        }
+        if (siswa.absen && siswa.absen.toString().trim()) {
+          absenSet.add(parseInt(siswa.absen) || 0);
+        }
+      });
+
+      const sortedKelas = Array.from(kelasSet).sort();
+      const sortedAbsen = Array.from(absenSet).sort((a, b) => a - b);
+
+      // Update Kelas dropdown
+      const kelasSelect = document.getElementById('sort-kelas-select');
+      kelasSelect.innerHTML = '<option value="all">Semua Kelas</option>';
+      sortedKelas.forEach(kelas => {
+        const option = document.createElement('option');
+        option.value = kelas;
+        option.textContent = kelas;
+        kelasSelect.appendChild(option);
+      });
+
+      // Update Absen dropdown
+      const absenSelect = document.getElementById('sort-absen-select');
+      absenSelect.innerHTML = '<option value="all">Semua Absen</option>';
+      sortedAbsen.forEach(absen => {
+        const option = document.createElement('option');
+        option.value = absen.toString();
+        option.textContent = `Absen ${absen}`;
+        absenSelect.appendChild(option);
+      });
+
+      // Set current selections
+      kelasSelect.value = selectedSortKelas;
+      absenSelect.value = selectedSortAbsen;
+    }
+
+    function applySortFilters() {
+      let filtered = [...allSiswa];
+      
+      // Filter by kelas
+      if (selectedSortKelas !== 'all') {
+        filtered = filtered.filter(siswa => siswa.kelas === selectedSortKelas);
+      }
+      
+      // Filter by absen
+      if (selectedSortAbsen !== 'all') {
+        filtered = filtered.filter(siswa => parseInt(siswa.absen) === parseInt(selectedSortAbsen));
+      }
+      
+      // Apply search filter if there's a search term
+      const searchTerm = document.getElementById('search-input').value.toLowerCase().trim();
+      if (searchTerm) {
+        filtered = filtered.filter(siswa => 
+          (siswa.nama || '').toLowerCase().includes(searchTerm) ||
+          (siswa.nis || '').toLowerCase().includes(searchTerm) ||
+          (siswa.kelas || '').toLowerCase().includes(searchTerm) ||
+          (siswa.absen || '').toString().toLowerCase().includes(searchTerm)
+        );
+      }
+      
+      filteredSiswa = filtered;
+      renderSiswaTable(filtered);
+      
+      // Update count badge
+      const countBadge = document.getElementById('siswa-count-badge');
+      if (countBadge) {
+        countBadge.textContent = `Total: ${filtered.length} Siswa`;
+      }
+    }
+
+    function resetSortFilters() {
+      selectedSortKelas = 'all';
+      selectedSortAbsen = 'all';
+      
+      document.getElementById('sort-kelas-select').value = 'all';
+      document.getElementById('sort-absen-select').value = 'all';
+      document.getElementById('search-input').value = '';
+      
+      applySortFilters();
+    }
+
+    function renderSiswaTable(siswaList) {
+      const tableBody = document.getElementById('siswa-table-body');
+      tableBody.innerHTML = '';
+
+      if (siswaList.length === 0) {
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="5" class="px-6 py-12">
+              <div class="empty-state">
+                <div class="text-5xl mb-4">👥</div>
+                <div class="text-lg font-medium">Belum ada data siswa</div>
+              </div>
+            </td>
+          </tr>
+        `;
+      } else {
+        siswaList.forEach((siswa) => {
+          const row = document.createElement('tr');
+          row.className = 'table-hover-row transition-all duration-300 border-b border-gray-100';
+          
+          row.innerHTML = `
+            <td class="px-4 py-4 text-indigo-600 font-bold text-lg">${siswa.absen || '-'}</td>
+            <td class="px-4 py-4 text-gray-700 font-medium">${siswa.nis || '-'}</td>
+            <td class="px-4 py-4 text-gray-800 font-medium">${siswa.nama || '-'}</td>
+            <td class="px-4 py-4 text-gray-600 font-medium">
+              <span class="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-sm font-semibold">
+                ${siswa.kelas || '-'}
+              </span>
+            </td>
+            <td class="px-4 py-4">
+              <div class="flex gap-2 justify-center">
+                <button class="bg-indigo-100 text-indigo-700 px-3 py-2 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-300 hover:bg-indigo-200 hover-lift flex items-center gap-1" onclick="openEditModal('${siswa.id}')">
+                  ✏️ Edit
+                </button>
+                <button class="bg-red-100 text-red-700 px-3 py-2 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-300 hover:bg-red-200 hover-lift flex items-center gap-1" onclick="openDeleteModal('${siswa.id}')">
+                  🗑️ Hapus
+                </button>
+              </div>
+            </td>
+          `;
+          tableBody.appendChild(row);
+        });
+      }
+
+      document.getElementById('crud-loading').style.display = 'none';
+      document.getElementById('siswa-table-container').style.display = 'block';
+    }
+
+    function handleAddStudent(event) {
+      event.preventDefault();
+      
+      const addBtn = document.querySelector('#add-student-form button[type="submit"]');
+      const addBtnText = document.getElementById('add-btn-text');
+      
+      const formData = new FormData(event.target);
+      const studentData = {
+        absen: formData.get('absen')?.toString().trim() || '',
+        nis: formData.get('nis')?.toString().trim() || '',
+        nama: formData.get('nama')?.toString().trim() || '',
+        kelas: formData.get('kelas')?.toString().trim() || ''
+      };
+
+      if (!studentData.absen || !studentData.nis || !studentData.nama || !studentData.kelas) {
+        showSuccessMessageCrud('❌ Semua field harus diisi!');
+        return;
+      }
+
+      if (isNaN(studentData.absen) || parseInt(studentData.absen) <= 0) {
+        showSuccessMessageCrud('❌ Nomor absen harus berupa angka positif!');
+        return;
+      }
+
+      const duplicateNis = allSiswa.find(s => s.nis?.toString().toLowerCase() === studentData.nis.toLowerCase());
+      
+      if (duplicateNis) {
+        showSuccessMessageCrud('❌ NIS sudah digunakan!');
+        return;
+      }
+
+      addBtn.disabled = true;
+      addBtnText.textContent = '⏳ Menambahkan...';
+
+      const finalData = {
+        ...studentData,
+        absen: parseInt(studentData.absen)
+      };
+
+      database.ref('/siswa').push(finalData)
+        .then(() => {
+          showSuccessMessageCrud('✅ Data siswa berhasil ditambahkan!');
+          event.target.reset();
+          loadSiswaData();
+        })
+        .catch(error => {
+          console.error('Error adding student:', error);
+          showSuccessMessageCrud('❌ Gagal menambahkan data siswa!');
+        })
+        .finally(() => {
+          addBtn.disabled = false;
+          addBtnText.textContent = '➕ Tambah Siswa';
+        });
+    }
+
+    function openEditModal(studentId) {
+      const student = allSiswa.find(s => s.id === studentId);
+      if (!student) return;
+
+      currentEditId = studentId;
+      
+      document.getElementById('edit-student-id').value = studentId;
+      document.getElementById('edit-absen').value = student.absen;
+      document.getElementById('edit-nis').value = student.nis;
+      document.getElementById('edit-nama').value = student.nama;
+      document.getElementById('edit-kelas').value = student.kelas;
+      
+      document.getElementById('edit-modal').style.display = 'flex';
+    }
+
+    function closeEditModal() {
+      document.getElementById('edit-modal').style.display = 'none';
+      currentEditId = null;
+    }
+
+    function handleEditStudent(event) {
+      event.preventDefault();
+      
+      if (!currentEditId) return;
+
+      const editBtn = document.querySelector('#edit-student-form button[type="submit"]');
+      const editBtnText = document.getElementById('edit-btn-text');
+      
+      const formData = new FormData(event.target);
+      const studentData = {
+        absen: formData.get('absen')?.toString().trim() || '',
+        nis: formData.get('nis')?.toString().trim() || '',
+        nama: formData.get('nama')?.toString().trim() || '',
+        kelas: formData.get('kelas')?.toString().trim() || ''
+      };
+
+      if (!studentData.absen || !studentData.nis || !studentData.nama || !studentData.kelas) {
+        showSuccessMessageCrud('❌ Semua field harus diisi!');
+        return;
+      }
+
+      if (isNaN(studentData.absen) || parseInt(studentData.absen) <= 0) {
+        showSuccessMessageCrud('❌ Nomor absen harus berupa angka positif!');
+        return;
+      }
+
+      const duplicateNis = allSiswa.find(s => s.nis?.toString().toLowerCase() === studentData.nis.toLowerCase() && s.id !== currentEditId);
+      
+      if (duplicateNis) {
+        showSuccessMessageCrud('❌ NIS sudah digunakan!');
+        return;
+      }
+
+      editBtn.disabled = true;
+      editBtnText.textContent = '⏳ Menyimpan...';
+
+      const finalData = {
+        ...studentData,
+        absen: parseInt(studentData.absen)
+      };
+
+      database.ref(`/siswa/${currentEditId}`).update(finalData)
+        .then(() => {
+          showSuccessMessageCrud('✅ Data siswa berhasil diperbarui!');
+          closeEditModal();
+          loadSiswaData();
+        })
+        .catch(error => {
+          console.error('Error updating student:', error);
+          showSuccessMessageCrud('❌ Gagal memperbarui data siswa!');
+        })
+        .finally(() => {
+          editBtn.disabled = false;
+          editBtnText.textContent = '💾 Simpan Perubahan';
+        });
+    }
+
+    function openDeleteModal(studentId) {
+      const student = allSiswa.find(s => s.id === studentId);
+      if (!student) return;
+
+      currentDeleteId = studentId;
+      
+      document.getElementById('delete-student-name').textContent = student.nama;
+      document.getElementById('delete-student-nis').textContent = student.nis;
+      document.getElementById('delete-student-kelas').textContent = student.kelas;
+      
+      document.getElementById('delete-modal').style.display = 'flex';
+    }
+
+    function closeDeleteModal() {
+      document.getElementById('delete-modal').style.display = 'none';
+      currentDeleteId = null;
+    }
+
+    function handleDeleteStudent() {
+      if (!currentDeleteId) return;
+
+      const deleteBtn = document.getElementById('confirm-delete-btn');
+      const deleteBtnText = document.getElementById('delete-btn-text');
+
+      deleteBtn.disabled = true;
+      deleteBtnText.textContent = '⏳ Menghapus...';
+
+      database.ref(`/siswa/${currentDeleteId}`).remove()
+        .then(() => {
+          showSuccessMessageCrud('✅ Data siswa berhasil dihapus!');
+          closeDeleteModal();
+          loadSiswaData();
+        })
+        .catch(error => {
+          console.error('Error deleting student:', error);
+          showSuccessMessageCrud('❌ Gagal menghapus data siswa!');
+        })
+        .finally(() => {
+          deleteBtn.disabled = false;
+          deleteBtnText.textContent = '🗑️ Hapus';
+        });
+    }
+
+    function handleSearch() {
+      applySortFilters();
+    }
+
+    // CRUD Soal Functions
+    function showSoalError(message) {
+      const errorDiv = document.getElementById('soal-error');
+      errorDiv.textContent = message;
+      errorDiv.style.display = 'block';
+      document.getElementById('soal-loading').style.display = 'none';
+    }
+
+    function showSuccessMessageSoal(message) {
+      const container = document.getElementById('soal-container');
+      const existingMessage = container.querySelector('.success-message');
+      if (existingMessage) {
+        existingMessage.remove();
+      }
+
+      const successDiv = document.createElement('div');
+      successDiv.className = 'success-message';
+      successDiv.textContent = message;
+      
+      const header = container.querySelector('header');
+      if (header && header.nextElementSibling) {
+        header.nextElementSibling.insertBefore(successDiv, header.nextElementSibling.firstChild);
+      }
+
+      setTimeout(() => {
+        if (successDiv && successDiv.parentNode) {
+          successDiv.remove();
+        }
+      }, 4000);
+    }
+
+    function loadSoalData() {
+      document.getElementById('soal-loading').style.display = 'block';
+      document.getElementById('soal-table-container').style.display = 'none';
+      document.getElementById('soal-error').style.display = 'none';
+
+      database.ref('/soal').once('value')
+        .then(snapshot => {
+          const data = snapshot.val();
+          
+          if (!data) {
+            allSoal = [];
+            filteredSoal = [];
+            renderSoalTable([]);
+            return;
+          }
+
+          const soalList = [];
+          Object.keys(data).forEach(key => {
+            const soal = data[key];
+            if (typeof soal === 'object' && soal !== null) {
+              // Extract nomor dari key jika dalam format soal_X
+              let extractedNumber = 0;
+              if (key.startsWith('soal_')) {
+                const numberPart = key.replace('soal_', '');
+                extractedNumber = parseInt(numberPart) || 0;
+              }
+              
+              soalList.push({
+                id: key,
+                nomor_urut: soal.nomor_urut || extractedNumber,
+                pertanyaan: soal.pertanyaan || '',
+                gambar: soal.gambar || '',
+                opsia: soal.opsia || '',
+                opsib: soal.opsib || '',
+                opsic: soal.opsic || '',
+                opsid: soal.opsid || '',
+                kunci: soal.kunci || '',
+                tipe_soal: soal.tipe_soal || 'text'
+              });
+            }
+          });
+
+          // Urutkan berdasarkan nomor urut
+          soalList.sort((a, b) => (a.nomor_urut || 0) - (b.nomor_urut || 0));
+
+          allSoal = soalList;
+          filteredSoal = soalList;
+          renderSoalTable(soalList);
+        })
+        .catch(error => {
+          console.error('Error loading soal data:', error);
+          showSoalError('❌ Gagal memuat data soal dari Firebase!');
+        });
+    }
+
+    function renderSoalTable(soalList) {
+      const tableBody = document.getElementById('soal-table-body');
+      tableBody.innerHTML = '';
+
+      if (soalList.length === 0) {
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="6" class="px-6 py-12">
+              <div class="empty-state">
+                <div class="text-5xl mb-4">📝</div>
+                <div class="text-lg font-medium">Belum ada data soal</div>
+              </div>
+            </td>
+          </tr>
+        `;
+      } else {
+        soalList.forEach((soal, index) => {
+          const row = document.createElement('tr');
+          row.className = 'table-hover-row transition-all duration-300 border-b border-gray-100';
+          
+          const pertanyaanText = soal.pertanyaan.length > 120 ? 
+            soal.pertanyaan.substring(0, 120) + '...' : soal.pertanyaan;
+          
+          const gambarDisplay = soal.gambar ? 
+            `<a href="${soal.gambar}" target="_blank" class="text-indigo-600 hover:text-indigo-800 font-medium transition-colors duration-200 flex items-center gap-1 justify-center">
+              <span>🖼️</span> Lihat
+            </a>` : 
+            '<span class="text-gray-400">-</span>';
+
+          const tipeDisplay = soal.tipe_soal === 'image' ? 
+            '<span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm font-semibold">🖼️ Image</span>' :
+            '<span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-semibold">📝 Text</span>';
+
+          const kunciColor = soal.kunci === 'A' ? 'text-red-600' :
+                            soal.kunci === 'B' ? 'text-blue-600' :
+                            soal.kunci === 'C' ? 'text-green-600' :
+                            soal.kunci === 'D' ? 'text-purple-600' : 'text-gray-600';
+
+          const nomorUrut = soal.nomor_urut || (index + 1);
+
+          row.innerHTML = `
+            <td class="px-4 py-4 text-center">
+              <span class="bg-indigo-100 text-indigo-700 px-3 py-2 rounded-full text-base font-bold">${nomorUrut}</span>
+            </td>
+            <td class="px-4 py-4 text-gray-800 text-base leading-relaxed">${pertanyaanText || '-'}</td>
+            <td class="px-4 py-4 text-center text-base">${gambarDisplay}</td>
+            <td class="px-4 py-4 text-center">
+              <span class="text-xl font-bold ${kunciColor}">${soal.kunci || '-'}</span>
+            </td>
+            <td class="px-4 py-4 text-center text-base">${tipeDisplay}</td>
+            <td class="px-4 py-4">
+              <div class="flex gap-2 justify-center">
+                <button class="bg-indigo-100 text-indigo-700 px-3 py-2 rounded-lg text-base font-semibold cursor-pointer transition-all duration-300 hover:bg-indigo-200 hover-lift flex items-center gap-1" onclick="openEditSoalModal('${soal.id}')">
+                  ✏️ Edit
+                </button>
+                <button class="bg-red-100 text-red-700 px-3 py-2 rounded-lg text-base font-semibold cursor-pointer transition-all duration-300 hover:bg-red-200 hover-lift flex items-center gap-1" onclick="openDeleteSoalModal('${soal.id}')">
+                  🗑️ Hapus
+                </button>
+              </div>
+            </td>
+          `;
+          tableBody.appendChild(row);
+        });
+      }
+
+      document.getElementById('soal-loading').style.display = 'none';
+      document.getElementById('soal-table-container').style.display = 'block';
+    }
+
+    function handleAddSoal(event) {
+      event.preventDefault();
+      
+      const addBtn = document.querySelector('#add-soal-form button[type="submit"]');
+      const addBtnText = document.getElementById('add-soal-btn-text');
+      
+      const formData = new FormData(event.target);
+      const soalData = {
+        pertanyaan: formData.get('pertanyaan'),
+        gambar: formData.get('gambar') || '',
+        opsia: formData.get('opsia'),
+        opsib: formData.get('opsib'),
+        opsic: formData.get('opsic'),
+        opsid: formData.get('opsid'),
+        kunci: formData.get('kunci'),
+        tipe_soal: formData.get('tipe_soal')
+      };
+
+      if (!soalData.pertanyaan || !soalData.opsia || !soalData.opsib || 
+          !soalData.opsic || !soalData.opsid || !soalData.kunci || !soalData.tipe_soal) {
+        showSuccessMessageSoal('❌ Semua field wajib harus diisi!');
+        return;
+      }
+
+      addBtn.disabled = true;
+      addBtnText.textContent = '⏳ Menambahkan...';
+
+      // Dapatkan nomor urut berikutnya
+      const nextNumber = allSoal.length > 0 ? Math.max(...allSoal.map(s => s.nomor_urut || 0)) + 1 : 1;
+      soalData.nomor_urut = nextNumber;
+
+      database.ref('/soal').push(soalData)
+        .then(() => {
+          showSuccessMessageSoal(`✅ Soal nomor ${nextNumber} berhasil ditambahkan!`);
+          event.target.reset();
+          loadSoalData();
+        })
+        .catch(error => {
+          console.error('Error adding soal:', error);
+          showSuccessMessageSoal('❌ Gagal menambahkan data soal!');
+        })
+        .finally(() => {
+          addBtn.disabled = false;
+          addBtnText.textContent = '➕ Tambah Soal';
+        });
+    }
+
+    function openEditSoalModal(soalId) {
+      const soal = allSoal.find(s => s.id === soalId);
+      if (!soal) return;
+
+      currentEditSoalId = soalId;
+      
+      document.getElementById('edit-soal-id').value = soalId;
+      document.getElementById('edit-pertanyaan').value = soal.pertanyaan;
+      document.getElementById('edit-gambar').value = soal.gambar;
+      document.getElementById('edit-opsia').value = soal.opsia;
+      document.getElementById('edit-opsib').value = soal.opsib;
+      document.getElementById('edit-opsic').value = soal.opsic;
+      document.getElementById('edit-opsid').value = soal.opsid;
+      document.getElementById('edit-kunci').value = soal.kunci;
+      document.getElementById('edit-tipe-soal').value = soal.tipe_soal;
+      
+      document.getElementById('edit-soal-modal').style.display = 'flex';
+    }
+
+    function closeEditSoalModal() {
+      document.getElementById('edit-soal-modal').style.display = 'none';
+      currentEditSoalId = null;
+    }
+
+    function handleEditSoal(event) {
+      event.preventDefault();
+      
+      if (!currentEditSoalId) return;
+
+      const editBtn = document.querySelector('#edit-soal-form button[type="submit"]');
+      const editBtnText = document.getElementById('edit-soal-btn-text');
+      
+      const formData = new FormData(event.target);
+      const soalData = {
+        pertanyaan: formData.get('pertanyaan'),
+        gambar: formData.get('gambar') || '',
+        opsia: formData.get('opsia'),
+        opsib: formData.get('opsib'),
+        opsic: formData.get('opsic'),
+        opsid: formData.get('opsid'),
+        kunci: formData.get('kunci'),
+        tipe_soal: formData.get('tipe_soal')
+      };
+
+      if (!soalData.pertanyaan || !soalData.opsia || !soalData.opsib || 
+          !soalData.opsic || !soalData.opsid || !soalData.kunci || !soalData.tipe_soal) {
+        showSuccessMessageSoal('❌ Semua field wajib harus diisi!');
+        return;
+      }
+
+      editBtn.disabled = true;
+      editBtnText.textContent = '⏳ Menyimpan...';
+
+      database.ref(`/soal/${currentEditSoalId}`).update(soalData)
+        .then(() => {
+          showSuccessMessageSoal('✅ Data soal berhasil diperbarui!');
+          closeEditSoalModal();
+          loadSoalData();
+        })
+        .catch(error => {
+          console.error('Error updating soal:', error);
+          showSuccessMessageSoal('❌ Gagal memperbarui data soal!');
+        })
+        .finally(() => {
+          editBtn.disabled = false;
+          editBtnText.textContent = '💾 Simpan Perubahan';
+        });
+    }
+
+    function openDeleteSoalModal(soalId) {
+      const soal = allSoal.find(s => s.id === soalId);
+      if (!soal) return;
+
+      currentDeleteSoalId = soalId;
+      
+      const pertanyaanText = soal.pertanyaan.length > 150 ? 
+        soal.pertanyaan.substring(0, 150) + '...' : soal.pertanyaan;
+      
+      const tipeDisplay = soal.tipe_soal === 'image' ? 'image' : 'text';
+
+      document.getElementById('delete-soal-pertanyaan').textContent = pertanyaanText;
+      document.getElementById('delete-soal-kunci').textContent = soal.kunci;
+      document.getElementById('delete-soal-tipe').textContent = tipeDisplay;
+      
+      document.getElementById('delete-soal-modal').style.display = 'flex';
+    }
+
+    function closeDeleteSoalModal() {
+      document.getElementById('delete-soal-modal').style.display = 'none';
+      currentDeleteSoalId = null;
+    }
+
+    function handleDeleteSoal() {
+      if (!currentDeleteSoalId) return;
+
+      const deleteBtn = document.getElementById('confirm-delete-soal-btn');
+      const deleteBtnText = document.getElementById('delete-soal-btn-text');
+
+      deleteBtn.disabled = true;
+      deleteBtnText.textContent = '⏳ Menghapus...';
+
+      database.ref(`/soal/${currentDeleteSoalId}`).remove()
+        .then(() => {
+          showSuccessMessageSoal('✅ Data soal berhasil dihapus!');
+          closeDeleteSoalModal();
+          loadSoalData();
+        })
+        .catch(error => {
+          console.error('Error deleting soal:', error);
+          showSuccessMessageSoal('❌ Gagal menghapus data soal!');
+        })
+        .finally(() => {
+          deleteBtn.disabled = false;
+          deleteBtnText.textContent = '🗑️ Hapus';
+        });
+    }
+
+    function handleSoalSearch() {
+      const searchTerm = document.getElementById('search-soal-input').value.toLowerCase().trim();
+      
+      if (!searchTerm) {
+        filteredSoal = allSoal;
+      } else {
+        filteredSoal = allSoal.filter(soal => 
+          (soal.pertanyaan || '').toLowerCase().includes(searchTerm) ||
+          (soal.kunci || '').toLowerCase().includes(searchTerm) ||
+          (soal.tipe_soal || '').toLowerCase().includes(searchTerm) ||
+          (soal.opsia || '').toLowerCase().includes(searchTerm) ||
+          (soal.opsib || '').toLowerCase().includes(searchTerm) ||
+          (soal.opsic || '').toLowerCase().includes(searchTerm) ||
+          (soal.opsid || '').toLowerCase().includes(searchTerm)
+        );
+      }
+      
+      renderSoalTable(filteredSoal);
+    }
+
+    function updateSoalNumbering() {
+      const updateBtn = document.getElementById('update-numbering-btn');
+      
+      if (allSoal.length === 0) {
+        showSuccessMessageSoal('❌ Tidak ada soal untuk diperbarui!');
+        return;
+      }
+
+      updateBtn.disabled = true;
+      const originalText = updateBtn.innerHTML;
+      updateBtn.innerHTML = '⏳ Memperbarui...';
+
+      // Urutkan soal berdasarkan key ID (soal_1, soal_2, dst) atau nomor urut yang ada
+      const sortedSoal = [...allSoal].sort((a, b) => {
+        // Prioritaskan urutan berdasarkan key ID jika dalam format soal_X
+        let numberA = 999999;
+        let numberB = 999999;
+        
+        if (a.id.startsWith('soal_')) {
+          const numA = parseInt(a.id.replace('soal_', '')) || 999999;
+          numberA = numA;
+        } else {
+          numberA = a.nomor_urut || 999999;
+        }
+        
+        if (b.id.startsWith('soal_')) {
+          const numB = parseInt(b.id.replace('soal_', '')) || 999999;
+          numberB = numB;
+        } else {
+          numberB = b.nomor_urut || 999999;
+        }
+        
+        return numberA - numberB;
+      });
+
+      // Update nomor urut secara berurutan (1, 2, 3, dst)
+      const updatePromises = sortedSoal.map((soal, index) => {
+        const newNumber = index + 1;
+        return database.ref(`/soal/${soal.id}`).update({ nomor_urut: newNumber });
+      });
+
+      Promise.all(updatePromises)
+        .then(() => {
+          showSuccessMessageSoal(`✅ Nomor urut ${sortedSoal.length} soal berhasil diperbarui! (soal_1 = nomor 1, dst)`);
+          loadSoalData();
+        })
+        .catch(error => {
+          console.error('Error updating numbering:', error);
+          showSuccessMessageSoal('❌ Gagal memperbarui nomor urut soal!');
+        })
+        .finally(() => {
+          updateBtn.disabled = false;
+          updateBtn.innerHTML = originalText;
+        });
+    }
+
+    // Analisis Butir Soal Functions
+    function showAnalisisError(message) {
+      const errorDiv = document.getElementById('analisis-error');
+      errorDiv.textContent = message;
+      errorDiv.style.display = 'block';
+      document.getElementById('analisis-loading').style.display = 'none';
+    }
+
+    function showSuccessMessageAnalisis(message) {
+      const container = document.getElementById('analisis-container');
+      const existingMessage = container.querySelector('.success-message');
+      if (existingMessage) {
+        existingMessage.remove();
+      }
+
+      const successDiv = document.createElement('div');
+      successDiv.className = 'success-message';
+      successDiv.textContent = message;
+      
+      const header = container.querySelector('header');
+      if (header && header.nextElementSibling) {
+        header.nextElementSibling.insertBefore(successDiv, header.nextElementSibling.firstChild);
+      }
+
+      setTimeout(() => {
+        if (successDiv && successDiv.parentNode) {
+          successDiv.remove();
+        }
+      }, 4000);
+    }
+
+    function calculateDifficultyIndex(correctAnswers, totalAnswers) {
+      if (totalAnswers === 0) return 0;
+      return correctAnswers / totalAnswers;
+    }
+
+    function categorizeDifficulty(index) {
+      if (index < 0.30) {
+        return { category: 'sukar', label: 'Terlalu Sukar', color: 'bg-red-100 text-red-700' };
+      } else if (index >= 0.30 && index <= 0.70) {
+        return { category: 'sedang', label: 'Cukup (Sedang)', color: 'bg-yellow-100 text-yellow-700' };
+      } else {
+        return { category: 'mudah', label: 'Terlalu Mudah', color: 'bg-green-100 text-green-700' };
+      }
+    }
+
+    function loadAnalisisData() {
+      document.getElementById('analisis-loading').style.display = 'block';
+      document.getElementById('analisis-table-container').style.display = 'none';
+      document.getElementById('analisis-error').style.display = 'none';
+
+      // Load data detail jawaban dari Firebase
+      database.ref('/detail_jawaban').once('value')
+        .then(snapshot => {
+          const detailJawabanData = snapshot.val();
+          
+          if (!detailJawabanData) {
+            showAnalisisError('❌ Tidak ada data jawaban siswa untuk dianalisis!');
+            return;
+          }
+
+          // Proses data untuk analisis
+          const soalAnalysis = {};
+          
+          // Iterasi semua data detail jawaban
+          Object.keys(detailJawabanData).forEach(key => {
+            const siswaData = detailJawabanData[key];
+            
+            if (siswaData && siswaData.detail_jawaban && Array.isArray(siswaData.detail_jawaban)) {
+              siswaData.detail_jawaban.forEach(jawaban => {
+                const soalNo = jawaban.soal_no;
+                
+                if (!soalAnalysis[soalNo]) {
+                  soalAnalysis[soalNo] = {
+                    soal_no: soalNo,
+                    pertanyaan: jawaban.pertanyaan || '',
+                    jawaban_benar: jawaban.jawaban_benar || '',
+                    total_jawaban: 0,
+                    jawaban_benar_count: 0,
+                    gambar: jawaban.gambar || '',
+                    tipe_soal: jawaban.tipe_soal || 'text'
+                  };
+                }
+                
+                soalAnalysis[soalNo].total_jawaban++;
+                
+                if (jawaban.is_correct === true || jawaban.jawaban_siswa === jawaban.jawaban_benar) {
+                  soalAnalysis[soalNo].jawaban_benar_count++;
+                }
+              });
+            }
+          });
+
+          // Convert ke array dan hitung indeks kesukaran
+          const analisisArray = Object.values(soalAnalysis).map(soal => {
+            const difficultyIndex = calculateDifficultyIndex(soal.jawaban_benar_count, soal.total_jawaban);
+            const difficulty = categorizeDifficulty(difficultyIndex);
+            
+            return {
+              ...soal,
+              difficulty_index: difficultyIndex,
+              difficulty_category: difficulty.category,
+              difficulty_label: difficulty.label,
+              difficulty_color: difficulty.color
+            };
+          });
+
+          // Urutkan berdasarkan nomor soal
+          analisisArray.sort((a, b) => (a.soal_no || 0) - (b.soal_no || 0));
+
+          allAnalisisData = analisisArray;
+          filteredAnalisisData = analisisArray;
+          
+          renderAnalisisStats(analisisArray);
+          renderAnalisisTable(analisisArray);
+        })
+        .catch(error => {
+          console.error('Error loading analisis data:', error);
+          showAnalisisError('❌ Gagal memuat data analisis dari Firebase!');
+        });
+    }
+
+    function renderAnalisisStats(data) {
+      const totalSoal = data.length;
+      const mudahCount = data.filter(d => d.difficulty_category === 'mudah').length;
+      const sedangCount = data.filter(d => d.difficulty_category === 'sedang').length;
+      const sukarCount = data.filter(d => d.difficulty_category === 'sukar').length;
+      
+      const avgIndex = totalSoal > 0 ? (data.reduce((sum, d) => sum + d.difficulty_index, 0) / totalSoal).toFixed(3) : 0;
+
+      const statsContainer = document.getElementById('analisis-stats');
+      statsContainer.innerHTML = `
+        <div class="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-6 rounded-xl shadow-lg hover-lift transition-all duration-300">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-purple-100 text-sm font-medium mb-1">Total Soal</div>
+              <div class="text-3xl font-bold">${totalSoal}</div>
+            </div>
+            <div class="text-4xl opacity-80">📝</div>
+          </div>
+        </div>
+        <div class="bg-gradient-to-r from-green-500 to-green-600 text-white p-6 rounded-xl shadow-lg hover-lift transition-all duration-300">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-green-100 text-sm font-medium mb-1">Terlalu Mudah</div>
+              <div class="text-3xl font-bold">${mudahCount}</div>
+            </div>
+            <div class="text-4xl opacity-80">😊</div>
+          </div>
+        </div>
+        <div class="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white p-6 rounded-xl shadow-lg hover-lift transition-all duration-300">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-yellow-100 text-sm font-medium mb-1">Cukup (Sedang)</div>
+              <div class="text-3xl font-bold">${sedangCount}</div>
+            </div>
+            <div class="text-4xl opacity-80">😐</div>
+          </div>
+        </div>
+        <div class="bg-gradient-to-r from-red-500 to-red-600 text-white p-6 rounded-xl shadow-lg hover-lift transition-all duration-300">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-red-100 text-sm font-medium mb-1">Terlalu Sukar</div>
+              <div class="text-3xl font-bold">${sukarCount}</div>
+            </div>
+            <div class="text-4xl opacity-80">😰</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderAnalisisTable(data) {
+      const tableBody = document.getElementById('analisis-table-body');
+      tableBody.innerHTML = '';
+
+      if (data.length === 0) {
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="7" class="px-6 py-12">
+              <div class="empty-state">
+                <div class="text-5xl mb-4">📊</div>
+                <div class="text-lg font-medium">Belum ada data analisis</div>
+              </div>
+            </td>
+          </tr>
+        `;
+      } else {
+        data.forEach((item) => {
+          const row = document.createElement('tr');
+          row.className = 'table-hover-row transition-all duration-300 border-b border-gray-100';
+          
+          const pertanyaanText = item.pertanyaan.length > 100 ? 
+            item.pertanyaan.substring(0, 100) + '...' : item.pertanyaan;
+
+          const kunciColor = item.jawaban_benar === 'A' ? 'text-red-600' :
+                            item.jawaban_benar === 'B' ? 'text-blue-600' :
+                            item.jawaban_benar === 'C' ? 'text-green-600' :
+                            item.jawaban_benar === 'D' ? 'text-purple-600' : 'text-gray-600';
+
+          row.innerHTML = `
+            <td class="px-4 py-4 text-center">
+              <span class="bg-purple-100 text-purple-700 px-3 py-2 rounded-full text-base font-bold">${item.soal_no}</span>
+            </td>
+            <td class="px-4 py-4 text-gray-800 text-base leading-relaxed">${pertanyaanText || '-'}</td>
+            <td class="px-4 py-4 text-center">
+              <span class="text-xl font-bold ${kunciColor}">${item.jawaban_benar || '-'}</span>
+            </td>
+            <td class="px-4 py-4 text-center">
+              <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-base font-bold">${item.jawaban_benar_count}</span>
+            </td>
+            <td class="px-4 py-4 text-center">
+              <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-base font-bold">${item.total_jawaban}</span>
+            </td>
+            <td class="px-4 py-4 text-center">
+              <span class="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-base font-bold">${item.difficulty_index.toFixed(3)}</span>
+            </td>
+            <td class="px-4 py-4 text-center">
+              <span class="${item.difficulty_color} px-3 py-1 rounded-full text-sm font-semibold">${item.difficulty_label}</span>
+            </td>
+          `;
+          tableBody.appendChild(row);
+        });
+      }
+
+      document.getElementById('analisis-loading').style.display = 'none';
+      document.getElementById('analisis-table-container').style.display = 'block';
+      
+      // Update count badge
+      const countBadge = document.getElementById('analisis-count-badge');
+      if (countBadge) {
+        countBadge.textContent = `Total: ${data.length} Soal`;
+      }
+    }
+
+    function applyKategoriFilter() {
+      let filtered = [...allAnalisisData];
+      
+      if (selectedKategoriFilter !== 'all') {
+        filtered = filtered.filter(item => item.difficulty_category === selectedKategoriFilter);
+      }
+      
+      filteredAnalisisData = filtered;
+      renderAnalisisTable(filtered);
+    }
+
+    function exportAnalisisToExcel() {
+      const exportBtn = document.getElementById('export-analisis-btn');
+      
+      if (!filteredAnalisisData || filteredAnalisisData.length === 0) {
+        showSuccessMessageAnalisis('❌ Tidak ada data analisis untuk diekspor!');
+        return;
+      }
+
+      if (typeof XLSX === 'undefined') {
+        showSuccessMessageAnalisis('❌ Library Excel tidak tersedia! Silakan refresh halaman.');
+        return;
+      }
+
+      exportBtn.disabled = true;
+      const originalText = exportBtn.innerHTML;
+      exportBtn.innerHTML = '⏳ Memproses...';
+
+      setTimeout(() => {
+        try {
+          const dataToExport = filteredAnalisisData.map((item, index) => ({
+            'No': index + 1,
+            'No_Soal': item.soal_no,
+            'Pertanyaan': item.pertanyaan || '',
+            'Kunci_Jawaban': item.jawaban_benar || '',
+            'Jawaban_Benar': item.jawaban_benar_count,
+            'Total_Jawaban': item.total_jawaban,
+            'Indeks_Kesukaran': parseFloat(item.difficulty_index.toFixed(3)),
+            'Kategori': item.difficulty_label,
+            'Tipe_Soal': item.tipe_soal || 'text'
+          }));
+
+          // Statistik
+          const totalSoal = filteredAnalisisData.length;
+          const mudahCount = filteredAnalisisData.filter(d => d.difficulty_category === 'mudah').length;
+          const sedangCount = filteredAnalisisData.filter(d => d.difficulty_category === 'sedang').length;
+          const sukarCount = filteredAnalisisData.filter(d => d.difficulty_category === 'sukar').length;
+          const avgIndex = totalSoal > 0 ? (filteredAnalisisData.reduce((sum, d) => sum + d.difficulty_index, 0) / totalSoal).toFixed(3) : 0;
+
+          const summaryData = [
+            {},
+            { 'No': '=== STATISTIK ANALISIS ===' },
+            { 'No': 'Total Soal', 'No_Soal': totalSoal },
+            { 'No': 'Terlalu Mudah (> 0.70)', 'No_Soal': mudahCount },
+            { 'No': 'Cukup/Sedang (0.30-0.70)', 'No_Soal': sedangCount },
+            { 'No': 'Terlalu Sukar (< 0.30)', 'No_Soal': sukarCount },
+            { 'No': 'Rata-rata Indeks', 'No_Soal': avgIndex },
+            {},
+            { 'No': '=== INFORMASI EXPORT ===' },
+            { 'No': 'Filter Kategori', 'No_Soal': selectedKategoriFilter === 'all' ? 'Semua Kategori' : selectedKategoriFilter },
+            { 'No': 'Tanggal Export', 'No_Soal': new Date().toLocaleDateString('id-ID') },
+            { 'No': 'Waktu Export', 'No_Soal': new Date().toLocaleTimeString('id-ID') },
+            {},
+            { 'No': '=== PANDUAN INTERPRETASI ===' },
+            { 'No': 'Indeks < 0.30', 'No_Soal': 'Terlalu Sukar - Perlu diperbaiki' },
+            { 'No': 'Indeks 0.30 - 0.70', 'No_Soal': 'Cukup/Sedang - Baik digunakan' },
+            { 'No': 'Indeks > 0.70', 'No_Soal': 'Terlalu Mudah - Perlu diperbaiki' }
+          ];
+
+          const allData = [...dataToExport, ...summaryData];
+          const ws = XLSX.utils.json_to_sheet(allData);
+          
+          // Set column widths
+          ws['!cols'] = [
+            { wch: 6 },   // No
+            { wch: 10 },  // No_Soal
+            { wch: 50 },  // Pertanyaan
+            { wch: 8 },   // Kunci_Jawaban
+            { wch: 12 },  // Jawaban_Benar
+            { wch: 12 },  // Total_Jawaban
+            { wch: 15 },  // Indeks_Kesukaran
+            { wch: 20 },  // Kategori
+            { wch: 12 }   // Tipe_Soal
+          ];
+
+          const wb = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(wb, ws, 'Analisis Butir Soal');
+
+          const now = new Date();
+          const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
+          const timeStr = now.toTimeString().slice(0, 8).replace(/:/g, '');
+          const filterText = selectedKategoriFilter === 'all' ? 'Semua_Kategori' : selectedKategoriFilter;
+          const filename = `Analisis_Butir_Soal_${filterText}_${dateStr}_${timeStr}.xlsx`;
+
+          const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+          const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = filename;
+          link.style.display = 'none';
+          
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          
+          setTimeout(() => window.URL.revokeObjectURL(url), 2000);
+
+          exportBtn.innerHTML = '✅ Berhasil!';
+          showSuccessMessageAnalisis(`✅ File "${filename}" berhasil diunduh! Total: ${totalSoal} soal`);
+
+        } catch (error) {
+          console.error('Export error:', error);
+          exportBtn.innerHTML = '❌ Gagal';
+          showSuccessMessageAnalisis('❌ Gagal mengekspor data analisis! ' + error.message);
+        }
+
+        setTimeout(() => {
+          exportBtn.innerHTML = originalText;
+          exportBtn.disabled = false;
+        }, 3000);
+      }, 200);
+    }
+
+
+
+    // Global functions for onclick handlers
+    window.openEditModal = openEditModal;
+    window.openDeleteModal = openDeleteModal;
+    window.openEditSoalModal = openEditSoalModal;
+    window.openDeleteSoalModal = openDeleteSoalModal;
+
+    // Event Listeners
+    document.getElementById('login-form').addEventListener('submit', handleLogin);
+    document.getElementById('logout-btn').addEventListener('click', handleLogout);
+    document.getElementById('logout-btn-crud').addEventListener('click', handleLogout);
+    document.getElementById('logout-btn-soal').addEventListener('click', handleLogout);
+    document.getElementById('logout-btn-analisis').addEventListener('click', handleLogout);
+    
+    // Navigation listeners
+    document.getElementById('crud-menu-btn').addEventListener('click', showCrudMenu);
+    document.getElementById('soal-menu-btn').addEventListener('click', showSoalMenu);
+    document.getElementById('analisis-menu-btn').addEventListener('click', showAnalisisMenu);
+    document.getElementById('back-to-dashboard-btn').addEventListener('click', showDashboard);
+    document.getElementById('back-to-dashboard-btn-soal').addEventListener('click', showDashboard);
+    document.getElementById('back-to-dashboard-btn-analisis').addEventListener('click', showDashboard);
+    document.getElementById('soal-menu-btn-from-crud').addEventListener('click', showSoalMenu);
+    document.getElementById('analisis-menu-btn-from-crud').addEventListener('click', showAnalisisMenu);
+    document.getElementById('crud-menu-btn-from-soal').addEventListener('click', showCrudMenu);
+    document.getElementById('analisis-menu-btn-from-soal').addEventListener('click', showAnalisisMenu);
+    document.getElementById('crud-menu-btn-from-analisis').addEventListener('click', showCrudMenu);
+    document.getElementById('soal-menu-btn-from-analisis').addEventListener('click', showSoalMenu);
+
+    // CRUD Siswa listeners
+    document.getElementById('add-student-form').addEventListener('submit', handleAddStudent);
+    document.getElementById('edit-student-form').addEventListener('submit', handleEditStudent);
+    document.getElementById('search-input').addEventListener('input', handleSearch);
+    document.getElementById('export-siswa-btn').addEventListener('click', exportSiswaToExcel);
+    document.getElementById('import-siswa-file').addEventListener('change', importSiswaFromExcel);
+    
+    // Sort controls listeners
+    document.getElementById('sort-kelas-select').addEventListener('change', (e) => {
+      selectedSortKelas = e.target.value;
+      applySortFilters();
+    });
+    document.getElementById('sort-absen-select').addEventListener('change', (e) => {
+      selectedSortAbsen = e.target.value;
+      applySortFilters();
+    });
+    document.getElementById('reset-sort-btn').addEventListener('click', resetSortFilters);
+    
+    // Modal listeners
+    document.getElementById('close-edit-modal').addEventListener('click', closeEditModal);
+    document.getElementById('cancel-edit-btn').addEventListener('click', closeEditModal);
+    document.getElementById('close-delete-modal').addEventListener('click', closeDeleteModal);
+    document.getElementById('cancel-delete-btn').addEventListener('click', closeDeleteModal);
+    document.getElementById('confirm-delete-btn').addEventListener('click', handleDeleteStudent);
+
+    // CRUD Soal listeners
+    document.getElementById('add-soal-form').addEventListener('submit', handleAddSoal);
+    document.getElementById('edit-soal-form').addEventListener('submit', handleEditSoal);
+    document.getElementById('search-soal-input').addEventListener('input', handleSoalSearch);
+    document.getElementById('update-numbering-btn').addEventListener('click', updateSoalNumbering);
+    document.getElementById('export-soal-btn').addEventListener('click', exportSoalToExcel);
+    document.getElementById('import-soal-file').addEventListener('change', importSoalFromExcel);
+    document.getElementById('export-soal-btn').addEventListener('click', exportSoalToExcel);
+    document.getElementById('import-soal-file').addEventListener('change', importSoalFromExcel);
+    
+    // Soal Modal listeners
+    document.getElementById('close-edit-soal-modal').addEventListener('click', closeEditSoalModal);
+    document.getElementById('cancel-edit-soal-btn').addEventListener('click', closeEditSoalModal);
+    document.getElementById('close-delete-soal-modal').addEventListener('click', closeDeleteSoalModal);
+    document.getElementById('cancel-delete-soal-btn').addEventListener('click', closeDeleteSoalModal);
+    document.getElementById('confirm-delete-soal-btn').addEventListener('click', handleDeleteSoal);
+
+
+
+    // Analisis listeners
+    document.getElementById('kategori-filter').addEventListener('change', (e) => {
+      selectedKategoriFilter = e.target.value;
+      applyKategoriFilter();
+    });
+    document.getElementById('refresh-analisis-btn').addEventListener('click', loadAnalisisData);
+    document.getElementById('export-analisis-btn').addEventListener('click', exportAnalisisToExcel);
+
+    // Close modals when clicking outside
+    document.getElementById('edit-modal').addEventListener('click', (e) => {
+      if (e.target.id === 'edit-modal') closeEditModal();
+    });
+    document.getElementById('delete-modal').addEventListener('click', (e) => {
+      if (e.target.id === 'delete-modal') closeDeleteModal();
+    });
+    document.getElementById('edit-soal-modal').addEventListener('click', (e) => {
+      if (e.target.id === 'edit-soal-modal') closeEditSoalModal();
+    });
+    document.getElementById('delete-soal-modal').addEventListener('click', (e) => {
+      if (e.target.id === 'delete-soal-modal') closeDeleteSoalModal();
+    });
+
+
+    // Initialize
+    if (sessionStorage.getItem('adminLoggedIn') === 'true') {
+      isLoggedIn = true;
+      showDashboard();
+    } else {
+      showLogin();
+      setupPasswordToggle();
+    }
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a03ba1c8507fd73',t:'MTc2MzQyOTY4My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
