@@ -1105,7 +1105,7 @@
             'NIS': student.nis?.toString() || '-',
             'Nama_Lengkap': student.nama?.toString() || '-',
             'Kelas': student.kelas?.toString() || '-',
-            'Skor_Persen': student.skor !== undefined && student.skor !== null ? parseFloat(student.skor) : '-'
+            'Skor': student.skor !== undefined && student.skor !== null ? parseFloat(student.skor) : '-'
           }));
 
           const stats = calculateStats(currentStudents);
