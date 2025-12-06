@@ -62,6 +62,23 @@
       opacity: 0.6;
       cursor: not-allowed;
     }
+    .confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      z-index: 9999;
+      pointer-events: none;
+    }
+    @keyframes confetti-fall {
+      0% {
+        transform: translateY(-100vh) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) rotate(720deg);
+        opacity: 0;
+      }
+    }
     .match-container {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -97,6 +114,8 @@
     <div class="max-w-md w-full mx-4">
      <div class="bg-white rounded-lg shadow-lg p-8">
       <div class="text-center mb-8">
+       <div class="w-24 h-24 mx-auto mb-4"><img src="https://spenzaga.github.io/assets/img/logo.png" alt="Logo Sekolah" class="w-full h-full object-contain" onerror="this.src=''; this.alt='Logo gagal dimuat'; this.style.display='none';">
+       </div>
        <h1 class="text-3xl font-bold mb-2" id="schoolNameLogin">SMP Negeri 1 Purbalingga</h1>
        <p class="text-xl text-gray-700 mb-4" id="examTitleLogin">Computer Based Test</p>
        <div class="w-16 h-1 bg-blue-600 mx-auto"></div>
@@ -287,9 +306,14 @@
         };
 
         if (question.type === 'TF') {
-          question.options = ['True', 'False'];
-          const ans1 = values[5] || '';
-          question.correctAnswer = ans1.replace('*', '').trim();
+          const opt1 = values[5] || '';
+          const opt2 = values[6] || '';
+          question.options = [
+            opt1.replace('*', '').trim(),
+            opt2.replace('*', '').trim()
+          ];
+          const correctOpt = [opt1, opt2].find(o => o.startsWith('*'));
+          question.correctAnswer = correctOpt ? correctOpt.replace('*', '').trim() : null;
           question.correctFeedback = values[9];
           question.incorrectFeedback = values[10];
           question.points = parseFloat(values[11]) || 1;
@@ -524,8 +548,8 @@
             </span>
             <p class="text-sm text-gray-600">Soal ${currentQuestionIndex + 1} dari ${questions.length}</p>
           </div>
-          <h3 class="text-xl font-bold mb-4">${question.question}</h3>
           ${mediaHTML}
+          <h3 class="text-xl font-bold mb-4">${question.question}</h3>
           <div id="answerArea"></div>
         </div>
       `;
@@ -638,6 +662,15 @@
       const leftItems = question.pairs.map(p => p.left);
       const rightItems = question.pairs.map(p => p.right);
       
+      // Shuffle right items if not already done for this question
+      if (!question.shuffledRightItems) {
+        question.shuffledRightItems = shuffleArray([...rightItems]);
+        // Create mapping from shuffled position to original position
+        question.shuffleMapping = question.shuffledRightItems.map(item => 
+          rightItems.indexOf(item)
+        );
+      }
+      
       if (!currentAnswer) {
         currentAnswer = {};
         answers[currentQuestionIndex] = currentAnswer;
@@ -652,17 +685,20 @@
           <div class="text-gray-400">↔</div>
           <select class="flex-1 p-2 border-2 border-gray-300 rounded-lg" data-left-idx="${leftIdx}">
             <option value="">Pilih pasangan...</option>
-            ${rightItems.map((right, rightIdx) => `
-              <option value="${rightIdx}" ${currentAnswer[leftIdx] === rightIdx ? 'selected' : ''}>
-                ${right}
-              </option>
-            `).join('')}
+            ${question.shuffledRightItems.map((right, shuffledIdx) => {
+              const originalIdx = question.shuffleMapping[shuffledIdx];
+              return `
+                <option value="${originalIdx}" ${currentAnswer[leftIdx] === originalIdx ? 'selected' : ''}>
+                  ${right}
+                </option>
+              `;
+            }).join('')}
           </select>
         `;
         
         pairDiv.querySelector('select').onchange = (e) => {
-          const selectedRightIdx = e.target.value ? parseInt(e.target.value) : null;
-          answers[currentQuestionIndex][leftIdx] = selectedRightIdx;
+          const selectedOriginalIdx = e.target.value ? parseInt(e.target.value) : null;
+          answers[currentQuestionIndex][leftIdx] = selectedOriginalIdx;
           renderQuestionNav();
         };
         
@@ -831,6 +867,13 @@
         document.getElementById('resultScreen').style.display = 'flex';
         document.getElementById('finalScore').textContent = score;
         document.getElementById('totalQuestions').textContent = questions.length;
+        
+        // Show confetti for high scores (80 or above)
+        if (score >= 80) {
+          setTimeout(() => {
+            createConfetti();
+          }, 500);
+        }
       } catch (error) {
         showWarning('Gagal mengirim hasil. Silakan hubungi pengawas.');
         submitBtn.disabled = false;
@@ -916,6 +959,27 @@
       `;
     }
 
+    function createConfetti() {
+      const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ffa500', '#ff1493'];
+      const confettiCount = 100;
+      
+      for (let i = 0; i < confettiCount; i++) {
+        setTimeout(() => {
+          const confetti = document.createElement('div');
+          confetti.className = 'confetti';
+          confetti.style.left = Math.random() * 100 + '%';
+          confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+          confetti.style.animation = `confetti-fall ${3 + Math.random() * 2}s linear forwards`;
+          confetti.style.animationDelay = Math.random() * 0.5 + 's';
+          document.body.appendChild(confetti);
+          
+          setTimeout(() => {
+            confetti.remove();
+          }, 5500);
+        }, i * 30);
+      }
+    }
+
     // Element SDK Integration
     async function onConfigChange(config) {
       const schoolNameLogin = document.getElementById('schoolNameLogin');
@@ -955,5 +1019,5 @@
     // Initialize app
     loadData();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a9f73e042defd37',t:'MTc2NTA2MjU4NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a9f9fd342d4f8da',t:'MTc2NTA2NDM4NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
