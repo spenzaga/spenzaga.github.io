@@ -2,912 +2,537 @@
 <html lang="id">
  <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>CBT SMP Negeri 1 Purbalingga</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Computer Based Test - SMP Negeri 1 Purbalingga</title>
+  <script src="/_sdk/element_sdk.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    * {
+    body {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-    }
-    
-    html, body {
       width: 100%;
       height: 100%;
       overflow-x: hidden;
-      user-select: none;
-      -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-      -webkit-touch-callout: none;
     }
-    
-    #app {
+    html {
+      height: 100%;
+    }
+    .app-container {
       width: 100%;
       min-height: 100%;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
-    
     .question-card {
-      animation: fadeIn 0.3s ease-in;
+      transition: all 0.3s ease;
     }
-    
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+    .option-button {
+      transition: all 0.2s ease;
     }
-    
+    .option-button:hover {
+      transform: translateX(4px);
+    }
     .timer-warning {
       animation: pulse 1s infinite;
     }
-    
     @keyframes pulse {
       0%, 100% { opacity: 1; }
       50% { opacity: 0.7; }
     }
-    
-    .matching-container {
+    .loading-spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #2563eb;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .fade-in {
+      animation: fadeIn 0.5s ease-in;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    input:disabled, button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .match-container {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 20px;
+      gap: 16px;
     }
-    
-    .drag-item {
-      cursor: grab;
-      transition: all 0.2s;
+    .draggable {
+      cursor: move;
+      user-select: none;
     }
-    
-    .drag-item:active {
-      cursor: grabbing;
-      opacity: 0.7;
-    }
-    
     .drop-zone {
-      min-height: 50px;
+      min-height: 40px;
       border: 2px dashed #cbd5e1;
       border-radius: 8px;
-      padding: 12px;
-      transition: all 0.2s;
+      padding: 8px;
     }
-    
-    .drop-zone.drag-over {
-      background-color: #e0f2fe;
-      border-color: #0ea5e9;
-    }
-    
-    .sequence-item {
-      cursor: move;
-    }
-    
-    /* Responsive Design */
-    @media (max-width: 768px) {
-      .matching-container {
-        grid-template-columns: 1fr;
-      }
-      
-      .question-card {
-        padding: 1rem !important;
-      }
-      
-      .floating-nav-panel {
-        top: 50% !important;
-        right: 10px !important;
-        left: auto !important;
-        transform: translateY(-50%) !important;
-        max-width: 280px !important;
-      }
-      
-      .nav-btn-mobile {
-        top: 50% !important;
-        right: 10px !important;
-        bottom: auto !important;
-        transform: translateY(-50%) !important;
-      }
-    }
-    
-    @media (max-width: 480px) {
-      .timer-text {
-        font-size: 1.25rem;
-      }
-      
-      .header-text {
-        font-size: 1rem;
-      }
-      
-      .question-number {
-        font-size: 0.875rem;
-        padding: 0.5rem 0.75rem;
-      }
-    }
-    
-    /* Print Styles */
-    @media print {
-      .no-print {
-        display: none !important;
-      }
-    }
-    
-    /* Confetti Animation */
-    .confetti {
-      position: fixed;
-      width: 10px;
-      height: 10px;
-      top: -10px;
-      z-index: 9999;
-      pointer-events: none;
-    }
-    
-    @keyframes confetti-fall {
-      to {
-        transform: translateY(100vh) rotate(360deg);
-      }
+    .drop-zone.dragover {
+      background-color: #e0e7ff;
+      border-color: #4f46e5;
     }
   </style>
   <style>@view-transition { navigation: auto; }</style>
   <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
-  <script src="/_sdk/element_sdk.js" type="text/javascript"></script>
  </head>
- <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-full">
-  <div id="app" class="w-full min-h-full"></div>
+ <body>
+  <div class="app-container" id="app"><!-- Loading Screen -->
+   <div id="loadingScreen" class="w-full min-h-full flex items-center justify-center">
+    <div class="text-center">
+     <div class="loading-spinner mx-auto mb-4"></div>
+     <p class="text-gray-600">Memuat data ujian...</p>
+    </div>
+   </div><!-- Login Screen -->
+   <div id="loginScreen" class="w-full min-h-full flex items-center justify-center" style="display: none;">
+    <div class="max-w-md w-full mx-4">
+     <div class="bg-white rounded-lg shadow-lg p-8">
+      <div class="text-center mb-8">
+       <h1 class="text-3xl font-bold mb-2" id="schoolNameLogin">SMP Negeri 1 Purbalingga</h1>
+       <p class="text-xl text-gray-700 mb-4" id="examTitleLogin">Computer Based Test</p>
+       <div class="w-16 h-1 bg-blue-600 mx-auto"></div>
+      </div>
+      <div id="loginError" class="hidden mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm"></div>
+      <form id="loginForm" class="space-y-4">
+       <div><label for="nisInput" class="block text-sm font-medium text-gray-700 mb-2">Nomor Induk Siswa (NIS)</label> <input type="text" id="nisInput" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Masukkan NIS Anda" autocomplete="off">
+       </div><button type="submit" id="loginButton" class="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition"> Masuk </button>
+      </form>
+      <div class="mt-6 p-4 bg-yellow-50 rounded-lg">
+       <p class="text-sm text-yellow-800"><strong>⚠️ Perhatian:</strong></p>
+       <ul class="text-sm text-yellow-700 mt-2 space-y-1 list-disc list-inside">
+        <li>Jangan pindah tab atau minimize browser</li>
+        <li>Jangan gunakan Google Translate</li>
+        <li>Anda hanya dapat mengerjakan satu kali</li>
+        <li>Jawaban akan tersimpan otomatis</li>
+       </ul>
+      </div>
+     </div>
+    </div>
+   </div><!-- Exam Screen -->
+   <div id="examScreen" class="w-full min-h-full" style="display: none;"><!-- Header -->
+    <div class="w-full bg-blue-600 text-white shadow-lg">
+     <div class="max-w-6xl mx-auto px-4 py-4">
+      <div class="flex justify-between items-center flex-wrap gap-4">
+       <div>
+        <h2 class="text-xl font-bold" id="schoolNameExam">SMP Negeri 1 Purbalingga</h2>
+        <p class="text-sm opacity-90" id="studentInfo"></p>
+       </div>
+       <div class="text-right">
+        <p class="text-sm opacity-90">Waktu Tersisa</p>
+        <p class="text-2xl font-bold" id="timer">90:00</p>
+       </div>
+      </div>
+     </div>
+    </div><!-- Question Navigation -->
+    <div class="w-full bg-gray-100 border-b border-gray-300">
+     <div class="max-w-6xl mx-auto px-4 py-3">
+      <div class="flex items-center gap-2 overflow-x-auto pb-2"><span class="text-sm font-medium text-gray-700 whitespace-nowrap">Nomor Soal:</span>
+       <div id="questionNav" class="flex gap-2"></div>
+      </div>
+     </div>
+    </div><!-- Question Area -->
+    <div class="w-full">
+     <div class="max-w-4xl mx-auto px-4 py-6">
+      <div id="questionContainer" class="bg-white rounded-lg shadow-lg p-6"></div><!-- Navigation Buttons -->
+      <div class="flex justify-between mt-6"><button id="prevButton" class="px-6 py-3 bg-gray-500 text-white rounded-lg font-medium hover:bg-gray-600 transition disabled:opacity-50"> ← Sebelumnya </button> <button id="nextButton" class="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition"> Selanjutnya → </button> <button id="submitButton" class="px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition" style="display: none;"> Selesai Ujian </button>
+      </div>
+     </div>
+    </div><!-- Warning Toast -->
+    <div id="warningToast" class="fixed bottom-4 right-4 bg-red-600 text-white px-6 py-4 rounded-lg shadow-lg" style="display: none;">
+     <p class="font-medium">⚠️ Peringatan!</p>
+     <p class="text-sm" id="warningMessage"></p>
+    </div>
+   </div><!-- Result Screen -->
+   <div id="resultScreen" class="w-full min-h-full flex items-center justify-center" style="display: none;">
+    <div class="max-w-md w-full mx-4">
+     <div class="bg-white rounded-lg shadow-lg p-8 text-center">
+      <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4"><span class="text-4xl">✓</span>
+      </div>
+      <h2 class="text-2xl font-bold mb-2">Ujian Selesai!</h2>
+      <p class="text-gray-600 mb-6">Jawaban Anda telah berhasil dikirim</p>
+      <div class="bg-blue-50 rounded-lg p-6 mb-6">
+       <p class="text-sm text-gray-600 mb-2">Skor Anda</p>
+       <p class="text-4xl font-bold text-blue-600" id="finalScore">0</p>
+       <p class="text-sm text-gray-600 mt-2">dari <span id="totalQuestions">0</span> soal</p>
+      </div>
+      <p class="text-sm text-gray-600">Terima kasih telah mengikuti ujian.</p>
+     </div>
+    </div>
+   </div>
+  </div>
   <script>
-    // ==================== SECURITY & ANTI-CHEAT ====================
+    // Security measures
     let tabSwitchCount = 0;
-    let hasStarted = false;
-    let isSubmitting = false;
-    
-    // Disable right click
+    let examStarted = false;
+    const MAX_TAB_SWITCHES = 3;
+
+    // Disable right-click and F12
     document.addEventListener('contextmenu', e => e.preventDefault());
-    
-    // Disable keyboard shortcuts
-    document.addEventListener('keydown', function(e) {
-      // F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
-      if (e.keyCode == 123 || 
-          (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74)) ||
-          (e.ctrlKey && e.keyCode == 85)) {
+    document.addEventListener('keydown', e => {
+      if (e.key === 'F12' || 
+          (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+          (e.ctrlKey && e.shiftKey && e.key === 'J') ||
+          (e.ctrlKey && e.key === 'U')) {
         e.preventDefault();
-        return false;
+        showWarning('Jangan mencoba membuka developer tools!');
       }
-      
-      // Ctrl+C, Ctrl+V, Ctrl+A
-      if (e.ctrlKey && (e.keyCode == 67 || e.keyCode == 86 || e.keyCode == 65)) {
-        e.preventDefault();
-        return false;
-      }
-    });
-    
-    // Detect tab switch / window blur
-    document.addEventListener('visibilitychange', function() {
-      if (hasStarted && !isSubmitting && document.hidden) {
-        tabSwitchCount++;
-        if (tabSwitchCount >= 3) {
-          showInlineMessage('Anda telah berpindah tab 3 kali. Ujian akan disubmit otomatis.', 'error');
-          setTimeout(() => submitExam(true), 2000);
-        } else {
-          showInlineMessage(`Peringatan ${tabSwitchCount}/3: Jangan pindah tab! Ujian akan otomatis tersubmit jika Anda pindah tab 3 kali.`, 'warning');
-        }
-      }
-    });
-    
-    window.addEventListener('blur', function() {
-      if (hasStarted && !isSubmitting) {
-        tabSwitchCount++;
-        if (tabSwitchCount >= 3) {
-          submitExam(true);
-        }
-      }
-    });
-    
-    // Detect Google Translate
-    const observer = new MutationObserver(function(mutations) {
-      mutations.forEach(function(mutation) {
-        if (mutation.target.className && mutation.target.className.includes('translated')) {
-          if (hasStarted && !isSubmitting) {
-            showInlineMessage('Google Translate terdeteksi! Ujian akan disubmit otomatis.', 'error');
-            setTimeout(() => submitExam(true), 2000);
-          }
-        }
-      });
-    });
-    
-    observer.observe(document.body, {
-      attributes: true,
-      attributeFilter: ['class'],
-      subtree: true
     });
 
-    // ==================== DATA MANAGEMENT ====================
-    let students = [];
-    let questions = [];
-    let currentStudent = null;
-    let userAnswers = {};
-    let currentQuestionIndex = 0;
-    let timeRemaining = 0;
-    let timerInterval = null;
-    let submittedStudents = new Set();
-    
-    // Local Storage Management
-    const STORAGE_KEYS = {
-      STUDENTS: 'cbt_students',
-      QUESTIONS: 'cbt_questions',
-      SUBMITTED: 'cbt_submitted',
-      RESULTS: 'cbt_results',
-      CURRENT_SESSION: 'cbt_session'
-    };
-    
-    function saveToLocalStorage(key, data) {
-      try {
-        localStorage.setItem(key, JSON.stringify(data));
-        return true;
-      } catch (e) {
-        console.error('Error saving to localStorage:', e);
-        return false;
-      }
-    }
-    
-    function loadFromLocalStorage(key) {
-      try {
-        const data = localStorage.getItem(key);
-        return data ? JSON.parse(data) : null;
-      } catch (e) {
-        console.error('Error loading from localStorage:', e);
-        return null;
-      }
-    }
-    
-    function saveCurrentSession() {
-      const session = {
-        student: currentStudent,
-        answers: userAnswers,
-        questionIndex: currentQuestionIndex,
-        timeRemaining: timeRemaining,
-        timestamp: Date.now()
-      };
-      saveToLocalStorage(STORAGE_KEYS.CURRENT_SESSION, session);
-    }
-    
-    function loadCurrentSession() {
-      return loadFromLocalStorage(STORAGE_KEYS.CURRENT_SESSION);
-    }
-    
-    function clearCurrentSession() {
-      localStorage.removeItem(STORAGE_KEYS.CURRENT_SESSION);
-    }
-    
-    // Load data from CSV
-    async function loadCSV(url) {
-      try {
-        const response = await fetch(url);
-        const text = await response.text();
-        const lines = text.trim().split('\n');
-        const headers = lines[0].split(',').map(h => h.trim().replace(/['"]/g, ''));
+    // Detect tab switch
+    document.addEventListener('visibilitychange', () => {
+      if (examStarted && document.hidden) {
+        tabSwitchCount++;
+        showWarning(`Jangan pindah tab! Peringatan ${tabSwitchCount}/${MAX_TAB_SWITCHES}`);
         
-        return lines.slice(1).map(line => {
-          const values = parseCSVLine(line);
-          const obj = {};
-          headers.forEach((header, index) => {
-            obj[header] = values[index] ? values[index].trim().replace(/^["']|["']$/g, '') : '';
-          });
-          return obj;
-        });
+        if (tabSwitchCount >= MAX_TAB_SWITCHES) {
+          showWarning('Ujian otomatis diselesaikan karena terlalu banyak pindah tab!');
+          setTimeout(() => submitExam(true), 2000);
+        }
+      }
+    });
+
+    // Detect Google Translate
+    const observer = new MutationObserver(() => {
+      if (document.querySelector('font[style*="vertical-align"]') || 
+          document.documentElement.classList.contains('translated-ltr')) {
+        showWarning('Google Translate terdeteksi! Matikan sekarang.');
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    // Global variables
+    let questions = [];
+    let students = [];
+    let currentStudent = null;
+    let currentQuestionIndex = 0;
+    let answers = {};
+    let timerInterval = null;
+    let timeRemaining = 5400; // 90 minutes in seconds
+    let completedStudents = new Set();
+
+    const defaultConfig = {
+      school_name: "SMP Negeri 1 Purbalingga",
+      exam_title: "Computer Based Test",
+      time_limit: "90",
+      pass_score: "75"
+    };
+
+    // Load data from CSV
+    async function loadData() {
+      try {
+        const [questionsResponse, studentsResponse] = await Promise.all([
+          fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vShD-FggVnTmZjkm_VYH6raebmwcCW9qLdY8JPrJzMHZSGlI5O1lF9prNziinNA7YwyoPgZQal_nlkm/pub?gid=1299383846&single=true&output=csv'),
+          fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vShD-FggVnTmZjkm_VYH6raebmwcCW9qLdY8JPrJzMHZSGlI5O1lF9prNziinNA7YwyoPgZQal_nlkm/pub?gid=1534064510&single=true&output=csv')
+        ]);
+
+        const questionsText = await questionsResponse.text();
+        const studentsText = await studentsResponse.text();
+
+        console.log('Questions CSV loaded:', questionsText.substring(0, 200));
+        console.log('Students CSV loaded:', studentsText.substring(0, 200));
+
+        parseQuestions(questionsText);
+        parseStudents(studentsText);
+
+        console.log('Total questions parsed:', questions.length);
+        console.log('Total students parsed:', students.length);
+        console.log('Sample students:', students.slice(0, 3));
+
+        if (questions.length === 0) {
+          showError('Tidak ada soal yang berhasil dimuat. Periksa format CSV soal.');
+          return;
+        }
+
+        if (students.length === 0) {
+          showError('Tidak ada data siswa yang berhasil dimuat. Periksa format CSV siswa.');
+          return;
+        }
+
+        document.getElementById('loadingScreen').style.display = 'none';
+        document.getElementById('loginScreen').style.display = 'flex';
       } catch (error) {
-        console.error('Error loading CSV:', error);
-        return [];
+        console.error('Error loading data:', error);
+        showError('Gagal memuat data. Silakan refresh halaman. Error: ' + error.message);
       }
     }
-    
+
+    function parseQuestions(csv) {
+      const lines = csv.trim().split('\n');
+      const headers = lines[0].split(',');
+      
+      for (let i = 1; i < lines.length; i++) {
+        const values = parseCSVLine(lines[i]);
+        if (values.length < 2) continue;
+
+        const question = {
+          type: values[0],
+          question: values[1],
+          image: values[2] || null,
+          video: values[3] || null,
+          audio: values[4] || null,
+          options: [],
+          correctAnswer: null,
+          correctFeedback: null,
+          incorrectFeedback: null,
+          points: 1
+        };
+
+        if (question.type === 'TF') {
+          question.options = ['Benar', 'Salah'];
+          const ans1 = values[5] || '';
+          question.correctAnswer = ans1.replace('*', '').trim();
+          question.correctFeedback = values[9];
+          question.incorrectFeedback = values[10];
+          question.points = parseFloat(values[11]) || 1;
+        } else if (question.type === 'MC') {
+          const opts = [values[5], values[6], values[7], values[8]].filter(o => o);
+          question.options = opts.map(o => o.replace('*', '').trim());
+          const correctOpt = opts.find(o => o.startsWith('*'));
+          question.correctAnswer = correctOpt ? correctOpt.replace('*', '').trim() : null;
+          question.correctFeedback = values[9];
+          question.incorrectFeedback = values[10];
+          question.points = parseFloat(values[11]) || 1;
+        } else if (question.type === 'MR') {
+          const opts = [values[5], values[6], values[7], values[8]].filter(o => o);
+          question.options = opts.map(o => o.replace('*', '').trim());
+          question.correctAnswer = opts.filter(o => o.startsWith('*')).map(o => o.replace('*', '').trim());
+          question.correctFeedback = values[9];
+          question.incorrectFeedback = values[10];
+          question.points = parseFloat(values[11]) || 1;
+        } else if (question.type === 'TI') {
+          const acceptedAnswers = [values[5], values[6], values[7], values[8]]
+            .filter(a => a)
+            .map(a => a.replace('*', '').trim());
+          question.correctAnswer = acceptedAnswers;
+          question.correctFeedback = values[9];
+          question.incorrectFeedback = values[10];
+          question.points = parseFloat(values[11]) || 1;
+        } else if (question.type === 'MG') {
+          const pairData = [values[5], values[6], values[7], values[8]].filter(p => p);
+          const pairs = [];
+          pairData.forEach(p => {
+            const parts = p.split('|');
+            if (parts.length === 2) {
+              pairs.push({ left: parts[0].trim(), right: parts[1].trim() });
+            }
+          });
+          question.pairs = pairs;
+          question.correctAnswer = pairs.map((p, idx) => ({ leftIdx: idx, rightIdx: idx }));
+          question.correctFeedback = values[9];
+          question.incorrectFeedback = values[10];
+          question.points = parseFloat(values[11]) || 1;
+        } else if (question.type === 'SEQ') {
+          question.items = [values[5], values[6], values[7], values[8]].filter(i => i).map(i => i.trim());
+          question.correctAnswer = question.items.slice();
+          question.correctFeedback = values[9];
+          question.incorrectFeedback = values[10];
+          question.points = parseFloat(values[11]) || 1;
+        } else if (question.type === 'NUMG') {
+          const ans = values[5] || '';
+          question.correctAnswer = parseFloat(ans.replace('*', '').trim());
+          question.tolerance = 0.01;
+          question.correctFeedback = values[9];
+          question.incorrectFeedback = values[10];
+          question.points = parseFloat(values[11]) || 1;
+        }
+
+        questions.push(question);
+      }
+    }
+
     function parseCSVLine(line) {
       const result = [];
       let current = '';
       let inQuotes = false;
-      
+
       for (let i = 0; i < line.length; i++) {
         const char = line[i];
-        
         if (char === '"') {
           inQuotes = !inQuotes;
         } else if (char === ',' && !inQuotes) {
-          result.push(current);
+          result.push(current.trim());
           current = '';
         } else {
           current += char;
         }
       }
-      result.push(current);
-      
-      // Clean up and preserve line breaks
-      return result.map(field => {
-        // Remove surrounding quotes
-        let cleaned = field.trim().replace(/^["']|["']$/g, '');
-        // Replace escaped newlines with actual newlines
-        cleaned = cleaned.replace(/\\n/g, '\n');
-        // Replace double quotes used for escaping quotes
-        cleaned = cleaned.replace(/""/g, '"');
-        return cleaned;
-      });
+      result.push(current.trim());
+      return result;
     }
-    
-    function parseQuestions(rawQuestions) {
-      return rawQuestions.map(q => {
-        const type = q['Question Type'] || q.Type;
-        const parsed = {
-          Type: type,
-          Question: q['Question Text'] || q.Question || '',
-          Image: q.Image || '',
-          Video: q.Video || '',
-          Audio: q.Audio || '',
-          Points: parseInt(q.Points) || 10,
-          CorrectFeedback: q['Correct Feedback'] || 'Benar!',
-          IncorrectFeedback: q['Incorrect Feedback'] || 'Salah!'
-        };
-        
-        // Parse answers based on type
-        if (type === 'TF') {
-          const ans1 = (q['Answer 1'] || 'True').trim();
-          const ans2 = (q['Answer 2'] || 'False').trim();
-          parsed.Options = [
-            { text: ans1.replace(/^\*/, ''), correct: ans1.startsWith('*') },
-            { text: ans2.replace(/^\*/, ''), correct: ans2.startsWith('*') }
-          ];
-          parsed.CorrectAnswer = parsed.Options.find(o => o.correct)?.text || 'True';
-        } else if (type === 'MC') {
-          parsed.Options = [1, 2, 3, 4]
-            .map(i => q[`Answer ${i}`])
-            .filter(a => a && a.trim())
-            .map(a => {
-              const trimmed = a.trim();
-              return {
-                text: trimmed.replace(/^\*/, ''),
-                correct: trimmed.startsWith('*')
-              };
-            });
-          parsed.CorrectAnswer = parsed.Options.find(o => o.correct)?.text || '';
-        } else if (type === 'MR') {
-          parsed.Options = [1, 2, 3, 4]
-            .map(i => q[`Answer ${i}`])
-            .filter(a => a && a.trim())
-            .map(a => {
-              const trimmed = a.trim();
-              return {
-                text: trimmed.replace(/^\*/, ''),
-                correct: trimmed.startsWith('*')
-              };
-            });
-          parsed.CorrectAnswers = parsed.Options.filter(o => o.correct).map(o => o.text);
-          // Also include non-marked answers as options if no correct answers marked
-          if (parsed.CorrectAnswers.length === 0 && parsed.Options.length > 0) {
-            parsed.Options = parsed.Options.map(o => ({ ...o, correct: false }));
-          }
-        } else if (type === 'TI') {
-          parsed.CorrectAnswers = [1, 2, 3, 4]
-            .map(i => q[`Answer ${i}`])
-            .filter(a => a && a.trim())
-            .map(a => a.trim().replace(/^\*/, '').toLowerCase().trim());
-        } else if (type === 'MG') {
-          // Format: State|Nickname in each answer
-          parsed.Pairs = [1, 2, 3, 4]
-            .map(i => q[`Answer ${i}`])
-            .filter(a => a && a.trim())
-            .map(a => {
-              const [left, right] = a.split('|');
-              return { left: left.trim(), right: right.trim() };
-            });
-          parsed.LeftItems = parsed.Pairs.map(p => p.left);
-          parsed.RightItems = parsed.Pairs.map(p => p.right);
-        } else if (type === 'SEQ') {
-          parsed.Sequence = [1, 2, 3, 4]
-            .map(i => q[`Answer ${i}`])
-            .filter(a => a && a.trim())
-            .map(a => a.trim());
-        } else if (type === 'NUMG') {
-          const ans = (q['Answer 1'] || '').trim();
-          parsed.CorrectNumber = parseFloat(ans.replace(/^\*/, ''));
-        }
-        
-        return parsed;
-      });
-    }
-    
-    async function initializeApp() {
-      showLoading();
-      
-      // Try loading from localStorage first
-      const cachedStudents = loadFromLocalStorage(STORAGE_KEYS.STUDENTS);
-      const cachedQuestions = loadFromLocalStorage(STORAGE_KEYS.QUESTIONS);
-      const cachedSubmitted = loadFromLocalStorage(STORAGE_KEYS.SUBMITTED);
-      
-      if (cachedSubmitted) {
-        submittedStudents = new Set(cachedSubmitted);
-      }
-      
-      // Load from CSV if not in cache or force refresh
-      try {
-        if (!cachedStudents || !cachedQuestions) {
-          students = await loadCSV('https://docs.google.com/spreadsheets/d/e/2PACX-1vShD-FggVnTmZjkm_VYH6raebmwcCW9qLdY8JPrJzMHZSGlI5O1lF9prNziinNA7YwyoPgZQal_nlkm/pub?gid=1534064510&single=true&output=csv');
-          
-          const rawQuestions = await loadCSV('https://docs.google.com/spreadsheets/d/e/2PACX-1vShD-FggVnTmZjkm_VYH6raebmwcCW9qLdY8JPrJzMHZSGlI5O1lF9prNziinNA7YwyoPgZQal_nlkm/pub?gid=1299383846&single=true&output=csv');
-          
-          questions = parseQuestions(rawQuestions);
-          
-          // Save to localStorage for offline use
-          saveToLocalStorage(STORAGE_KEYS.STUDENTS, students);
-          saveToLocalStorage(STORAGE_KEYS.QUESTIONS, questions);
-        } else {
-          students = cachedStudents;
-          questions = cachedQuestions;
-        }
-      } catch (error) {
-        console.error('Error loading from CSV:', error);
-        // Fallback to cached data
-        if (cachedStudents && cachedQuestions) {
-          students = cachedStudents;
-          questions = cachedQuestions;
-          showInlineMessage('Mode Offline: Menggunakan data tersimpan', 'info');
-        } else {
-          showInlineMessage('Gagal memuat data. Periksa koneksi internet.', 'error');
-          return;
+
+    function parseStudents(csv) {
+      const lines = csv.trim().split('\n');
+      for (let i = 1; i < lines.length; i++) {
+        if (!lines[i].trim()) continue;
+        const values = parseCSVLine(lines[i]);
+        if (values.length >= 4) {
+          const student = {
+            nis: values[0].trim(),
+            absen: values[1].trim(),
+            nama: values[2].trim(),
+            kelas: values[3].trim()
+          };
+          console.log('Parsed student:', student);
+          students.push(student);
         }
       }
-      
-      // Check for existing session
-      const session = loadCurrentSession();
-      if (session && session.student) {
-        showResumeDialog(session);
-      } else {
-        renderLoginPage();
-      }
     }
-    
-    function showResumeDialog(session) {
-      const timePassed = Math.floor((Date.now() - session.timestamp) / 1000);
-      const minutesPassed = Math.floor(timePassed / 60);
-      
-      document.getElementById('app').innerHTML = `
-        <div class="flex items-center justify-center min-h-full p-4 sm:p-6">
-          <div class="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 w-full max-w-md">
-            <h2 class="text-xl sm:text-2xl font-bold text-blue-900 mb-4">Sesi Ditemukan</h2>
-            <p class="text-gray-700 mb-4">
-              Anda memiliki sesi ujian yang belum selesai:
-            </p>
-            <div class="bg-blue-50 border-2 border-blue-200 rounded-lg p-4 mb-6">
-              <p class="text-sm text-gray-700"><strong>Nama:</strong> ${session.student.Nama}</p>
-              <p class="text-sm text-gray-700"><strong>Kelas:</strong> ${session.student.Kelas}</p>
-              <p class="text-sm text-gray-700"><strong>Soal:</strong> ${session.questionIndex + 1}/${questions.length}</p>
-              <p class="text-sm text-gray-700"><strong>Waktu berlalu:</strong> ${minutesPassed} menit</p>
-            </div>
-            <p class="text-sm text-yellow-700 mb-6">
-              ℹ Apakah Anda ingin melanjutkan ujian atau memulai sesi baru?
-            </p>
-            <div class="flex flex-col sm:flex-row gap-3">
-              <button 
-                onclick="clearCurrentSession(); renderLoginPage();"
-                class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-3 px-4 rounded-lg transition duration-200"
-              >
-                Sesi Baru
-              </button>
-              <button 
-                onclick="resumeSession()"
-                class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200"
-              >
-                Lanjutkan
-              </button>
-            </div>
-          </div>
-        </div>
-      `;
-    }
-    
-    function resumeSession() {
-      const session = loadCurrentSession();
-      if (session) {
-        currentStudent = session.student;
-        userAnswers = session.answers;
-        currentQuestionIndex = session.questionIndex;
-        timeRemaining = session.timeRemaining;
-        hasStarted = true;
-        startTimer();
-        renderExamPage();
-      }
-    }
-    
-    // ==================== INLINE MESSAGE SYSTEM ====================
-    function showInlineMessage(message, type = 'info') {
-      const messageDiv = document.createElement('div');
-      const colors = {
-        info: 'bg-blue-500',
-        warning: 'bg-yellow-500',
-        error: 'bg-red-500',
-        success: 'bg-green-500'
-      };
-      
-      messageDiv.className = `fixed top-4 left-1/2 transform -translate-x-1/2 ${colors[type]} text-white px-6 py-4 rounded-lg shadow-2xl z-50 max-w-md text-center font-semibold`;
-      messageDiv.textContent = message;
-      
-      document.body.appendChild(messageDiv);
-      
-      setTimeout(() => {
-        messageDiv.style.opacity = '0';
-        messageDiv.style.transition = 'opacity 0.3s';
-        setTimeout(() => messageDiv.remove(), 300);
-      }, 4000);
-    }
-    
-    // ==================== RENDER FUNCTIONS ====================
-    function showLoading() {
-      document.getElementById('app').innerHTML = `
-        <div class="flex items-center justify-center min-h-full">
-          <div class="text-center">
-            <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
-            <p class="text-gray-700 text-lg">Memuat data ujian...</p>
-          </div>
-        </div>
-      `;
-    }
-    
-    function renderLoginPage() {
-      document.getElementById('app').innerHTML = `
-        <div class="flex items-center justify-center min-h-full p-4 sm:p-6">
-          <div class="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 w-full max-w-md">
-            <div class="text-center mb-8">
-              <h1 class="text-3xl font-bold text-blue-900 mb-2">CBT Online</h1>
-              <p class="text-xl font-semibold text-blue-700">SMP Negeri 1 Purbalingga</p>
-              <p class="text-gray-600 mt-2">Silakan login dengan NIS Anda</p>
-            </div>
-            
-            <form id="loginForm" class="space-y-6">
-              <div>
-                <label for="nisInput" class="block text-sm font-medium text-gray-700 mb-2">
-                  Nomor Induk Siswa (NIS)
-                </label>
-                <input 
-                  type="text" 
-                  id="nisInput" 
-                  required
-                  class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-lg"
-                  placeholder="Masukkan NIS Anda"
-                  autocomplete="off"
-                >
-              </div>
-              
-              <div id="loginError" class="hidden bg-red-50 border-2 border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm"></div>
-              
-              <button 
-                type="submit"
-                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200 text-lg"
-              >
-                Masuk Ujian
-              </button>
-            </form>
-          </div>
-        </div>
-      `;
-      
-      document.getElementById('loginForm').addEventListener('submit', handleLogin);
-    }
-    
-    function handleLogin(e) {
+
+    // Login handler
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      
       const nis = document.getElementById('nisInput').value.trim();
-      const student = students.find(s => s.NIS === nis);
+      const loginButton = document.getElementById('loginButton');
+      const loginError = document.getElementById('loginError');
+
+      console.log('Login attempt with NIS:', nis);
+      console.log('Available students:', students);
+      console.log('Students NIS list:', students.map(s => s.nis));
+
+      loginError.classList.add('hidden');
+
+      if (completedStudents.has(nis)) {
+        loginError.textContent = 'Anda sudah menyelesaikan ujian. Tidak dapat mengerjakan lagi.';
+        loginError.classList.remove('hidden');
+        return;
+      }
+
+      // Try to find student with exact match first
+      let student = students.find(s => s.nis === nis);
       
-      const errorDiv = document.getElementById('loginError');
-      
+      // If not found, try case-insensitive and trim whitespace
       if (!student) {
-        errorDiv.textContent = 'NIS tidak ditemukan. Periksa kembali NIS Anda.';
-        errorDiv.classList.remove('hidden');
-        return;
+        student = students.find(s => s.nis.toLowerCase() === nis.toLowerCase());
       }
       
-      if (submittedStudents.has(nis)) {
-        errorDiv.textContent = 'Anda sudah mengerjakan ujian ini. Tidak dapat mengerjakan lagi.';
-        errorDiv.classList.remove('hidden');
+      // If still not found, try removing all whitespace
+      if (!student) {
+        const cleanNIS = nis.replace(/\s+/g, '');
+        student = students.find(s => s.nis.replace(/\s+/g, '') === cleanNIS);
+      }
+
+      console.log('Found student:', student);
+
+      if (!student) {
+        loginError.textContent = `NIS "${nis}" tidak ditemukan. Silakan periksa kembali. Total siswa terdaftar: ${students.length}`;
+        loginError.classList.remove('hidden');
         return;
       }
-      
+
       currentStudent = student;
-      userAnswers = {};
-      currentQuestionIndex = 0;
+      completedStudents.add(nis);
       
-      renderInstructionPage();
-    }
-    
-    function renderInstructionPage() {
-      const totalPoints = questions.reduce((sum, q) => sum + (q.Points || 10), 0);
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('examScreen').style.display = 'block';
       
-      document.getElementById('app').innerHTML = `
-        <div class="flex items-center justify-center min-h-full p-4 sm:p-6">
-          <div class="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 w-full max-w-2xl">
-            <div class="text-center mb-6">
-              <h2 class="text-2xl font-bold text-blue-900 mb-2">Petunjuk Pengerjaan</h2>
-              <p class="text-gray-700">Selamat datang, <span class="font-semibold text-blue-600">${currentStudent.Nama}</span></p>
-              <p class="text-sm text-gray-600">Kelas: ${currentStudent.Kelas} | NIS: ${currentStudent.NIS}</p>
-            </div>
-            
-            <div class="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-6 mb-6">
-              <h3 class="font-bold text-yellow-900 mb-3 text-lg">⚠️ PERHATIAN PENTING</h3>
-              <ul class="space-y-2 text-sm text-yellow-900">
-                <li>✓ Waktu ujian: <strong>90 menit</strong></li>
-                <li>✓ Jumlah soal: <strong>${questions.length} soal</strong></li>
-                <li>✓ Total poin: <strong>${totalPoints} poin</strong></li>
-                <li>✓ Anda hanya dapat mengerjakan <strong>SATU KALI</strong></li>
-                <li>✓ <strong>DILARANG</strong> pindah tab (maksimal 3x peringatan)</li>
-                <li>✓ <strong>DILARANG</strong> menggunakan Google Translate</li>
-                <li>✓ <strong>DILARANG</strong> membuka Developer Tools</li>
-                <li>✓ Jawaban otomatis tersimpan saat Anda menjawab</li>
-                <li>✓ Klik "Submit Ujian" jika sudah selesai</li>
-              </ul>
-            </div>
-            
-            <div class="bg-blue-50 border-2 border-blue-200 rounded-lg p-6 mb-6">
-              <h3 class="font-bold text-blue-900 mb-3">Jenis Soal:</h3>
-              <ul class="grid grid-cols-2 gap-2 text-sm text-blue-900">
-                <li>• Benar/Salah (TF)</li>
-                <li>• Pilihan Ganda (MC)</li>
-                <li>• Jawaban Ganda (MR)</li>
-                <li>• Jawaban Singkat (TI)</li>
-                <li>• Menjodohkan (MG)</li>
-                <li>• Urutan (SEQ)</li>
-                <li>• Numerik (NUMG)</li>
-              </ul>
-            </div>
-            
-            <button 
-              onclick="startExam()"
-              class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-6 rounded-lg transition duration-200 text-lg"
-            >
-              Saya Siap, Mulai Ujian
-            </button>
-          </div>
-        </div>
-      `;
-    }
-    
+      const config = window.elementSdk ? window.elementSdk.config : defaultConfig;
+      document.getElementById('studentInfo').textContent = `${student.nama} (${student.kelas}) - ${student.nis}`;
+      
+      timeRemaining = parseInt(config.time_limit || defaultConfig.time_limit) * 60;
+      startExam();
+    });
+
     function startExam() {
-      hasStarted = true;
-      timeRemaining = 90 * 60; // 90 minutes in seconds
+      examStarted = true;
+      renderQuestionNav();
+      renderQuestion();
       startTimer();
-      renderExamPage();
     }
-    
+
     function startTimer() {
       timerInterval = setInterval(() => {
         timeRemaining--;
         updateTimerDisplay();
-        
-        // Auto-save session every 10 seconds
-        if (timeRemaining % 10 === 0) {
-          saveCurrentSession();
-        }
-        
+
         if (timeRemaining <= 0) {
           clearInterval(timerInterval);
-          showInlineMessage('Waktu habis! Ujian akan disubmit otomatis.', 'error');
+          showWarning('Waktu habis! Ujian otomatis diselesaikan.');
           setTimeout(() => submitExam(true), 2000);
         }
       }, 1000);
     }
-    
-    function updateTimerDisplay() {
-      const hours = Math.floor(timeRemaining / 3600);
-      const minutes = Math.floor((timeRemaining % 3600) / 60);
-      const seconds = timeRemaining % 60;
-      
-      const timerElement = document.getElementById('timer');
-      if (timerElement) {
-        const timeString = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-        timerElement.textContent = timeString;
-        
-        if (timeRemaining <= 300) { // 5 minutes warning
-          timerElement.classList.add('timer-warning', 'text-red-600');
-        }
-      }
-    }
-    
-    function renderExamPage() {
-      const question = questions[currentQuestionIndex];
-      const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
-      
-      document.getElementById('app').innerHTML = `
-        <div class="w-full min-h-full bg-gradient-to-br from-blue-50 to-indigo-100">
-          <!-- Header -->
-          <div class="bg-white shadow-lg sticky top-0 z-10">
-            <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
-              <div class="flex justify-between items-center mb-2 sm:mb-3">
-                <div>
-                  <h2 class="text-base sm:text-xl font-bold text-blue-900 header-text">SMP Negeri 1 Purbalingga</h2>
-                  <p class="text-xs sm:text-sm text-gray-600">${currentStudent.Nama} (${currentStudent.Kelas})</p>
-                </div>
-                <div class="text-right">
-                  <div class="text-xl sm:text-2xl font-bold text-blue-600 timer-text" id="timer">01:30:00</div>
-                  <p class="text-xs text-gray-600">Sisa Waktu</p>
-                </div>
-              </div>
-              
-              <!-- Progress Bar -->
-              <div class="w-full bg-gray-200 rounded-full h-3">
-                <div class="bg-blue-600 h-3 rounded-full transition-all duration-300" style="width: ${progress}%"></div>
-              </div>
-              <p class="text-sm text-gray-600 mt-2">Soal ${currentQuestionIndex + 1} dari ${questions.length}</p>
-            </div>
-          </div>
-          
-          <!-- Question Content -->
-          <div class="max-w-4xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
-            <div class="bg-white rounded-2xl shadow-xl p-4 sm:p-8 question-card">
-              ${renderQuestion(question, currentQuestionIndex)}
-            </div>
-            
-            <!-- Navigation -->
-            <div class="flex justify-between items-center mt-4 sm:mt-6 gap-2 no-print">
-              <button 
-                onclick="previousQuestion()"
-                ${currentQuestionIndex === 0 ? 'disabled' : ''}
-                class="bg-gray-500 hover:bg-gray-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-2 sm:py-3 px-4 sm:px-8 rounded-lg transition duration-200 text-sm sm:text-base"
-              >
-                ← <span class="hidden sm:inline">Sebelumnya</span>
-              </button>
-              
-              ${currentQuestionIndex === questions.length - 1 ? `
-                <button 
-                  onclick="confirmSubmit()"
-                  class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 sm:py-3 px-4 sm:px-8 rounded-lg transition duration-200 text-sm sm:text-base"
-                >
-                  Submit <span class="hidden sm:inline">Ujian</span> ✓
-                </button>
-              ` : `
-                <button 
-                  onclick="nextQuestion()"
-                  class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 sm:py-3 px-4 sm:px-8 rounded-lg transition duration-200 text-sm sm:text-base"
-                >
-                  <span class="hidden sm:inline">Selanjutnya</span> →
-                </button>
-              `}
-            </div>
-            
-            <!-- Floating Navigation Button -->
-            <button 
-              id="navToggleBtn"
-              onclick="toggleNavigation()"
-              class="nav-btn-mobile no-print fixed right-4 sm:right-6 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-2xl transition duration-300 z-20"
-              style="top: 50%; transform: translateY(-50%);"
-              title="Navigasi Soal"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
 
-            <!-- Floating Question Navigator -->
-            <div id="floatingNav" class="floating-nav-panel no-print fixed right-4 sm:right-6 bg-white rounded-2xl shadow-2xl p-3 sm:p-4 z-20 hidden max-h-[60vh] overflow-y-auto" style="top: 50%; transform: translateY(-50%); max-width: 280px;">
-              <div class="flex justify-between items-center mb-3 sticky top-0 bg-white pb-2 border-b border-gray-200">
-                <h3 class="font-bold text-gray-800 text-sm">Navigasi Soal</h3>
-                <button onclick="toggleNavigation()" class="text-gray-500 hover:text-gray-700 p-1">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-              
-              <div class="grid grid-cols-5 gap-2 mb-3">
-                ${questions.map((q, idx) => `
-                  <button 
-                    onclick="goToQuestion(${idx})"
-                    class="w-full aspect-square flex items-center justify-center rounded-lg text-xs font-bold transition duration-200 shadow hover:shadow-md transform hover:scale-105 ${
-                      idx === currentQuestionIndex 
-                        ? 'bg-blue-600 text-white ring-2 ring-blue-300' 
-                        : userAnswers[idx] !== undefined
-                        ? 'bg-green-500 text-white hover:bg-green-600'
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                    }"
-                    style="min-width: 36px; min-height: 36px;"
-                  >
-                    ${idx + 1}
-                  </button>
-                `).join('')}
-              </div>
-              
-              <div class="border-t border-gray-200 pt-3 space-y-2 text-xs">
-                <div class="flex items-center gap-2">
-                  <div class="w-4 h-4 bg-blue-600 rounded flex-shrink-0"></div>
-                  <span class="text-gray-700">Aktif</span>
-                </div>
-                <div class="flex items-center gap-2">
-                  <div class="w-4 h-4 bg-green-500 rounded flex-shrink-0"></div>
-                  <span class="text-gray-700">Dijawab</span>
-                </div>
-                <div class="flex items-center gap-2">
-                  <div class="w-4 h-4 bg-gray-200 rounded flex-shrink-0"></div>
-                  <span class="text-gray-700">Belum</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      `;
+    function updateTimerDisplay() {
+      const minutes = Math.floor(timeRemaining / 60);
+      const seconds = timeRemaining % 60;
+      const timerEl = document.getElementById('timer');
+      timerEl.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
       
-      updateTimerDisplay();
-      attachQuestionEventListeners(question);
-    }
-    
-    function renderQuestion(question, index) {
-      const type = question.Type;
-      const questionText = question.Question || '';
-      
-      let html = `
-        <div class="mb-6">
-          ${question.Image ? `
-            <div class="mb-4">
-              <img src="${question.Image}" alt="Question image" class="max-w-full h-auto rounded-lg shadow-md mx-auto" onerror="this.style.display='none'">
-            </div>
-          ` : ''}
-          
-          ${question.Video ? `
-            <div class="mb-4">
-              <video controls class="max-w-full h-auto rounded-lg shadow-md mx-auto">
-                <source src="${question.Video}" type="video/mp4">
-                Your browser does not support the video tag.
-              </video>
-            </div>
-          ` : ''}
-          
-          ${question.Audio ? `
-            <div class="mb-4">
-              <audio controls class="w-full">
-                <source src="${question.Audio}" type="audio/mpeg">
-                Your browser does not support the audio element.
-              </audio>
-            </div>
-          ` : ''}
-          
-          <div class="flex items-start gap-2 sm:gap-3 mb-4">
-            <span class="question-number bg-blue-600 text-white font-bold px-3 sm:px-4 py-2 rounded-lg text-base sm:text-lg flex-shrink-0">
-              ${index + 1}
-            </span>
-            <div class="flex-1">
-              <div class="flex items-center gap-2 mb-2">
-                <span class="inline-block bg-purple-100 text-purple-800 text-xs font-semibold px-3 py-1 rounded-full">
-                  ${getTypeLabel(type)}
-                </span>
-                <span class="inline-block bg-green-100 text-green-800 text-xs font-semibold px-3 py-1 rounded-full">
-                  ${question.Points} poin
-                </span>
-              </div>
-              <p class="text-gray-800 text-lg leading-relaxed whitespace-pre-wrap">${questionText}</p>
-            </div>
-          </div>
-        </div>
-      `;
-      
-      switch(type) {
-        case 'TF':
-          html += renderTrueFalse(question, index);
-          break;
-        case 'MC':
-          html += renderMultipleChoice(question, index);
-          break;
-        case 'MR':
-          html += renderMultipleResponse(question, index);
-          break;
-        case 'TI':
-          html += renderTextInput(question, index);
-          break;
-        case 'MG':
-          html += renderMatching(question, index);
-          break;
-        case 'SEQ':
-          html += renderSequence(question, index);
-          break;
-        case 'NUMG':
-          html += renderNumeric(question, index);
-          break;
-        default:
-          html += '<p class="text-red-600">Tipe soal tidak dikenali</p>';
+      if (timeRemaining <= 300) {
+        timerEl.classList.add('timer-warning');
       }
-      
-      return html;
     }
-    
-    function getTypeLabel(type) {
+
+    function renderQuestionNav() {
+      const nav = document.getElementById('questionNav');
+      nav.innerHTML = '';
+      
+      questions.forEach((q, index) => {
+        const btn = document.createElement('button');
+        btn.textContent = index + 1;
+        btn.className = 'w-10 h-10 rounded-lg font-medium transition';
+        
+        if (answers[index] !== undefined) {
+          btn.className += ' bg-green-500 text-white';
+        } else if (index === currentQuestionIndex) {
+          btn.className += ' bg-blue-600 text-white';
+        } else {
+          btn.className += ' bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-100';
+        }
+        
+        btn.onclick = () => {
+          currentQuestionIndex = index;
+          renderQuestion();
+          renderQuestionNav();
+        };
+        
+        nav.appendChild(btn);
+      });
+    }
+
+    function renderQuestion() {
+      const container = document.getElementById('questionContainer');
+      const question = questions[currentQuestionIndex];
+      
+      let mediaHTML = '';
+      if (question.image) {
+        mediaHTML += `<img src="${question.image}" alt="Question image" class="max-w-full h-auto rounded-lg mb-4 shadow-md" onerror="this.style.display='none'; this.alt='Gambar gagal dimuat';">`;
+      }
+      if (question.audio) {
+        mediaHTML += `<audio controls class="w-full mb-4"><source src="${question.audio}" type="audio/mpeg">Browser Anda tidak mendukung audio.</audio>`;
+      }
+      if (question.video) {
+        mediaHTML += `<video controls class="w-full rounded-lg mb-4 shadow-md"><source src="${question.video}" type="video/mp4">Browser Anda tidak mendukung video.</video>`;
+      }
+
+      container.innerHTML = `
+        <div class="question-card fade-in">
+          <div class="mb-4">
+            <span class="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium mb-2">
+              ${getQuestionTypeLabel(question.type)}
+            </span>
+            <p class="text-sm text-gray-600">Soal ${currentQuestionIndex + 1} dari ${questions.length}</p>
+          </div>
+          <h3 class="text-xl font-bold mb-4">${question.question}</h3>
+          ${mediaHTML}
+          <div id="answerArea"></div>
+        </div>
+      `;
+
+      renderAnswerArea(question);
+      updateNavigationButtons();
+    }
+
+    function getQuestionTypeLabel(type) {
       const labels = {
         'TF': 'Benar/Salah',
         'MC': 'Pilihan Ganda',
@@ -919,781 +544,414 @@
       };
       return labels[type] || type;
     }
-    
-    function renderTrueFalse(question, index) {
-      const answer = userAnswers[index];
-      return `
-        <div class="space-y-3">
-          ${question.Options.map((opt, i) => `
-            <label class="flex items-center p-4 border-2 rounded-lg cursor-pointer transition duration-200 hover:bg-blue-50 ${answer === opt.text ? 'border-blue-600 bg-blue-50' : 'border-gray-300'}">
-              <input type="radio" name="q${index}" value="${opt.text}" ${answer === opt.text ? 'checked' : ''} class="w-5 h-5 text-blue-600">
-              <span class="ml-3 text-gray-800 font-medium">${opt.text}</span>
-            </label>
-          `).join('')}
-        </div>
-      `;
-    }
-    
-    function renderMultipleChoice(question, index) {
-      const answer = userAnswers[index];
-      
-      return `
-        <div class="space-y-3">
-          ${question.Options.map((opt, i) => `
-            <label class="flex items-start p-4 border-2 rounded-lg cursor-pointer transition duration-200 hover:bg-blue-50 ${answer === opt.text ? 'border-blue-600 bg-blue-50' : 'border-gray-300'}">
-              <input type="radio" name="q${index}" value="${opt.text}" ${answer === opt.text ? 'checked' : ''} class="w-5 h-5 text-blue-600 mt-1 flex-shrink-0">
-              <span class="ml-3 text-gray-800">
-                <span class="font-bold mr-2">${String.fromCharCode(65 + i)}.</span>${opt.text}
-              </span>
-            </label>
-          `).join('')}
-        </div>
-      `;
-    }
-    
-    function renderMultipleResponse(question, index) {
-      const answers = userAnswers[index] || [];
-      
-      return `
-        <div class="space-y-3">
-          <p class="text-sm text-gray-600 mb-3">Pilih semua jawaban yang benar:</p>
-          ${question.Options.map((opt, i) => `
-            <label class="flex items-start p-4 border-2 rounded-lg cursor-pointer transition duration-200 hover:bg-blue-50 ${answers.includes(opt.text) ? 'border-blue-600 bg-blue-50' : 'border-gray-300'}">
-              <input type="checkbox" name="q${index}" value="${opt.text}" ${answers.includes(opt.text) ? 'checked' : ''} class="w-5 h-5 text-blue-600 mt-1 flex-shrink-0">
-              <span class="ml-3 text-gray-800">
-                <span class="font-bold mr-2">${String.fromCharCode(65 + i)}.</span>${opt.text}
-              </span>
-            </label>
-          `).join('')}
-        </div>
-      `;
-    }
-    
-    function renderTextInput(question, index) {
-      const answer = userAnswers[index] || '';
-      return `
-        <div>
-          <textarea 
-            id="textInput${index}"
-            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-gray-800 min-h-32"
-            placeholder="Ketik jawaban Anda di sini..."
-          >${answer}</textarea>
-          <p class="text-xs text-gray-500 mt-2">Tip: Ada beberapa variasi jawaban yang diterima</p>
-        </div>
-      `;
-    }
-    
-    function renderMatching(question, index) {
-      const answers = userAnswers[index] || {};
-      const shuffledRight = [...question.RightItems].sort(() => Math.random() - 0.5);
-      
-      return `
-        <div class="matching-container">
-          <div class="space-y-3">
-            <h4 class="font-semibold text-gray-700 mb-3">Pertanyaan:</h4>
-            ${question.LeftItems.map((item, idx) => `
-              <div class="bg-blue-50 p-4 rounded-lg">
-                <div class="font-semibold text-blue-900 mb-2">${idx + 1}. ${item}</div>
-                <select 
-                  class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                  data-match-index="${idx}"
-                >
-                  <option value="">-- Pilih Pasangan --</option>
-                  ${shuffledRight.map((right, rightIdx) => {
-                    const originalIdx = question.RightItems.indexOf(right);
-                    return `
-                      <option value="${originalIdx}" ${answers[idx] == originalIdx ? 'selected' : ''}>
-                        ${String.fromCharCode(65 + rightIdx)}. ${right}
-                      </option>
-                    `;
-                  }).join('')}
-                </select>
-              </div>
-            `).join('')}
-          </div>
+
+    function renderAnswerArea(question) {
+      const area = document.getElementById('answerArea');
+      const currentAnswer = answers[currentQuestionIndex];
+
+      if (question.type === 'TF' || question.type === 'MC') {
+        question.options.forEach((option, index) => {
+          const btn = document.createElement('button');
+          btn.className = 'option-button w-full text-left p-4 mb-3 rounded-lg border-2 transition';
+          btn.className += currentAnswer === option ? ' border-blue-600 bg-blue-50' : ' border-gray-300 hover:border-blue-400';
+          btn.innerHTML = `
+            <span class="inline-block w-8 h-8 rounded-full border-2 mr-3 text-center leading-7 ${currentAnswer === option ? 'border-blue-600 bg-blue-600 text-white' : 'border-gray-400'}">
+              ${String.fromCharCode(65 + index)}
+            </span>
+            ${option}
+          `;
+          btn.onclick = () => {
+            answers[currentQuestionIndex] = option;
+            renderQuestion();
+            renderQuestionNav();
+          };
+          area.appendChild(btn);
+        });
+      } else if (question.type === 'MR') {
+        question.options.forEach((option, index) => {
+          const div = document.createElement('div');
+          div.className = 'flex items-start p-4 mb-3 rounded-lg border-2 border-gray-300 hover:border-blue-400 transition cursor-pointer';
           
-          <div class="space-y-3">
-            <h4 class="font-semibold text-gray-700 mb-3">Pilihan Jawaban:</h4>
-            ${shuffledRight.map((item, idx) => `
-              <div class="bg-gray-50 p-4 rounded-lg">
-                <span class="font-semibold text-gray-700">${String.fromCharCode(65 + idx)}.</span>
-                <span class="text-gray-800 ml-2">${item}</span>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      `;
-    }
-    
-    function renderSequence(question, index) {
-      const answers = userAnswers[index] || [...question.Sequence].sort(() => Math.random() - 0.5);
-      
-      return `
-        <div>
-          <p class="text-sm text-gray-600 mb-4">Susun urutan yang benar dengan drag & drop:</p>
-          <div id="sequenceContainer${index}" class="space-y-2">
-            ${answers.map((item, idx) => `
-              <div 
-                class="sequence-item bg-white border-2 border-gray-300 p-4 rounded-lg cursor-move hover:border-blue-400 transition duration-200"
-                draggable="true"
-                data-index="${idx}"
-              >
-                <div class="flex items-center gap-3">
-                  <span class="bg-gray-200 text-gray-700 font-bold px-3 py-1 rounded">${idx + 1}</span>
-                  <span class="text-gray-800">${item}</span>
-                  <span class="ml-auto text-gray-400">☰</span>
-                </div>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      `;
-    }
-    
-    function renderNumeric(question, index) {
-      const answer = userAnswers[index] || '';
-      return `
-        <div>
-          <input 
-            type="number" 
-            id="numInput${index}"
-            value="${answer}"
-            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-gray-800 text-lg"
-            placeholder="Masukkan jawaban angka"
-            step="any"
-          >
-        </div>
-      `;
-    }
-    
-    function attachQuestionEventListeners(question) {
-      const type = question.Type;
-      const index = currentQuestionIndex;
-      
-      if (type === 'TF' || type === 'MC') {
-        document.querySelectorAll(`input[name="q${index}"]`).forEach(radio => {
-          radio.addEventListener('change', (e) => {
-            userAnswers[index] = e.target.value;
-            saveCurrentSession();
-          });
-        });
-      } else if (type === 'MR') {
-        document.querySelectorAll(`input[name="q${index}"]`).forEach(checkbox => {
-          checkbox.addEventListener('change', () => {
-            const checked = Array.from(document.querySelectorAll(`input[name="q${index}"]:checked`))
-              .map(cb => cb.value);
-            userAnswers[index] = checked;
-            saveCurrentSession();
-          });
-        });
-      } else if (type === 'TI') {
-        const textInput = document.getElementById(`textInput${index}`);
-        if (textInput) {
-          textInput.addEventListener('input', (e) => {
-            userAnswers[index] = e.target.value;
-            saveCurrentSession();
-          });
-        }
-      } else if (type === 'MG') {
-        document.querySelectorAll('select[data-match-index]').forEach(select => {
-          select.addEventListener('change', (e) => {
-            const matchIndex = e.target.dataset.matchIndex;
-            if (!userAnswers[index]) userAnswers[index] = {};
-            userAnswers[index][matchIndex] = e.target.value;
-            saveCurrentSession();
-          });
-        });
-      } else if (type === 'SEQ') {
-        setupSequenceDragDrop(index);
-      } else if (type === 'NUMG') {
-        const numInput = document.getElementById(`numInput${index}`);
-        if (numInput) {
-          numInput.addEventListener('input', (e) => {
-            userAnswers[index] = e.target.value;
-            saveCurrentSession();
-          });
-        }
-      }
-    }
-    
-    function setupSequenceDragDrop(index) {
-      const container = document.getElementById(`sequenceContainer${index}`);
-      if (!container) return;
-      
-      let draggedElement = null;
-      
-      container.querySelectorAll('.sequence-item').forEach(item => {
-        item.addEventListener('dragstart', (e) => {
-          draggedElement = item;
-          item.style.opacity = '0.5';
-        });
-        
-        item.addEventListener('dragend', (e) => {
-          item.style.opacity = '1';
-        });
-        
-        item.addEventListener('dragover', (e) => {
-          e.preventDefault();
-        });
-        
-        item.addEventListener('drop', (e) => {
-          e.preventDefault();
-          if (draggedElement !== item) {
-            const allItems = Array.from(container.children);
-            const draggedIndex = allItems.indexOf(draggedElement);
-            const targetIndex = allItems.indexOf(item);
+          const checked = currentAnswer && currentAnswer.includes(option);
+          div.innerHTML = `
+            <input type="checkbox" id="opt${index}" ${checked ? 'checked' : ''} class="mt-1 w-5 h-5 text-blue-600">
+            <label for="opt${index}" class="ml-3 cursor-pointer flex-1">${option}</label>
+          `;
+          
+          div.onclick = () => {
+            const checkbox = div.querySelector('input');
+            checkbox.checked = !checkbox.checked;
             
-            if (draggedIndex < targetIndex) {
-              item.after(draggedElement);
-            } else {
-              item.before(draggedElement);
+            if (!answers[currentQuestionIndex]) {
+              answers[currentQuestionIndex] = [];
             }
             
-            // Update answer
-            const newOrder = Array.from(container.children).map(el => 
-              el.querySelector('span:nth-child(2)').textContent
-            );
-            userAnswers[index] = newOrder;
+            if (checkbox.checked) {
+              if (!answers[currentQuestionIndex].includes(option)) {
+                answers[currentQuestionIndex].push(option);
+              }
+            } else {
+              answers[currentQuestionIndex] = answers[currentQuestionIndex].filter(a => a !== option);
+            }
             
-            // Update numbers
-            container.querySelectorAll('.sequence-item').forEach((el, idx) => {
-              el.querySelector('.bg-gray-200').textContent = idx + 1;
-            });
-            
-            saveCurrentSession();
-          }
+            renderQuestionNav();
+          };
+          
+          area.appendChild(div);
         });
-      });
+      } else if (question.type === 'TI') {
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'w-full p-4 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent';
+        input.placeholder = 'Ketik jawaban Anda...';
+        input.value = currentAnswer || '';
+        input.oninput = (e) => {
+          answers[currentQuestionIndex] = e.target.value;
+          renderQuestionNav();
+        };
+        area.appendChild(input);
+      } else if (question.type === 'NUMG') {
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.step = 'any';
+        input.className = 'w-full p-4 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent';
+        input.placeholder = 'Masukkan angka...';
+        input.value = currentAnswer !== undefined ? currentAnswer : '';
+        input.oninput = (e) => {
+          answers[currentQuestionIndex] = parseFloat(e.target.value);
+          renderQuestionNav();
+        };
+        area.appendChild(input);
+      } else if (question.type === 'MG') {
+        renderMatchingQuestion(question, area, currentAnswer);
+      } else if (question.type === 'SEQ') {
+        renderSequenceQuestion(question, area, currentAnswer);
+      }
     }
-    
-    function previousQuestion() {
+
+    function renderMatchingQuestion(question, area, currentAnswer) {
+      const matchDiv = document.createElement('div');
+      matchDiv.className = 'space-y-4';
+      
+      const leftItems = question.pairs.map(p => p.left);
+      const rightItems = question.pairs.map(p => p.right);
+      
+      if (!currentAnswer) {
+        currentAnswer = {};
+        answers[currentQuestionIndex] = currentAnswer;
+      }
+      
+      leftItems.forEach((left, leftIdx) => {
+        const pairDiv = document.createElement('div');
+        pairDiv.className = 'flex items-center gap-4 p-4 bg-gray-50 rounded-lg';
+        
+        pairDiv.innerHTML = `
+          <div class="flex-1 font-medium">${left}</div>
+          <div class="text-gray-400">↔</div>
+          <select class="flex-1 p-2 border-2 border-gray-300 rounded-lg" data-left-idx="${leftIdx}">
+            <option value="">Pilih pasangan...</option>
+            ${rightItems.map((right, rightIdx) => `
+              <option value="${rightIdx}" ${currentAnswer[leftIdx] === rightIdx ? 'selected' : ''}>
+                ${right}
+              </option>
+            `).join('')}
+          </select>
+        `;
+        
+        pairDiv.querySelector('select').onchange = (e) => {
+          const selectedRightIdx = e.target.value ? parseInt(e.target.value) : null;
+          answers[currentQuestionIndex][leftIdx] = selectedRightIdx;
+          renderQuestionNav();
+        };
+        
+        matchDiv.appendChild(pairDiv);
+      });
+      
+      area.appendChild(matchDiv);
+    }
+
+    function renderSequenceQuestion(question, area, currentAnswer) {
+      const items = currentAnswer || shuffleArray([...question.items]);
+      
+      const seqDiv = document.createElement('div');
+      seqDiv.className = 'space-y-3';
+      seqDiv.innerHTML = '<p class="text-sm text-gray-600 mb-3">Klik dan seret untuk mengurutkan:</p>';
+      
+      items.forEach((item, idx) => {
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'draggable p-4 bg-white border-2 border-gray-300 rounded-lg cursor-move hover:border-blue-400 transition';
+        itemDiv.draggable = true;
+        itemDiv.innerHTML = `
+          <span class="inline-block w-8 h-8 bg-blue-100 text-blue-800 rounded-full text-center leading-8 mr-3 font-medium">
+            ${idx + 1}
+          </span>
+          ${item}
+        `;
+        
+        itemDiv.ondragstart = (e) => {
+          e.dataTransfer.effectAllowed = 'move';
+          e.dataTransfer.setData('text/html', idx.toString());
+          itemDiv.classList.add('opacity-50');
+        };
+        
+        itemDiv.ondragend = () => {
+          itemDiv.classList.remove('opacity-50');
+        };
+        
+        itemDiv.ondragover = (e) => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
+        };
+        
+        itemDiv.ondrop = (e) => {
+          e.preventDefault();
+          const fromIdx = parseInt(e.dataTransfer.getData('text/html'));
+          const toIdx = idx;
+          
+          if (fromIdx !== toIdx) {
+            const newItems = [...items];
+            const [movedItem] = newItems.splice(fromIdx, 1);
+            newItems.splice(toIdx, 0, movedItem);
+            answers[currentQuestionIndex] = newItems;
+            renderQuestion();
+            renderQuestionNav();
+          }
+        };
+        
+        seqDiv.appendChild(itemDiv);
+      });
+      
+      area.appendChild(seqDiv);
+    }
+
+    function shuffleArray(array) {
+      const newArray = [...array];
+      for (let i = newArray.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+      }
+      return newArray;
+    }
+
+    function updateNavigationButtons() {
+      const prevBtn = document.getElementById('prevButton');
+      const nextBtn = document.getElementById('nextButton');
+      const submitBtn = document.getElementById('submitButton');
+
+      prevBtn.disabled = currentQuestionIndex === 0;
+
+      if (currentQuestionIndex === questions.length - 1) {
+        nextBtn.style.display = 'none';
+        submitBtn.style.display = 'block';
+      } else {
+        nextBtn.style.display = 'block';
+        submitBtn.style.display = 'none';
+      }
+    }
+
+    document.getElementById('prevButton').onclick = () => {
       if (currentQuestionIndex > 0) {
         currentQuestionIndex--;
-        renderExamPage();
+        renderQuestion();
+        renderQuestionNav();
       }
-    }
-    
-    function nextQuestion() {
+    };
+
+    document.getElementById('nextButton').onclick = () => {
       if (currentQuestionIndex < questions.length - 1) {
         currentQuestionIndex++;
-        renderExamPage();
+        renderQuestion();
+        renderQuestionNav();
       }
-    }
-    
-    function goToQuestion(index) {
-      currentQuestionIndex = index;
-      renderExamPage();
-    }
-    
-    function toggleNavigation() {
-      const nav = document.getElementById('floatingNav');
-      if (nav) {
-        nav.classList.toggle('hidden');
+    };
+
+    document.getElementById('submitButton').onclick = () => {
+      const unanswered = questions.length - Object.keys(answers).length;
+      if (unanswered > 0) {
+        showWarning(`Masih ada ${unanswered} soal yang belum dijawab. Yakin ingin selesai?`);
+        setTimeout(() => {
+          const confirmDiv = document.createElement('div');
+          confirmDiv.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+          confirmDiv.innerHTML = `
+            <div class="bg-white rounded-lg p-6 max-w-md mx-4">
+              <h3 class="text-xl font-bold mb-4">Konfirmasi</h3>
+              <p class="mb-6">Apakah Anda yakin ingin menyelesaikan ujian?</p>
+              <div class="flex gap-3 justify-end">
+                <button id="cancelSubmit" class="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Batal</button>
+                <button id="confirmSubmit" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">Ya, Selesai</button>
+              </div>
+            </div>
+          `;
+          document.body.appendChild(confirmDiv);
+          
+          document.getElementById('cancelSubmit').onclick = () => {
+            document.body.removeChild(confirmDiv);
+          };
+          
+          document.getElementById('confirmSubmit').onclick = () => {
+            document.body.removeChild(confirmDiv);
+            submitExam(false);
+          };
+        }, 1000);
+      } else {
+        submitExam(false);
       }
-    }
-    
-    function confirmSubmit() {
-      const answeredCount = Object.keys(userAnswers).length;
-      const unansweredCount = questions.length - answeredCount;
-      
-      const confirmDiv = document.createElement('div');
-      confirmDiv.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
-      confirmDiv.innerHTML = `
-        <div class="bg-white rounded-2xl p-8 max-w-md w-full">
-          <h3 class="text-2xl font-bold text-gray-800 mb-4">Konfirmasi Submit</h3>
-          <div class="space-y-2 mb-6">
-            <p class="text-gray-700">Soal terjawab: <span class="font-bold text-green-600">${answeredCount}/${questions.length}</span></p>
-            ${unansweredCount > 0 ? `
-              <p class="text-gray-700">Soal belum dijawab: <span class="font-bold text-red-600">${unansweredCount}</span></p>
-              <p class="text-sm text-red-600 mt-3">⚠️ Soal yang tidak dijawab akan mendapat nilai 0</p>
-            ` : ''}
-          </div>
-          <p class="text-gray-700 mb-6">Apakah Anda yakin ingin mengumpulkan ujian?</p>
-          <div class="flex gap-3">
-            <button 
-              onclick="this.closest('.fixed').remove()"
-              class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-3 px-6 rounded-lg transition duration-200"
-            >
-              Batal
-            </button>
-            <button 
-              onclick="this.closest('.fixed').remove(); submitExam(false);"
-              class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition duration-200"
-            >
-              Ya, Submit
-            </button>
-          </div>
-        </div>
-      `;
-      
-      document.body.appendChild(confirmDiv);
-    }
-    
+    };
+
     async function submitExam(autoSubmit) {
-      if (isSubmitting) return;
-      isSubmitting = true;
+      if (timerInterval) {
+        clearInterval(timerInterval);
+      }
+      examStarted = false;
+
+      const score = calculateScore();
       
-      clearInterval(timerInterval);
-      
-      // Calculate score with points
-      let totalPoints = 0;
-      let earnedPoints = 0;
-      
-      questions.forEach((q, idx) => {
-        totalPoints += q.Points || 10;
-        
-        if (userAnswers[idx] !== undefined) {
-          if (checkAnswer(q, userAnswers[idx])) {
-            earnedPoints += q.Points || 10;
-          }
-        }
-      });
-      
-      const finalScore = totalPoints > 0 ? Math.round((earnedPoints / totalPoints) * 100) : 0;
-      
-      // Show loading
-      document.getElementById('app').innerHTML = `
-        <div class="flex items-center justify-center min-h-full">
-          <div class="text-center">
-            <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
-            <p class="text-gray-700 text-lg">Mengirim jawaban ke server...</p>
-          </div>
-        </div>
-      `;
-      
-      // Save result to localStorage
-      const result = {
-        nis: currentStudent.NIS,
-        nama: currentStudent.Nama,
-        kelas: currentStudent.Kelas,
-        score: finalScore,
-        earnedPoints: earnedPoints,
-        totalPoints: totalPoints,
-        timestamp: new Date().toISOString(),
-        autoSubmit: autoSubmit
-      };
-      
-      const results = loadFromLocalStorage(STORAGE_KEYS.RESULTS) || [];
-      results.push(result);
-      saveToLocalStorage(STORAGE_KEYS.RESULTS, results);
-      
-      // Add to submitted students
-      submittedStudents.add(currentStudent.NIS);
-      saveToLocalStorage(STORAGE_KEYS.SUBMITTED, Array.from(submittedStudents));
-      
-      // Clear current session
-      clearCurrentSession();
-      
-      // Submit to Google Apps Script (optional - works in background)
+      const submitBtn = document.getElementById('submitButton');
+      const nextBtn = document.getElementById('nextButton');
+      submitBtn.disabled = true;
+      nextBtn.disabled = true;
+      submitBtn.textContent = 'Mengirim...';
+
       try {
         const formData = new FormData();
-        formData.append('NIS', currentStudent.NIS);
-        formData.append('Absen', currentStudent.Absen || '');
-        formData.append('Nama', currentStudent.Nama);
-        formData.append('Kelas', currentStudent.Kelas);
-        formData.append('Skor', finalScore);
-        
-        fetch('https://script.google.com/macros/s/AKfycbyD255R7kBMEdE5yDUA8WmQMelB6t8MkP0tlWhcKI64X7slv6kZFaly-xCX-BWTFC7q/exec', {
+        formData.append('NIS', currentStudent.nis);
+        formData.append('Absen', currentStudent.absen);
+        formData.append('Nama', currentStudent.nama);
+        formData.append('Kelas', currentStudent.kelas);
+        formData.append('Skor', score);
+
+        await fetch('https://script.google.com/macros/s/AKfycbyD255R7kBMEdE5yDUA8WmQMelB6t8MkP0tlWhcKI64X7slv6kZFaly-xCX-BWTFC7q/exec', {
           method: 'POST',
-          body: formData,
-          mode: 'no-cors'
-        }).catch(err => console.log('Background sync will retry:', err));
-        
+          body: formData
+        });
+
+        document.getElementById('examScreen').style.display = 'none';
+        document.getElementById('resultScreen').style.display = 'flex';
+        document.getElementById('finalScore').textContent = score;
+        document.getElementById('totalQuestions').textContent = questions.length;
       } catch (error) {
-        console.error('Error submitting online:', error);
-      }
-      
-      renderResultPage(finalScore, earnedPoints, totalPoints, autoSubmit);
-    }
-    
-    function checkAnswer(question, userAnswer) {
-      const type = question.Type;
-      
-      switch(type) {
-        case 'TF':
-        case 'MC':
-          return userAnswer === question.CorrectAnswer || 
-                 question.Options?.find(o => o.text === userAnswer)?.correct;
-        
-        case 'MR':
-          const correctAnswers = question.CorrectAnswers || [];
-          const userAnswersSorted = Array.isArray(userAnswer) ? [...userAnswer].sort() : [];
-          return JSON.stringify(correctAnswers.sort()) === JSON.stringify(userAnswersSorted);
-        
-        case 'TI':
-          const userLower = (userAnswer || '').toLowerCase().trim();
-          return question.CorrectAnswers?.some(ans => ans === userLower) || false;
-        
-        case 'MG':
-          if (!question.Pairs) return false;
-          return question.Pairs.every((pair, idx) => {
-            const correctIdx = question.RightItems.indexOf(pair.right);
-            return userAnswer[idx] == correctIdx;
-          });
-        
-        case 'SEQ':
-          return JSON.stringify(question.Sequence) === JSON.stringify(userAnswer);
-        
-        case 'NUMG':
-          return Math.abs(parseFloat(userAnswer) - question.CorrectNumber) < 0.01;
-        
-        default:
-          return false;
+        showWarning('Gagal mengirim hasil. Silakan hubungi pengawas.');
+        submitBtn.disabled = false;
+        nextBtn.disabled = false;
+        submitBtn.textContent = 'Selesai Ujian';
       }
     }
-    
-    function createConfetti() {
-      const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ffa500', '#ff1493'];
-      const confettiCount = 150;
-      
-      for (let i = 0; i < confettiCount; i++) {
-        setTimeout(() => {
-          const confetti = document.createElement('div');
-          confetti.className = 'confetti';
-          confetti.style.left = Math.random() * 100 + '%';
-          confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-          confetti.style.opacity = Math.random() * 0.7 + 0.3;
-          confetti.style.animation = `confetti-fall ${Math.random() * 3 + 2}s linear forwards`;
-          confetti.style.animationDelay = Math.random() * 0.5 + 's';
-          
-          document.body.appendChild(confetti);
-          
-          setTimeout(() => confetti.remove(), 5000);
-        }, i * 10);
-      }
-    }
-    
-    function renderResultPage(score, earnedPoints, totalPoints, autoSubmit) {
-      const grade = score >= 80 ? 'Sangat Baik' : score >= 70 ? 'Baik' : score >= 60 ? 'Cukup' : 'Perlu Peningkatan';
-      const color = score >= 80 ? 'green' : score >= 70 ? 'blue' : score >= 60 ? 'yellow' : 'red';
-      
-      // Trigger confetti for excellent scores
-      if (score >= 80) {
-        setTimeout(() => createConfetti(), 500);
-      }
-      
-      document.getElementById('app').innerHTML = `
-        <div class="flex items-center justify-center min-h-full p-4 sm:p-6">
-          <div class="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 w-full max-w-2xl text-center">
-            ${autoSubmit ? `
-              <div class="bg-red-50 border-2 border-red-200 rounded-lg p-4 mb-6">
-                <p class="text-red-800 font-semibold">⚠️ Ujian disubmit otomatis karena pelanggaran atau waktu habis</p>
-              </div>
-            ` : ''}
-            
-            <div class="mb-6">
-              <div class="w-32 h-32 bg-${color}-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span class="text-5xl">✓</span>
-              </div>
-              <h2 class="text-3xl font-bold text-gray-800 mb-2">Ujian Selesai!</h2>
-              <p class="text-gray-600">Terima kasih telah mengerjakan ujian</p>
-            </div>
-            
-            <div class="bg-gray-50 rounded-xl p-6 mb-6">
-              <div class="grid grid-cols-2 gap-4 mb-4">
-                <div class="text-left">
-                  <p class="text-sm text-gray-600">Nama</p>
-                  <p class="font-semibold text-gray-800">${currentStudent.Nama}</p>
-                </div>
-                <div class="text-left">
-                  <p class="text-sm text-gray-600">Kelas</p>
-                  <p class="font-semibold text-gray-800">${currentStudent.Kelas}</p>
-                </div>
-                <div class="text-left">
-                  <p class="text-sm text-gray-600">NIS</p>
-                  <p class="font-semibold text-gray-800">${currentStudent.NIS}</p>
-                </div>
-                <div class="text-left">
-                  <p class="text-sm text-gray-600">Poin</p>
-                  <p class="font-semibold text-gray-800">${earnedPoints}/${totalPoints}</p>
-                </div>
-              </div>
-              
-              <div class="border-t-2 border-gray-200 pt-4">
-                <p class="text-sm text-gray-600 mb-2">Nilai Akhir</p>
-                <p class="text-5xl font-bold text-${color}-600 mb-2">${score}</p>
-                <p class="text-lg font-semibold text-${color}-700">${grade}</p>
-              </div>
-            </div>
-            
-            <div class="bg-blue-50 border-2 border-blue-200 rounded-lg p-4 mb-4">
-              <p class="text-blue-800 text-sm">
-                ✓ Jawaban Anda telah berhasil tersimpan<br>
-                ✓ Nilai telah dikirim ke sistem<br>
-                ✓ Anda dapat menutup halaman ini
-              </p>
-            </div>
-            
-            <button 
-              id="reviewBtn"
-              onclick="showReview()"
-              class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition duration-200"
-            >
-              📋 Lihat Review Jawaban
-            </button>
-            <p class="text-xs text-gray-500 mt-2">Review akan tertutup otomatis dalam 15 detik setelah dibuka</p>
-          </div>
-        </div>
-      `;
-    }
-    
-    // ==================== REVIEW FUNCTIONS ====================
-    function showReview() {
-      const reviewContainer = document.createElement('div');
-      reviewContainer.id = 'reviewContainer';
-      reviewContainer.className = 'fixed inset-0 bg-black bg-opacity-50 overflow-y-auto z-50 p-4';
-      
-      let countdown = 15; // 15 seconds
-      
-      reviewContainer.innerHTML = `
-        <div class="max-w-4xl mx-auto my-8">
-          <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
-            <!-- Header -->
-            <div class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-6">
-              <div class="flex justify-between items-center">
-                <div>
-                  <h2 class="text-2xl font-bold mb-1">Review Jawaban Ujian</h2>
-                  <p class="text-purple-100">Halaman ini akan tertutup dalam <span id="countdown" class="font-bold text-yellow-300">${countdown}</span> detik</p>
-                </div>
-                <button 
-                  onclick="closeReview()"
-                  class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white p-2 rounded-lg transition duration-200"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-            
-            <!-- Summary -->
-            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 border-b-2 border-gray-200">
-              <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
-                <div>
-                  <p class="text-2xl font-bold text-blue-600">${questions.length}</p>
-                  <p class="text-sm text-gray-600">Total Soal</p>
-                </div>
-                <div>
-                  <p class="text-2xl font-bold text-green-600">${countCorrectAnswers()}</p>
-                  <p class="text-sm text-gray-600">Benar</p>
-                </div>
-                <div>
-                  <p class="text-2xl font-bold text-red-600">${questions.length - countCorrectAnswers()}</p>
-                  <p class="text-sm text-gray-600">Salah</p>
-                </div>
-                <div>
-                  <p class="text-2xl font-bold text-purple-600">${Math.round((countCorrectAnswers() / questions.length) * 100)}%</p>
-                  <p class="text-sm text-gray-600">Akurasi</p>
-                </div>
-              </div>
-            </div>
-            
-            <!-- Questions Review -->
-            <div class="p-6 space-y-6 max-h-[60vh] overflow-y-auto">
-              ${questions.map((q, idx) => renderReviewQuestion(q, idx)).join('')}
-            </div>
-            
-            <!-- Footer -->
-            <div class="bg-gray-50 p-6 text-center border-t-2 border-gray-200">
-              <p class="text-gray-600 mb-4">Simpan screenshot ini jika diperlukan</p>
-              <button 
-                onclick="closeReview()"
-                class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-lg transition duration-200"
-              >
-                Tutup Review
-              </button>
-            </div>
-          </div>
-        </div>
-      `;
-      
-      document.body.appendChild(reviewContainer);
-      
-      // Start countdown
-      const countdownInterval = setInterval(() => {
-        countdown--;
-        const countdownEl = document.getElementById('countdown');
-        if (countdownEl) {
-          countdownEl.textContent = countdown;
-        }
-        
-        if (countdown <= 0) {
-          clearInterval(countdownInterval);
-          closeReviewAndRedirect();
-        }
-      }, 1000);
-      
-      // Store interval ID for cleanup
-      reviewContainer.dataset.intervalId = countdownInterval;
-    }
-    
-    function closeReview() {
-      const reviewContainer = document.getElementById('reviewContainer');
-      if (reviewContainer) {
-        const intervalId = reviewContainer.dataset.intervalId;
-        if (intervalId) {
-          clearInterval(parseInt(intervalId));
-        }
-        reviewContainer.remove();
-      }
-    }
-    
-    function closeReviewAndRedirect() {
-      closeReview();
-      showInlineMessage('Waktu review habis. Mengarahkan ke halaman login...', 'info');
-      setTimeout(() => {
-        // Reset all data
-        currentStudent = null;
-        userAnswers = {};
-        currentQuestionIndex = 0;
-        timeRemaining = 0;
-        hasStarted = false;
-        isSubmitting = false;
-        renderLoginPage();
-      }, 2000);
-    }
-    
-    function countCorrectAnswers() {
+
+    function calculateScore() {
       let correct = 0;
-      questions.forEach((q, idx) => {
-        if (userAnswers[idx] !== undefined && checkAnswer(q, userAnswers[idx])) {
-          correct++;
+      
+      questions.forEach((question, index) => {
+        const answer = answers[index];
+        if (answer === undefined) return;
+
+        if (question.type === 'TF' || question.type === 'MC') {
+          if (answer === question.correctAnswer) {
+            correct++;
+          }
+        } else if (question.type === 'TI') {
+          if (Array.isArray(question.correctAnswer)) {
+            const normalizedAnswer = answer.toLowerCase().trim();
+            const isCorrect = question.correctAnswer.some(correctAns => 
+              normalizedAnswer === correctAns.toLowerCase().trim()
+            );
+            if (isCorrect) {
+              correct++;
+            }
+          } else if (answer === question.correctAnswer) {
+            correct++;
+          }
+        } else if (question.type === 'MR') {
+          if (Array.isArray(answer) && Array.isArray(question.correctAnswer)) {
+            const answerSet = new Set(answer);
+            const correctSet = new Set(question.correctAnswer);
+            if (answerSet.size === correctSet.size && [...answerSet].every(a => correctSet.has(a))) {
+              correct++;
+            }
+          }
+        } else if (question.type === 'NUMG') {
+          const numAnswer = parseFloat(answer);
+          if (!isNaN(numAnswer) && Math.abs(numAnswer - question.correctAnswer) <= question.tolerance) {
+            correct++;
+          }
+        } else if (question.type === 'MG') {
+          if (typeof answer === 'object' && !Array.isArray(answer)) {
+            const allCorrect = Object.keys(answer).every(leftIdx => {
+              return answer[leftIdx] === parseInt(leftIdx);
+            });
+            if (allCorrect && Object.keys(answer).length === question.pairs.length) {
+              correct++;
+            }
+          }
+        } else if (question.type === 'SEQ') {
+          if (Array.isArray(answer) && answer.every((item, idx) => item === question.correctAnswer[idx])) {
+            correct++;
+          }
         }
       });
-      return correct;
+
+      return Math.round((correct / questions.length) * 100);
     }
-    
-    function renderReviewQuestion(question, index) {
-      const isCorrect = userAnswers[index] !== undefined && checkAnswer(question, userAnswers[index]);
-      const wasAnswered = userAnswers[index] !== undefined;
-      const type = question.Type;
+
+    function showWarning(message) {
+      const toast = document.getElementById('warningToast');
+      const messageEl = document.getElementById('warningMessage');
+      messageEl.textContent = message;
+      toast.style.display = 'block';
       
-      let userAnswerDisplay = '';
-      let correctAnswerDisplay = '';
-      
-      // Format user answer based on question type
-      switch(type) {
-        case 'TF':
-        case 'MC':
-          userAnswerDisplay = wasAnswered ? userAnswers[index] : '<span class="text-gray-400">Tidak dijawab</span>';
-          correctAnswerDisplay = question.CorrectAnswer || question.Options?.find(o => o.correct)?.text || 'N/A';
-          break;
-          
-        case 'MR':
-          userAnswerDisplay = wasAnswered && Array.isArray(userAnswers[index]) 
-            ? userAnswers[index].join(', ') 
-            : '<span class="text-gray-400">Tidak dijawab</span>';
-          correctAnswerDisplay = question.CorrectAnswers?.join(', ') || 'N/A';
-          break;
-          
-        case 'TI':
-          userAnswerDisplay = wasAnswered ? userAnswers[index] : '<span class="text-gray-400">Tidak dijawab</span>';
-          correctAnswerDisplay = question.CorrectAnswers?.join(' / ') || 'N/A';
-          break;
-          
-        case 'MG':
-          if (wasAnswered && question.Pairs) {
-            const pairs = question.Pairs.map((pair, idx) => {
-              const userChoice = userAnswers[index][idx];
-              const chosenRight = question.RightItems[userChoice];
-              return `${pair.left} → ${chosenRight || '(tidak dipilih)'}`;
-            });
-            userAnswerDisplay = pairs.join('<br>');
-            correctAnswerDisplay = question.Pairs.map(p => `${p.left} → ${p.right}`).join('<br>');
-          } else {
-            userAnswerDisplay = '<span class="text-gray-400">Tidak dijawab</span>';
-            correctAnswerDisplay = question.Pairs?.map(p => `${p.left} → ${p.right}`).join('<br>') || 'N/A';
-          }
-          break;
-          
-        case 'SEQ':
-          userAnswerDisplay = wasAnswered && Array.isArray(userAnswers[index])
-            ? userAnswers[index].map((item, i) => `${i + 1}. ${item}`).join('<br>')
-            : '<span class="text-gray-400">Tidak dijawab</span>';
-          correctAnswerDisplay = question.Sequence?.map((item, i) => `${i + 1}. ${item}`).join('<br>') || 'N/A';
-          break;
-          
-        case 'NUMG':
-          userAnswerDisplay = wasAnswered ? userAnswers[index] : '<span class="text-gray-400">Tidak dijawab</span>';
-          correctAnswerDisplay = question.CorrectNumber || 'N/A';
-          break;
-          
-        default:
-          userAnswerDisplay = '<span class="text-gray-400">Tidak dijawab</span>';
-          correctAnswerDisplay = 'N/A';
-      }
-      
-      return `
-        <div class="border-2 ${isCorrect ? 'border-green-300 bg-green-50' : wasAnswered ? 'border-red-300 bg-red-50' : 'border-gray-300 bg-gray-50'} rounded-xl p-4 sm:p-6">
-          <div class="flex items-start gap-3 mb-4">
-            <div class="flex-shrink-0">
-              <span class="inline-block w-10 h-10 ${isCorrect ? 'bg-green-600' : wasAnswered ? 'bg-red-600' : 'bg-gray-400'} text-white font-bold rounded-full flex items-center justify-center">
-                ${isCorrect ? '✓' : wasAnswered ? '✗' : '-'}
-              </span>
-            </div>
-            <div class="flex-1">
-              <div class="flex flex-wrap items-center gap-2 mb-2">
-                <span class="bg-purple-100 text-purple-800 text-xs font-semibold px-3 py-1 rounded-full">
-                  Soal ${index + 1}
-                </span>
-                <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full">
-                  ${getTypeLabel(type)}
-                </span>
-                <span class="bg-yellow-100 text-yellow-800 text-xs font-semibold px-3 py-1 rounded-full">
-                  ${question.Points} poin
-                </span>
-                ${isCorrect ? `
-                  <span class="bg-green-100 text-green-800 text-xs font-semibold px-3 py-1 rounded-full">
-                    ✓ BENAR
-                  </span>
-                ` : wasAnswered ? `
-                  <span class="bg-red-100 text-red-800 text-xs font-semibold px-3 py-1 rounded-full">
-                    ✗ SALAH
-                  </span>
-                ` : `
-                  <span class="bg-gray-100 text-gray-800 text-xs font-semibold px-3 py-1 rounded-full">
-                    - TIDAK DIJAWAB
-                  </span>
-                `}
-              </div>
-              <p class="text-gray-800 font-medium mb-4 whitespace-pre-wrap">${question.Question}</p>
-              
-              ${question.Image ? `
-                <div class="mb-4">
-                  <img src="${question.Image}" alt="Question" class="max-w-full h-auto rounded-lg" onerror="this.style.display='none'">
-                </div>
-              ` : ''}
-              
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-                <div class="bg-white rounded-lg p-4 border-2 ${isCorrect ? 'border-green-200' : 'border-red-200'}">
-                  <p class="text-sm font-semibold text-gray-600 mb-2">Jawaban Anda:</p>
-                  <p class="text-gray-800 ${!wasAnswered ? 'italic' : ''}">${userAnswerDisplay}</p>
-                </div>
-                <div class="bg-white rounded-lg p-4 border-2 border-blue-200">
-                  <p class="text-sm font-semibold text-gray-600 mb-2">Jawaban yang Benar:</p>
-                  <p class="text-gray-800 font-medium">${correctAnswerDisplay}</p>
-                </div>
-              </div>
-              
-              ${!isCorrect && wasAnswered && question.IncorrectFeedback ? `
-                <div class="mt-4 bg-red-100 border-l-4 border-red-500 p-3 rounded">
-                  <p class="text-sm text-red-800">💡 ${question.IncorrectFeedback}</p>
-                </div>
-              ` : ''}
-              
-              ${isCorrect && question.CorrectFeedback ? `
-                <div class="mt-4 bg-green-100 border-l-4 border-green-500 p-3 rounded">
-                  <p class="text-sm text-green-800">✨ ${question.CorrectFeedback}</p>
-                </div>
-              ` : ''}
-            </div>
-          </div>
+      setTimeout(() => {
+        toast.style.display = 'none';
+      }, 4000);
+    }
+
+    function showError(message) {
+      const loadingScreen = document.getElementById('loadingScreen');
+      loadingScreen.innerHTML = `
+        <div class="text-center">
+          <div class="text-red-600 text-4xl mb-4">⚠️</div>
+          <p class="text-gray-800 font-medium mb-2">Terjadi Kesalahan</p>
+          <p class="text-gray-600">${message}</p>
         </div>
       `;
     }
-    
-    // Initialize app on load
-    window.addEventListener('DOMContentLoaded', initializeApp);
+
+    // Element SDK Integration
+    async function onConfigChange(config) {
+      const schoolNameLogin = document.getElementById('schoolNameLogin');
+      const examTitleLogin = document.getElementById('examTitleLogin');
+      const schoolNameExam = document.getElementById('schoolNameExam');
+
+      if (schoolNameLogin) {
+        schoolNameLogin.textContent = config.school_name || defaultConfig.school_name;
+      }
+      if (examTitleLogin) {
+        examTitleLogin.textContent = config.exam_title || defaultConfig.exam_title;
+      }
+      if (schoolNameExam) {
+        schoolNameExam.textContent = config.school_name || defaultConfig.school_name;
+      }
+    }
+
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange,
+        mapToCapabilities: (config) => ({
+          recolorables: [],
+          borderables: [],
+          fontEditable: undefined,
+          fontSizeable: undefined
+        }),
+        mapToEditPanelValues: (config) => new Map([
+          ['school_name', config.school_name || defaultConfig.school_name],
+          ['exam_title', config.exam_title || defaultConfig.exam_title],
+          ['time_limit', config.time_limit || defaultConfig.time_limit],
+          ['pass_score', config.pass_score || defaultConfig.pass_score]
+        ])
+      });
+    }
+
+    // Initialize app
+    loadData();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a93ee003604835f',t:'MTc2NDk0MTc1Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a9f6a1192d6f90e',t:'MTc2NTA2MjE4My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
