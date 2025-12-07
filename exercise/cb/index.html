@@ -14,9 +14,17 @@
       width: 100%;
       height: 100%;
       overflow-x: hidden;
+      user-select: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
     }
     html {
       height: 100%;
+    }
+    input, textarea {
+      user-select: text !important;
+      -webkit-user-select: text !important;
     }
     .app-container {
       width: 100%;
@@ -126,6 +134,50 @@
     .floating-nav-button.hidden {
       right: -100px;
     }
+    .violation-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      animation: fadeIn 0.3s ease-in;
+    }
+    .violation-modal.active {
+      display: flex;
+    }
+    .violation-content {
+      background: white;
+      border-radius: 16px;
+      padding: 32px;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      border: 4px solid #dc2626;
+      animation: slideDown 0.3s ease-out;
+    }
+    @keyframes slideDown {
+      from {
+        transform: translateY(-50px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+    .warning-icon {
+      animation: shake 0.5s infinite;
+    }
+    @keyframes shake {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(-10deg); }
+      75% { transform: rotate(10deg); }
+    }
   </style>
   <style>@view-transition { navigation: auto; }</style>
   <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
@@ -164,6 +216,46 @@
       </div>
      </div>
     </div>
+   </div><!-- Confirmation Screen -->
+   <div id="confirmationScreen" class="w-full min-h-full flex items-center justify-center" style="display: none;">
+    <div class="max-w-md w-full mx-4">
+     <div class="bg-white rounded-lg shadow-lg p-8">
+      <div class="text-center mb-6">
+       <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4"><span class="text-3xl">📋</span>
+       </div>
+       <h2 class="text-2xl font-bold text-gray-800 mb-2">Konfirmasi Data</h2>
+       <p class="text-sm text-gray-600">Pastikan data Anda benar sebelum memulai ujian</p>
+      </div>
+      <div class="bg-gray-50 rounded-lg p-5 mb-6 space-y-3">
+       <div class="flex items-start"><span class="text-sm text-gray-600 w-20 font-medium">NIS:</span> <span class="font-semibold text-gray-800" id="confirmNIS">-</span>
+       </div>
+       <div class="flex items-start"><span class="text-sm text-gray-600 w-20 font-medium">Absen:</span> <span class="font-semibold text-gray-800" id="confirmAbsen">-</span>
+       </div>
+       <div class="flex items-start"><span class="text-sm text-gray-600 w-20 font-medium">Nama:</span> <span class="font-semibold text-gray-800" id="confirmNama">-</span>
+       </div>
+       <div class="flex items-start"><span class="text-sm text-gray-600 w-20 font-medium">Kelas:</span> <span class="font-semibold text-gray-800" id="confirmKelas">-</span>
+       </div>
+      </div>
+      <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
+       <h3 class="font-bold text-blue-900 mb-3 flex items-center"><span class="text-xl mr-2">✓</span> Pernyataan Kejujuran</h3>
+       <div class="space-y-2 text-sm text-blue-800">
+        <p>Saya menyatakan bahwa:</p>
+        <ul class="list-disc list-inside space-y-1 ml-2">
+         <li>Data yang saya masukkan adalah benar</li>
+         <li>Saya akan mengerjakan ujian dengan jujur</li>
+         <li>Saya tidak akan melakukan kecurangan</li>
+         <li>Saya tidak akan bekerja sama dengan peserta lain</li>
+         <li>Saya siap menerima konsekuensi jika melanggar aturan</li>
+        </ul>
+       </div>
+      </div>
+      <div class="mb-6"><label class="flex items-start cursor-pointer group"> <input type="checkbox" id="agreementCheckbox" class="mt-1 w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"> <span class="ml-3 text-sm text-gray-700 group-hover:text-gray-900"> Saya menyetujui pernyataan kejujuran di atas dan data yang saya masukkan adalah benar </span> </label>
+      </div>
+      <div id="confirmError" class="hidden mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm"></div>
+      <div class="flex gap-3"><button id="backToLoginButton" class="flex-1 px-4 py-3 bg-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-400 transition"> ← Kembali </button> <button id="startExamButton" class="flex-1 px-4 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed" disabled> Mulai Ujian → </button>
+      </div>
+     </div>
+    </div>
    </div><!-- Exam Screen -->
    <div id="examScreen" class="w-full min-h-full" style="display: none;"><!-- Header -->
     <div class="w-full bg-blue-600 text-white shadow-lg">
@@ -176,6 +268,7 @@
        <div class="text-right">
         <p class="text-sm opacity-90">Waktu Tersisa</p>
         <p class="text-2xl font-bold" id="timer">90:00</p>
+        <p class="text-xs mt-1" id="violationCounter">Pelanggaran: 0/5</p>
        </div>
       </div>
      </div>
@@ -205,10 +298,6 @@
       <div class="flex justify-between mt-6"><button id="prevButton" class="px-6 py-3 bg-gray-500 text-white rounded-lg font-medium hover:bg-gray-600 transition disabled:opacity-50"> ← Sebelumnya </button> <button id="nextButton" class="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition"> Selanjutnya → </button> <button id="submitButton" class="px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition" style="display: none;"> Selesai Ujian </button>
       </div>
      </div>
-    </div><!-- Warning Toast -->
-    <div id="warningToast" class="fixed bottom-4 right-4 bg-red-600 text-white px-6 py-4 rounded-lg shadow-lg" style="display: none;">
-     <p class="font-medium">⚠️ Peringatan!</p>
-     <p class="text-sm" id="warningMessage"></p>
     </div>
    </div><!-- Result Screen -->
    <div id="resultScreen" class="w-full min-h-full flex items-center justify-center" style="display: none;">
@@ -230,51 +319,64 @@
        <p class="text-sm text-gray-600 mb-2">Skor Anda</p>
        <p class="text-4xl font-bold text-blue-600" id="finalScore">0</p>
        <p class="text-sm text-gray-600 mt-2">dari <span id="totalQuestions">0</span> soal</p>
-      </div>
-      <p class="text-sm text-gray-600">Terima kasih telah mengikuti ujian.</p>
+      </div><button id="reviewButton" class="w-full bg-purple-600 text-white py-3 rounded-lg font-medium hover:bg-purple-700 transition mb-4"> 📖 Lihat Pembahasan </button>
+      <p class="text-sm text-gray-600 mb-2">Terima kasih telah mengikuti ujian.</p>
+      <p class="text-xs text-gray-500">Kembali ke login dalam <span id="redirectTimer" class="font-bold">30</span> detik...</p>
      </div>
+    </div>
+   </div><!-- Review Screen -->
+   <div id="reviewScreen" class="w-full min-h-full" style="display: none;"><!-- Header -->
+    <div class="w-full bg-purple-600 text-white shadow-lg">
+     <div class="max-w-6xl mx-auto px-4 py-4">
+      <div class="flex justify-between items-center flex-wrap gap-4">
+       <div>
+        <h2 class="text-xl font-bold">Pembahasan Soal</h2>
+        <p class="text-sm opacity-90" id="reviewStudentInfo"></p>
+       </div>
+       <div class="text-right">
+        <p class="text-sm opacity-90">Skor Akhir</p>
+        <p class="text-2xl font-bold" id="reviewScore">0</p>
+       </div>
+      </div>
+     </div>
+    </div><!-- Review Content -->
+    <div class="w-full">
+     <div class="max-w-4xl mx-auto px-4 py-6">
+      <div id="reviewContainer"></div><!-- Back Button -->
+      <div class="mt-6 text-center"><button id="backToResultButton" class="px-8 py-3 bg-gray-600 text-white rounded-lg font-medium hover:bg-gray-700 transition"> ← Kembali ke Hasil </button>
+      </div>
+     </div>
+    </div>
+   </div><!-- Violation Modal -->
+   <div id="violationModal" class="violation-modal">
+    <div class="violation-content">
+     <div class="text-center mb-6">
+      <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 warning-icon"><span class="text-5xl">⚠️</span>
+      </div>
+      <h2 class="text-3xl font-bold text-red-600 mb-2">PELANGGARAN TERDETEKSI!</h2>
+      <p class="text-xl font-bold text-gray-800" id="violationCount">Pelanggaran ke-1 dari 5</p>
+     </div>
+     <div class="bg-red-50 border-l-4 border-red-600 p-4 mb-4 rounded">
+      <p class="font-bold text-red-800 mb-2">Jenis Pelanggaran:</p>
+      <p class="text-red-700" id="violationType">-</p>
+     </div>
+     <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 mb-4 rounded">
+      <p class="font-bold text-yellow-800 mb-2" id="remainingWarning">⚠️ Sisa 4 kesempatan lagi</p>
+      <p class="text-sm text-yellow-700">Lebih dari 5 pelanggaran akan mengakibatkan ujian otomatis terkirim!</p>
+     </div>
+     <div class="bg-gray-50 rounded-lg p-4 mb-4">
+      <p class="font-medium text-gray-700 mb-2">Rincian Pelanggaran:</p>
+      <div id="violationList" class="text-sm text-gray-600 space-y-1"></div>
+     </div><button id="closeViolationModal" class="w-full bg-red-600 text-white py-3 rounded-lg font-bold hover:bg-red-700 transition"> SAYA MENGERTI </button>
     </div>
    </div>
   </div>
   <script>
     // Security measures
-    let tabSwitchCount = 0;
+    let violations = [];
+    const MAX_VIOLATIONS = 5;
     let examStarted = false;
-    const MAX_TAB_SWITCHES = 3;
-
-    // Disable right-click and F12
-    document.addEventListener('contextmenu', e => e.preventDefault());
-    document.addEventListener('keydown', e => {
-      if (e.key === 'F12' || 
-          (e.ctrlKey && e.shiftKey && e.key === 'I') ||
-          (e.ctrlKey && e.shiftKey && e.key === 'J') ||
-          (e.ctrlKey && e.key === 'U')) {
-        e.preventDefault();
-        showWarning('Jangan mencoba membuka developer tools!');
-      }
-    });
-
-    // Detect tab switch
-    document.addEventListener('visibilitychange', () => {
-      if (examStarted && document.hidden) {
-        tabSwitchCount++;
-        showWarning(`Jangan pindah tab! Peringatan ${tabSwitchCount}/${MAX_TAB_SWITCHES}`);
-        
-        if (tabSwitchCount >= MAX_TAB_SWITCHES) {
-          showWarning('Ujian otomatis diselesaikan karena terlalu banyak pindah tab!');
-          setTimeout(() => submitExam(true), 2000);
-        }
-      }
-    });
-
-    // Detect Google Translate
-    const observer = new MutationObserver(() => {
-      if (document.querySelector('font[style*="vertical-align"]') || 
-          document.documentElement.classList.contains('translated-ltr')) {
-        showWarning('Google Translate terdeteksi! Matikan sekarang.');
-      }
-    });
-    observer.observe(document.body, { childList: true, subtree: true });
+    let violationModalTimeout = null;
 
     // Global variables
     let questions = [];
@@ -283,7 +385,7 @@
     let currentQuestionIndex = 0;
     let answers = {};
     let timerInterval = null;
-    let timeRemaining = 5400; // 90 minutes in seconds
+    let timeRemaining = 5400;
     let completedStudents = new Set();
 
     const defaultConfig = {
@@ -292,6 +394,312 @@
       time_limit: "90",
       pass_score: "75"
     };
+
+    // Play beep sound
+    function playBeep() {
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.frequency.value = 800;
+      oscillator.type = 'sine';
+      
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+      
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.5);
+    }
+
+    // Record violation
+    function recordViolation(type, description) {
+      if (!examStarted) return;
+      
+      const timestamp = new Date().toLocaleTimeString('id-ID');
+      violations.push({ type, description, timestamp });
+      
+      updateViolationCounter();
+      showViolationModal(type, description);
+      playBeep();
+      
+      if (violations.length >= MAX_VIOLATIONS) {
+        setTimeout(() => {
+          submitExam(true);
+        }, 3000);
+      }
+    }
+
+    // Update violation counter in header
+    function updateViolationCounter() {
+      const counter = document.getElementById('violationCounter');
+      if (counter) {
+        counter.textContent = `Pelanggaran: ${violations.length}/${MAX_VIOLATIONS}`;
+        if (violations.length >= 3) {
+          counter.classList.add('timer-warning');
+        }
+      }
+    }
+
+    // Show violation modal
+    function showViolationModal(type, description) {
+      const modal = document.getElementById('violationModal');
+      const countEl = document.getElementById('violationCount');
+      const typeEl = document.getElementById('violationType');
+      const remainingEl = document.getElementById('remainingWarning');
+      const listEl = document.getElementById('violationList');
+      
+      const remaining = MAX_VIOLATIONS - violations.length;
+      
+      countEl.textContent = `Pelanggaran ke-${violations.length} dari ${MAX_VIOLATIONS}`;
+      typeEl.textContent = description;
+      
+      if (remaining > 0) {
+        remainingEl.innerHTML = `⚠️ Sisa ${remaining} kesempatan lagi`;
+      } else {
+        remainingEl.innerHTML = `🚫 BATAS PELANGGARAN TERCAPAI! Ujian akan otomatis terkirim...`;
+        remainingEl.className = 'font-bold text-red-800 mb-2';
+      }
+      
+      // Update violation list
+      listEl.innerHTML = violations.map((v, idx) => 
+        `<div class="flex items-start gap-2">
+          <span class="font-medium">${idx + 1}.</span>
+          <span>${v.description} (${v.timestamp})</span>
+        </div>`
+      ).join('');
+      
+      modal.classList.add('active');
+      
+      // Auto close after 5 seconds if not max violations
+      if (remaining > 0) {
+        if (violationModalTimeout) {
+          clearTimeout(violationModalTimeout);
+        }
+        violationModalTimeout = setTimeout(() => {
+          modal.classList.remove('active');
+        }, 5000);
+      }
+    }
+
+    // Close violation modal
+    document.addEventListener('DOMContentLoaded', () => {
+      const closeBtn = document.getElementById('closeViolationModal');
+      if (closeBtn) {
+        closeBtn.onclick = () => {
+          document.getElementById('violationModal').classList.remove('active');
+          if (violationModalTimeout) {
+            clearTimeout(violationModalTimeout);
+          }
+        };
+      }
+    });
+
+    // 1. Anti-Screenshot
+    document.addEventListener('keydown', (e) => {
+      // PrintScreen, Alt+PrintScreen
+      if (e.key === 'PrintScreen') {
+        e.preventDefault();
+        if (examStarted) {
+          recordViolation('screenshot', 'Mencoba mengambil screenshot (PrintScreen)');
+        }
+      }
+      
+      // Windows: Win+Shift+S (Snipping Tool)
+      if (e.key === 's' && e.shiftKey && (e.metaKey || e.key === 'Meta')) {
+        e.preventDefault();
+        if (examStarted) {
+          recordViolation('screenshot', 'Mencoba mengambil screenshot (Win+Shift+S)');
+        }
+      }
+      
+      // Mac: Cmd+Shift+3, Cmd+Shift+4, Cmd+Shift+5
+      if ((e.key === '3' || e.key === '4' || e.key === '5') && e.shiftKey && e.metaKey) {
+        e.preventDefault();
+        if (examStarted) {
+          recordViolation('screenshot', 'Mencoba mengambil screenshot (Cmd+Shift+' + e.key + ')');
+        }
+      }
+    });
+
+    // 2. Anti-Google Translate
+    const translateObserver = new MutationObserver(() => {
+      if (examStarted) {
+        if (document.querySelector('font[style*="vertical-align"]') || 
+            document.documentElement.classList.contains('translated-ltr') ||
+            document.documentElement.classList.contains('translated-rtl') ||
+            document.querySelector('.goog-te-banner-frame') ||
+            document.body.classList.contains('translated')) {
+          recordViolation('translate', 'Menggunakan Google Translate');
+        }
+      }
+    });
+    translateObserver.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+
+    // 3. Anti-Inspect Element
+    // Disable right-click
+    document.addEventListener('contextmenu', e => {
+      e.preventDefault();
+      if (examStarted) {
+        recordViolation('right_click', 'Mencoba klik kanan (inspect element)');
+      }
+    });
+
+    // Disable F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C, Ctrl+U
+    document.addEventListener('keydown', e => {
+      if (e.key === 'F12' || 
+          (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i')) ||
+          (e.ctrlKey && e.shiftKey && (e.key === 'J' || e.key === 'j')) ||
+          (e.ctrlKey && e.shiftKey && (e.key === 'C' || e.key === 'c')) ||
+          (e.ctrlKey && (e.key === 'U' || e.key === 'u'))) {
+        e.preventDefault();
+        if (examStarted) {
+          recordViolation('devtools', 'Mencoba membuka Developer Tools');
+        }
+      }
+    });
+
+    // Detect if DevTools is open
+    let devtoolsOpen = false;
+    const detectDevTools = () => {
+      const widthThreshold = window.outerWidth - window.innerWidth > 160;
+      const heightThreshold = window.outerHeight - window.innerHeight > 160;
+      
+      if ((widthThreshold || heightThreshold) && !devtoolsOpen) {
+        devtoolsOpen = true;
+        if (examStarted) {
+          recordViolation('devtools_open', 'Developer Tools terdeteksi terbuka');
+        }
+      } else if (!widthThreshold && !heightThreshold && devtoolsOpen) {
+        devtoolsOpen = false;
+      }
+    };
+    setInterval(detectDevTools, 1000);
+
+    // 4. Anti-Copy-Paste
+    document.addEventListener('copy', e => {
+      e.preventDefault();
+      if (examStarted) {
+        recordViolation('copy', 'Mencoba menyalin teks (Ctrl+C)');
+      }
+    });
+
+    document.addEventListener('cut', e => {
+      e.preventDefault();
+      if (examStarted) {
+        recordViolation('cut', 'Mencoba memotong teks (Ctrl+X)');
+      }
+    });
+
+    document.addEventListener('paste', e => {
+      const target = e.target;
+      if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
+        e.preventDefault();
+        if (examStarted) {
+          recordViolation('paste', 'Mencoba menempel teks (Ctrl+V)');
+        }
+      }
+    });
+
+    // Block Ctrl+C, Ctrl+V, Ctrl+X
+    document.addEventListener('keydown', e => {
+      if (e.ctrlKey || e.metaKey) {
+        if (e.key === 'c' || e.key === 'C') {
+          const selection = window.getSelection().toString();
+          if (selection && examStarted) {
+            e.preventDefault();
+            recordViolation('copy_key', 'Mencoba copy dengan keyboard (Ctrl+C)');
+          }
+        }
+        if (e.key === 'v' || e.key === 'V') {
+          const target = e.target;
+          if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA' && examStarted) {
+            e.preventDefault();
+            recordViolation('paste_key', 'Mencoba paste dengan keyboard (Ctrl+V)');
+          }
+        }
+        if (e.key === 'x' || e.key === 'X') {
+          const selection = window.getSelection().toString();
+          if (selection && examStarted) {
+            e.preventDefault();
+            recordViolation('cut_key', 'Mencoba cut dengan keyboard (Ctrl+X)');
+          }
+        }
+      }
+    });
+
+    // 5. Anti-New Tab/Window
+    // Block Ctrl+N (new window) and Ctrl+T (new tab)
+    document.addEventListener('keydown', e => {
+      if (e.ctrlKey || e.metaKey) {
+        if (e.key === 'n' || e.key === 'N') {
+          e.preventDefault();
+          if (examStarted) {
+            recordViolation('new_window', 'Mencoba membuka window baru (Ctrl+N)');
+          }
+        }
+        if (e.key === 't' || e.key === 'T') {
+          e.preventDefault();
+          if (examStarted) {
+            recordViolation('new_tab', 'Mencoba membuka tab baru (Ctrl+T)');
+          }
+        }
+      }
+    });
+
+    // Override window.open
+    const originalWindowOpen = window.open;
+    window.open = function() {
+      if (examStarted) {
+        recordViolation('window_open', 'Mencoba membuka window/tab baru (window.open)');
+        return null;
+      }
+      return originalWindowOpen.apply(this, arguments);
+    };
+
+    // Block middle click (open in new tab)
+    document.addEventListener('auxclick', e => {
+      if (e.button === 1 && examStarted) {
+        e.preventDefault();
+        recordViolation('middle_click', 'Mencoba membuka link di tab baru (middle click)');
+      }
+    });
+
+    // Block Ctrl+Click (open in new tab)
+    document.addEventListener('click', e => {
+      if ((e.ctrlKey || e.metaKey) && examStarted) {
+        const target = e.target.closest('a');
+        if (target) {
+          e.preventDefault();
+          recordViolation('ctrl_click', 'Mencoba membuka link di tab baru (Ctrl+Click)');
+        }
+      }
+    });
+
+    // Warn before closing/refreshing
+    window.addEventListener('beforeunload', e => {
+      if (examStarted) {
+        e.preventDefault();
+        e.returnValue = '';
+        return '';
+      }
+    });
+
+    // 6. Detect tab switch
+    document.addEventListener('visibilitychange', () => {
+      if (examStarted && document.hidden) {
+        recordViolation('tab_switch', 'Pindah tab atau minimize browser');
+      }
+    });
+
+    // 7. Detect focus loss (opening other apps)
+    window.addEventListener('blur', () => {
+      if (examStarted) {
+        recordViolation('focus_loss', 'Kehilangan fokus (buka aplikasi lain)');
+      }
+    });
 
     // Load data from CSV
     async function loadData() {
@@ -304,15 +712,8 @@
         const questionsText = await questionsResponse.text();
         const studentsText = await studentsResponse.text();
 
-        console.log('Questions CSV loaded:', questionsText.substring(0, 200));
-        console.log('Students CSV loaded:', studentsText.substring(0, 200));
-
         parseQuestions(questionsText);
         parseStudents(studentsText);
-
-        console.log('Total questions parsed:', questions.length);
-        console.log('Total students parsed:', students.length);
-        console.log('Sample students:', students.slice(0, 3));
 
         if (questions.length === 0) {
           showError('Tidak ada soal yang berhasil dimuat. Periksa format CSV soal.');
@@ -327,14 +728,12 @@
         document.getElementById('loadingScreen').style.display = 'none';
         document.getElementById('loginScreen').style.display = 'flex';
       } catch (error) {
-        console.error('Error loading data:', error);
         showError('Gagal memuat data. Silakan refresh halaman. Error: ' + error.message);
       }
     }
 
     function parseQuestions(csv) {
       const lines = csv.trim().split('\n');
-      const headers = lines[0].split(',');
       
       for (let i = 1; i < lines.length; i++) {
         const values = parseCSVLine(lines[i]);
@@ -443,11 +842,9 @@
 
     function parseStudents(csv) {
       const lines = csv.trim().split('\n');
-      console.log('First line (header):', lines[0]);
       for (let i = 1; i < lines.length; i++) {
         if (!lines[i].trim()) continue;
         const values = parseCSVLine(lines[i]);
-        console.log(`Row ${i} values:`, values);
         if (values.length >= 4) {
           const student = {
             absen: values[0].trim(),
@@ -455,7 +852,6 @@
             nama: values[2].trim(),
             kelas: values[3].trim()
           };
-          console.log('Parsed student:', student);
           students.push(student);
         }
       }
@@ -465,12 +861,7 @@
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const nis = document.getElementById('nisInput').value.trim();
-      const loginButton = document.getElementById('loginButton');
       const loginError = document.getElementById('loginError');
-
-      console.log('Login attempt with NIS:', nis);
-      console.log('Available students:', students);
-      console.log('Students NIS list:', students.map(s => s.nis));
 
       loginError.classList.add('hidden');
 
@@ -480,43 +871,95 @@
         return;
       }
 
-      // Try to find student with exact match first
       let student = students.find(s => s.nis === nis);
       
-      // If not found, try case-insensitive and trim whitespace
       if (!student) {
         student = students.find(s => s.nis.toLowerCase() === nis.toLowerCase());
       }
       
-      // If still not found, try removing all whitespace
       if (!student) {
         const cleanNIS = nis.replace(/\s+/g, '');
         student = students.find(s => s.nis.replace(/\s+/g, '') === cleanNIS);
       }
 
-      console.log('Found student:', student);
-
       if (!student) {
-        loginError.textContent = `NIS "${nis}" tidak ditemukan. Silakan periksa kembali. Total siswa terdaftar: ${students.length}`;
+        loginError.textContent = `NIS "${nis}" tidak ditemukan. Silakan periksa kembali.`;
         loginError.classList.remove('hidden');
         return;
       }
 
       currentStudent = student;
-      completedStudents.add(nis);
+      showConfirmationScreen(student);
+    });
+
+    // Confirmation screen handlers
+    function showConfirmationScreen(student) {
+      document.getElementById('confirmNIS').textContent = student.nis;
+      document.getElementById('confirmAbsen').textContent = student.absen;
+      document.getElementById('confirmNama').textContent = student.nama;
+      document.getElementById('confirmKelas').textContent = student.kelas;
+      
+      document.getElementById('agreementCheckbox').checked = false;
+      document.getElementById('startExamButton').disabled = true;
+      document.getElementById('confirmError').classList.add('hidden');
       
       document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('confirmationScreen').style.display = 'flex';
+    }
+
+    document.getElementById('agreementCheckbox').addEventListener('change', (e) => {
+      document.getElementById('startExamButton').disabled = !e.target.checked;
+    });
+
+    document.getElementById('backToLoginButton').addEventListener('click', () => {
+      currentStudent = null;
+      document.getElementById('confirmationScreen').style.display = 'none';
+      document.getElementById('loginScreen').style.display = 'flex';
+    });
+
+    document.getElementById('startExamButton').addEventListener('click', () => {
+      if (!document.getElementById('agreementCheckbox').checked) {
+        const confirmError = document.getElementById('confirmError');
+        confirmError.textContent = 'Anda harus menyetujui pernyataan kejujuran terlebih dahulu.';
+        confirmError.classList.remove('hidden');
+        return;
+      }
+
+      if (!currentStudent) {
+        return;
+      }
+
+      completedStudents.add(currentStudent.nis);
+      
+      document.getElementById('confirmationScreen').style.display = 'none';
       document.getElementById('examScreen').style.display = 'block';
       
       const config = window.elementSdk ? window.elementSdk.config : defaultConfig;
-      document.getElementById('studentInfo').textContent = `${student.nama} (${student.kelas}) - ${student.nis}`;
+      document.getElementById('studentInfo').textContent = `${currentStudent.nama} (${currentStudent.kelas}) - ${currentStudent.nis}`;
       
       timeRemaining = parseInt(config.time_limit || defaultConfig.time_limit) * 60;
+      
+      // Show security info
+      setTimeout(() => {
+        const infoDiv = document.createElement('div');
+        infoDiv.className = 'fixed bottom-4 left-4 bg-blue-600 text-white px-6 py-4 rounded-lg shadow-lg max-w-sm';
+        infoDiv.innerHTML = `
+          <p class="font-bold mb-2">🔒 Sistem Keamanan Aktif</p>
+          <p class="text-sm">Ujian dipantau. Hindari pelanggaran untuk menghindari auto-submit.</p>
+        `;
+        document.body.appendChild(infoDiv);
+        setTimeout(() => {
+          infoDiv.remove();
+        }, 5000);
+      }, 1000);
+      
       startExam();
     });
 
     function startExam() {
       examStarted = true;
+      violations = [];
+      updateViolationCounter();
       renderQuestionNav();
       renderQuestion();
       startTimer();
@@ -538,7 +981,6 @@
         floatingButton.classList.remove('hidden');
       };
 
-      // Close when clicking outside
       document.addEventListener('click', (e) => {
         if (!floatingPanel.contains(e.target) && !floatingButton.contains(e.target)) {
           if (floatingPanel.classList.contains('active')) {
@@ -556,7 +998,6 @@
 
         if (timeRemaining <= 0) {
           clearInterval(timerInterval);
-          showWarning('Waktu habis! Ujian otomatis diselesaikan.');
           setTimeout(() => submitExam(true), 2000);
         }
       }, 1000);
@@ -597,7 +1038,6 @@
           currentQuestionIndex = index;
           renderQuestion();
           renderQuestionNav();
-          // Close panel after selection
           document.getElementById('floatingNavPanel').classList.remove('active');
           document.getElementById('floatingNavButton').classList.remove('hidden');
         };
@@ -605,7 +1045,6 @@
         nav.appendChild(btn);
       });
 
-      // Update counter
       document.getElementById('answeredCount').textContent = answeredCount;
       document.getElementById('totalCount').textContent = questions.length;
     }
@@ -747,10 +1186,8 @@
       const leftItems = question.pairs.map(p => p.left);
       const rightItems = question.pairs.map(p => p.right);
       
-      // Shuffle right items if not already done for this question
       if (!question.shuffledRightItems) {
         question.shuffledRightItems = shuffleArray([...rightItems]);
-        // Create mapping from shuffled position to original position
         question.shuffleMapping = question.shuffledRightItems.map(item => 
           rightItems.indexOf(item)
         );
@@ -891,31 +1328,28 @@
     document.getElementById('submitButton').onclick = () => {
       const unanswered = questions.length - Object.keys(answers).length;
       if (unanswered > 0) {
-        showWarning(`Masih ada ${unanswered} soal yang belum dijawab. Yakin ingin selesai?`);
-        setTimeout(() => {
-          const confirmDiv = document.createElement('div');
-          confirmDiv.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
-          confirmDiv.innerHTML = `
-            <div class="bg-white rounded-lg p-6 max-w-md mx-4">
-              <h3 class="text-xl font-bold mb-4">Konfirmasi</h3>
-              <p class="mb-6">Apakah Anda yakin ingin menyelesaikan ujian?</p>
-              <div class="flex gap-3 justify-end">
-                <button id="cancelSubmit" class="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Batal</button>
-                <button id="confirmSubmit" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">Ya, Selesai</button>
-              </div>
+        const confirmDiv = document.createElement('div');
+        confirmDiv.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+        confirmDiv.innerHTML = `
+          <div class="bg-white rounded-lg p-6 max-w-md mx-4">
+            <h3 class="text-xl font-bold mb-4">Konfirmasi</h3>
+            <p class="mb-6">Masih ada ${unanswered} soal yang belum dijawab. Apakah Anda yakin ingin menyelesaikan ujian?</p>
+            <div class="flex gap-3 justify-end">
+              <button id="cancelSubmit" class="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Batal</button>
+              <button id="confirmSubmit" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">Ya, Selesai</button>
             </div>
-          `;
-          document.body.appendChild(confirmDiv);
-          
-          document.getElementById('cancelSubmit').onclick = () => {
-            document.body.removeChild(confirmDiv);
-          };
-          
-          document.getElementById('confirmSubmit').onclick = () => {
-            document.body.removeChild(confirmDiv);
-            submitExam(false);
-          };
-        }, 1000);
+          </div>
+        `;
+        document.body.appendChild(confirmDiv);
+        
+        document.getElementById('cancelSubmit').onclick = () => {
+          document.body.removeChild(confirmDiv);
+        };
+        
+        document.getElementById('confirmSubmit').onclick = () => {
+          document.body.removeChild(confirmDiv);
+          submitExam(false);
+        };
       } else {
         submitExam(false);
       }
@@ -956,18 +1390,283 @@
         document.getElementById('resultStudentNIS').textContent = currentStudent.nis;
         document.getElementById('resultStudentClass').textContent = currentStudent.kelas;
         
-        // Show confetti for high scores (80 or above)
         if (score >= 80) {
           setTimeout(() => {
             createConfetti();
           }, 500);
         }
+
+        let redirectCountdown = 30;
+        const redirectTimerEl = document.getElementById('redirectTimer');
+        let redirectInterval = setInterval(() => {
+          redirectCountdown--;
+          redirectTimerEl.textContent = redirectCountdown;
+          
+          if (redirectCountdown <= 0) {
+            clearInterval(redirectInterval);
+            resetToLogin();
+          }
+        }, 1000);
+
+        document.getElementById('reviewButton').onclick = () => {
+          clearInterval(redirectInterval);
+          showReviewScreen();
+        };
       } catch (error) {
-        showWarning('Gagal mengirim hasil. Silakan hubungi pengawas.');
         submitBtn.disabled = false;
         nextBtn.disabled = false;
         submitBtn.textContent = 'Selesai Ujian';
       }
+    }
+
+    function showReviewScreen() {
+      document.getElementById('resultScreen').style.display = 'none';
+      document.getElementById('reviewScreen').style.display = 'block';
+      
+      const score = calculateScore();
+      document.getElementById('reviewStudentInfo').textContent = `${currentStudent.nama} (${currentStudent.kelas}) - ${currentStudent.nis}`;
+      document.getElementById('reviewScore').textContent = score;
+      
+      renderReview();
+    }
+
+    function renderReview() {
+      const container = document.getElementById('reviewContainer');
+      container.innerHTML = '';
+      
+      questions.forEach((question, index) => {
+        const userAnswer = answers[index];
+        const isCorrect = checkAnswer(question, userAnswer, index);
+        
+        const reviewCard = document.createElement('div');
+        reviewCard.className = 'bg-white rounded-lg shadow-lg p-6 mb-6';
+        
+        let headerHTML = `
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-3">
+              <span class="text-lg font-bold text-gray-800">Soal ${index + 1}</span>
+              <span class="px-3 py-1 rounded-full text-sm font-medium ${isCorrect ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                ${isCorrect ? '✓ Benar' : '✗ Salah'}
+              </span>
+              <span class="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm font-medium">
+                ${getQuestionTypeLabel(question.type)}
+              </span>
+            </div>
+          </div>
+        `;
+        
+        let questionHTML = `<h3 class="text-lg font-medium mb-4">${question.question}</h3>`;
+        
+        let mediaHTML = '';
+        if (question.image) {
+          mediaHTML += `<img src="${question.image}" alt="Question image" class="max-w-full h-auto rounded-lg mb-4 shadow-md" onerror="this.style.display='none';">`;
+        }
+        if (question.audio) {
+          mediaHTML += `<audio controls class="w-full mb-4"><source src="${question.audio}" type="audio/mpeg"></audio>`;
+        }
+        if (question.video) {
+          mediaHTML += `<video controls class="w-full rounded-lg mb-4 shadow-md"><source src="${question.video}" type="video/mp4"></video>`;
+        }
+        
+        let answerHTML = '';
+        
+        if (question.type === 'TF' || question.type === 'MC') {
+          answerHTML += '<div class="space-y-3 mb-4">';
+          question.options.forEach((option, optIdx) => {
+            const isUserAnswer = userAnswer === option;
+            const isCorrectAnswer = option === question.correctAnswer;
+            
+            let optionClass = 'p-3 rounded-lg border-2 ';
+            if (isCorrectAnswer) {
+              optionClass += 'border-green-500 bg-green-50';
+            } else if (isUserAnswer && !isCorrectAnswer) {
+              optionClass += 'border-red-500 bg-red-50';
+            } else {
+              optionClass += 'border-gray-300 bg-gray-50';
+            }
+            
+            let badge = '';
+            if (isCorrectAnswer) {
+              badge = '<span class="ml-2 px-2 py-1 bg-green-600 text-white text-xs rounded">Jawaban Benar</span>';
+            }
+            if (isUserAnswer && !isCorrectAnswer) {
+              badge = '<span class="ml-2 px-2 py-1 bg-red-600 text-white text-xs rounded">Jawaban Anda</span>';
+            }
+            
+            answerHTML += `
+              <div class="${optionClass}">
+                <span class="font-medium">${String.fromCharCode(65 + optIdx)}.</span> ${option}${badge}
+              </div>
+            `;
+          });
+          answerHTML += '</div>';
+        } else if (question.type === 'MR') {
+          answerHTML += '<div class="mb-4">';
+          answerHTML += '<p class="font-medium text-gray-700 mb-2">Jawaban Benar:</p>';
+          answerHTML += '<div class="flex flex-wrap gap-2 mb-3">';
+          question.correctAnswer.forEach(ans => {
+            answerHTML += `<span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">${ans}</span>`;
+          });
+          answerHTML += '</div>';
+          
+          if (userAnswer && Array.isArray(userAnswer) && userAnswer.length > 0) {
+            answerHTML += '<p class="font-medium text-gray-700 mb-2">Jawaban Anda:</p>';
+            answerHTML += '<div class="flex flex-wrap gap-2">';
+            userAnswer.forEach(ans => {
+              const correct = question.correctAnswer.includes(ans);
+              answerHTML += `<span class="px-3 py-1 ${correct ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'} rounded-full text-sm">${ans}</span>`;
+            });
+            answerHTML += '</div>';
+          } else {
+            answerHTML += '<p class="text-red-600 text-sm">Tidak dijawab</p>';
+          }
+          answerHTML += '</div>';
+        } else if (question.type === 'TI') {
+          answerHTML += '<div class="mb-4">';
+          answerHTML += '<p class="font-medium text-gray-700 mb-2">Jawaban yang diterima:</p>';
+          answerHTML += '<div class="flex flex-wrap gap-2 mb-3">';
+          question.correctAnswer.forEach(ans => {
+            answerHTML += `<span class="px-3 py-1 bg-green-100 text-green-800 rounded-lg text-sm">${ans}</span>`;
+          });
+          answerHTML += '</div>';
+          answerHTML += `<p class="font-medium text-gray-700 mb-2">Jawaban Anda:</p>`;
+          answerHTML += `<p class="px-4 py-2 ${isCorrect ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'} rounded-lg">${userAnswer || 'Tidak dijawab'}</p>`;
+          answerHTML += '</div>';
+        } else if (question.type === 'NUMG') {
+          answerHTML += '<div class="mb-4">';
+          answerHTML += `<p class="font-medium text-gray-700 mb-2">Jawaban Benar: <span class="px-3 py-1 bg-green-100 text-green-800 rounded-lg">${question.correctAnswer}</span></p>`;
+          answerHTML += `<p class="font-medium text-gray-700 mb-2">Jawaban Anda: <span class="px-3 py-1 ${isCorrect ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'} rounded-lg">${userAnswer !== undefined ? userAnswer : 'Tidak dijawab'}</span></p>`;
+          answerHTML += '</div>';
+        } else if (question.type === 'MG') {
+          answerHTML += '<div class="mb-4">';
+          answerHTML += '<p class="font-medium text-gray-700 mb-3">Pasangan yang Benar:</p>';
+          answerHTML += '<div class="space-y-2">';
+          question.pairs.forEach((pair, idx) => {
+            const userSelectedIdx = userAnswer ? userAnswer[idx] : null;
+            const userSelectedRight = userSelectedIdx !== null && userSelectedIdx !== undefined ? question.pairs[userSelectedIdx].right : null;
+            const correctMatch = userSelectedIdx === idx;
+            
+            answerHTML += `
+              <div class="p-3 rounded-lg ${correctMatch ? 'bg-green-50 border-2 border-green-500' : 'bg-red-50 border-2 border-red-500'}">
+                <div class="flex items-center justify-between">
+                  <span class="font-medium">${pair.left}</span>
+                  <span class="text-gray-400">→</span>
+                  <span class="font-medium">${pair.right}</span>
+                </div>
+                ${!correctMatch && userSelectedRight ? `<p class="text-sm text-red-600 mt-1">Jawaban Anda: ${userSelectedRight}</p>` : ''}
+              </div>
+            `;
+          });
+          answerHTML += '</div></div>';
+        } else if (question.type === 'SEQ') {
+          answerHTML += '<div class="mb-4">';
+          answerHTML += '<p class="font-medium text-gray-700 mb-2">Urutan yang Benar:</p>';
+          answerHTML += '<div class="space-y-2 mb-3">';
+          question.correctAnswer.forEach((item, idx) => {
+            answerHTML += `
+              <div class="p-3 bg-green-50 border-2 border-green-500 rounded-lg">
+                <span class="font-bold text-green-800">${idx + 1}.</span> ${item}
+              </div>
+            `;
+          });
+          answerHTML += '</div>';
+          
+          if (userAnswer && Array.isArray(userAnswer)) {
+            answerHTML += '<p class="font-medium text-gray-700 mb-2">Urutan Jawaban Anda:</p>';
+            answerHTML += '<div class="space-y-2">';
+            userAnswer.forEach((item, idx) => {
+              const correct = item === question.correctAnswer[idx];
+              answerHTML += `
+                <div class="p-3 ${correct ? 'bg-green-50 border-2 border-green-500' : 'bg-red-50 border-2 border-red-500'} rounded-lg">
+                  <span class="font-bold ${correct ? 'text-green-800' : 'text-red-800'}">${idx + 1}.</span> ${item}
+                </div>
+              `;
+            });
+            answerHTML += '</div>';
+          }
+          answerHTML += '</div>';
+        }
+        
+        let feedbackHTML = '';
+        if (isCorrect && question.correctFeedback) {
+          feedbackHTML = `
+            <div class="mt-4 p-4 bg-green-50 border-l-4 border-green-500 rounded">
+              <p class="text-sm text-green-800"><strong>💡 Pembahasan:</strong> ${question.correctFeedback}</p>
+            </div>
+          `;
+        } else if (!isCorrect && question.incorrectFeedback) {
+          feedbackHTML = `
+            <div class="mt-4 p-4 bg-red-50 border-l-4 border-red-500 rounded">
+              <p class="text-sm text-red-800"><strong>💡 Pembahasan:</strong> ${question.incorrectFeedback}</p>
+            </div>
+          `;
+        }
+        
+        reviewCard.innerHTML = headerHTML + mediaHTML + questionHTML + answerHTML + feedbackHTML;
+        container.appendChild(reviewCard);
+      });
+    }
+
+    function checkAnswer(question, userAnswer, index) {
+      if (userAnswer === undefined) return false;
+
+      if (question.type === 'TF' || question.type === 'MC') {
+        return userAnswer === question.correctAnswer;
+      } else if (question.type === 'TI') {
+        if (Array.isArray(question.correctAnswer)) {
+          const normalizedAnswer = userAnswer.toLowerCase().trim();
+          return question.correctAnswer.some(correctAns => 
+            normalizedAnswer === correctAns.toLowerCase().trim()
+          );
+        }
+        return userAnswer === question.correctAnswer;
+      } else if (question.type === 'MR') {
+        if (Array.isArray(userAnswer) && Array.isArray(question.correctAnswer)) {
+          const answerSet = new Set(userAnswer);
+          const correctSet = new Set(question.correctAnswer);
+          return answerSet.size === correctSet.size && [...answerSet].every(a => correctSet.has(a));
+        }
+        return false;
+      } else if (question.type === 'NUMG') {
+        const numAnswer = parseFloat(userAnswer);
+        return !isNaN(numAnswer) && Math.abs(numAnswer - question.correctAnswer) <= question.tolerance;
+      } else if (question.type === 'MG') {
+        if (typeof userAnswer === 'object' && !Array.isArray(userAnswer)) {
+          const allCorrect = Object.keys(userAnswer).every(leftIdx => {
+            return userAnswer[leftIdx] === parseInt(leftIdx);
+          });
+          return allCorrect && Object.keys(userAnswer).length === question.pairs.length;
+        }
+        return false;
+      } else if (question.type === 'SEQ') {
+        return Array.isArray(userAnswer) && userAnswer.every((item, idx) => item === question.correctAnswer[idx]);
+      }
+      
+      return false;
+    }
+
+    document.getElementById('backToResultButton').onclick = () => {
+      document.getElementById('reviewScreen').style.display = 'none';
+      document.getElementById('resultScreen').style.display = 'flex';
+      
+      let redirectCountdown = 30;
+      const redirectTimerEl = document.getElementById('redirectTimer');
+      redirectTimerEl.textContent = redirectCountdown;
+      
+      const redirectInterval = setInterval(() => {
+        redirectCountdown--;
+        redirectTimerEl.textContent = redirectCountdown;
+        
+        if (redirectCountdown <= 0) {
+          clearInterval(redirectInterval);
+          resetToLogin();
+        }
+      }, 1000);
+
+      document.getElementById('reviewButton').onclick = () => {
+        clearInterval(redirectInterval);
+        showReviewScreen();
+      };
     }
 
     function calculateScore() {
@@ -1025,17 +1724,6 @@
       return Math.round((correct / questions.length) * 100);
     }
 
-    function showWarning(message) {
-      const toast = document.getElementById('warningToast');
-      const messageEl = document.getElementById('warningMessage');
-      messageEl.textContent = message;
-      toast.style.display = 'block';
-      
-      setTimeout(() => {
-        toast.style.display = 'none';
-      }, 4000);
-    }
-
     function showError(message) {
       const loadingScreen = document.getElementById('loadingScreen');
       loadingScreen.innerHTML = `
@@ -1066,6 +1754,19 @@
           }, 5500);
         }, i * 30);
       }
+    }
+
+    function resetToLogin() {
+      currentStudent = null;
+      currentQuestionIndex = 0;
+      answers = {};
+      examStarted = false;
+      violations = [];
+      
+      document.getElementById('nisInput').value = '';
+      
+      document.getElementById('resultScreen').style.display = 'none';
+      document.getElementById('loginScreen').style.display = 'flex';
     }
 
     // Element SDK Integration
@@ -1104,8 +1805,7 @@
       });
     }
 
-    // Initialize app
     loadData();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9aa05798e448d899',t:'MTc2NTA3MTkxMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9aa0978495a65f87',t:'MTc2NTA3NDUzMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
