@@ -1428,6 +1428,33 @@
       document.getElementById('reviewScore').textContent = score;
       
       renderReview();
+      
+      // Auto close review after 20 seconds
+      let reviewCountdown = 20;
+      const backButton = document.getElementById('backToResultButton');
+      const originalText = backButton.textContent;
+      
+      const reviewInterval = setInterval(() => {
+        reviewCountdown--;
+        backButton.textContent = `← Kembali ke Hasil (${reviewCountdown}s)`;
+        
+        if (reviewCountdown <= 0) {
+          clearInterval(reviewInterval);
+          backButton.textContent = originalText;
+          document.getElementById('reviewScreen').style.display = 'none';
+          resetToLogin();
+        }
+      }, 1000);
+      
+      // Update back button to clear interval when clicked
+      const newBackButton = backButton.cloneNode(true);
+      backButton.parentNode.replaceChild(newBackButton, backButton);
+      newBackButton.onclick = () => {
+        clearInterval(reviewInterval);
+        newBackButton.textContent = originalText;
+        document.getElementById('reviewScreen').style.display = 'none';
+        resetToLogin();
+      };
     }
 
     function renderReview() {
@@ -1807,5 +1834,5 @@
 
     loadData();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9aa0978495a65f87',t:'MTc2NTA3NDUzMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9aa09ff456c65f87',t:'MTc2NTA3NDg3NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
