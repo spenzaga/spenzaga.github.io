@@ -1,0 +1,1309 @@
+<!doctype html>
+<html lang="id">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Computer Based Test - SMP Negeri 1 Purbalingga</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+    }
+    
+    * {
+      box-sizing: border-box;
+    }
+    
+    .question-card {
+      transition: all 0.3s ease;
+    }
+    
+    .question-card:hover {
+      transform: translateY(-2px);
+    }
+    
+    .radio-custom:checked + label,
+    .checkbox-custom:checked + label {
+      background-color: rgb(59, 130, 246);
+      color: white;
+      border-color: rgb(59, 130, 246);
+    }
+    
+    .timer {
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+    
+    .match-item {
+      cursor: move;
+    }
+    
+    .match-item.dragging {
+      opacity: 0.5;
+    }
+    
+    .sequence-item {
+      cursor: move;
+    }
+    
+    .sequence-item.dragging {
+      opacity: 0.5;
+    }
+    
+    .security-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(220, 38, 38, 0.95);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 24px;
+      font-weight: bold;
+      text-align: center;
+      padding: 20px;
+    }
+    
+    .no-screenshot {
+      pointer-events: auto;
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="/_sdk/element_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="w-full min-h-full bg-slate-50">
+  <div id="app" class="w-full min-h-full"></div>
+  <div id="securityOverlay" class="security-overlay" style="display: none;">
+   <div>
+    <div style="font-size: 48px; margin-bottom: 20px;">
+     ⚠️
+    </div>
+    <div id="securityMessage">
+     Peringatan Keamanan
+    </div>
+    <div style="font-size: 16px; margin-top: 20px; opacity: 0.9;">
+     Ujian akan otomatis tersubmit
+    </div>
+   </div>
+  </div>
+  <script>
+    // Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyBiC7S29mWNiNyusbIwnR-Pha6aIZZTA0o",
+      authDomain: "quiziz-30f51.firebaseapp.com",
+      databaseURL: "https://quiziz-30f51-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "quiziz-30f51",
+      storageBucket: "quiziz-30f51.firebasestorage.app",
+      messagingSenderId: "335258259474",
+      appId: "1:335258259474:web:a89f78bcb592481fb9c8cb",
+      measurementId: "G-X6C0SV86SV"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    let currentStudent = null;
+    let questionsData = [];
+    let securityViolated = false;
+    let tabSwitchCount = 0;
+
+    let currentState = {
+      screen: 'login',
+      studentName: '',
+      studentClass: '',
+      studentNis: '',
+      studentAbsen: '',
+      currentQuestion: 0,
+      answers: {},
+      startTime: null,
+      timer: null,
+      timeElapsed: 0
+    };
+
+    // Security Features Implementation
+    function initSecurityFeatures() {
+      // 1. Anti Screenshot - disable keyboard shortcuts
+      document.addEventListener('keydown', function(e) {
+        // Block Print Screen, Ctrl+Shift+S (Firefox screenshot), Cmd+Shift+3/4 (Mac)
+        if (e.key === 'PrintScreen' || 
+            (e.ctrlKey && e.shiftKey && e.key === 'S') ||
+            (e.metaKey && e.shiftKey && (e.key === '3' || e.key === '4'))) {
+          e.preventDefault();
+          showSecurityWarning('Screenshot terdeteksi! Tindakan ini tidak diperbolehkan.');
+          return false;
+        }
+        
+        // Block Ctrl+S, Ctrl+P, F12, Ctrl+Shift+I
+        if ((e.ctrlKey && (e.key === 's' || e.key === 'p')) ||
+            e.key === 'F12' ||
+            (e.ctrlKey && e.shiftKey && e.key === 'I')) {
+          e.preventDefault();
+          return false;
+        }
+      });
+
+      // 2. Disable right-click (prevent inspect element and save)
+      document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+        return false;
+      });
+
+      // 3. Anti New Tab / Window Switch Detection
+      document.addEventListener('visibilitychange', function() {
+        if (currentState.screen === 'test' && document.hidden && !securityViolated) {
+          tabSwitchCount++;
+          if (tabSwitchCount >= 3) {
+            securityViolated = true;
+            showSecurityWarning('Anda keluar dari tab ujian sebanyak 3 kali. Ujian akan otomatis tersubmit.');
+            setTimeout(() => {
+              forceSubmitTest('Pelanggaran: Keluar dari tab ujian');
+            }, 3000);
+          } else {
+            showTemporaryWarning(`Peringatan ${tabSwitchCount}/3: Jangan keluar dari tab ujian!`);
+          }
+        }
+      });
+
+      // Detect window blur (switching to another window)
+      window.addEventListener('blur', function() {
+        if (currentState.screen === 'test' && !securityViolated) {
+          tabSwitchCount++;
+          if (tabSwitchCount >= 3) {
+            securityViolated = true;
+            showSecurityWarning('Anda berpindah aplikasi sebanyak 3 kali. Ujian akan otomatis tersubmit.');
+            setTimeout(() => {
+              forceSubmitTest('Pelanggaran: Berpindah aplikasi');
+            }, 3000);
+          } else {
+            showTemporaryWarning(`Peringatan ${tabSwitchCount}/3: Jangan berpindah aplikasi!`);
+          }
+        }
+      });
+
+      // 4. Anti Google Translate - detect translate attempts
+      const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+          mutation.addedNodes.forEach(function(node) {
+            if (node.tagName === 'FONT' && node.classList && node.classList.contains('translated-ltr')) {
+              showSecurityWarning('Google Translate terdeteksi! Tindakan ini tidak diperbolehkan.');
+              // Remove translation
+              if (node.parentNode) {
+                node.parentNode.removeChild(node);
+              }
+            }
+          });
+        });
+      });
+
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true
+      });
+
+      // Prevent Google Translate by adding notranslate class
+      document.documentElement.classList.add('notranslate');
+      document.body.classList.add('notranslate');
+      
+      // Add meta tag to disable translation
+      const metaNoTranslate = document.createElement('meta');
+      metaNoTranslate.name = 'google';
+      metaNoTranslate.content = 'notranslate';
+      document.head.appendChild(metaNoTranslate);
+    }
+
+    function showSecurityWarning(message) {
+      const overlay = document.getElementById('securityOverlay');
+      const messageEl = document.getElementById('securityMessage');
+      messageEl.textContent = message;
+      overlay.style.display = 'flex';
+    }
+
+    function showTemporaryWarning(message) {
+      const warningEl = document.createElement('div');
+      warningEl.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 px-6 py-4 rounded-lg shadow-2xl z-50 font-bold text-center';
+      warningEl.style.backgroundColor = '#dc2626';
+      warningEl.style.color = 'white';
+      warningEl.style.fontSize = '18px';
+      warningEl.style.minWidth = '300px';
+      warningEl.textContent = message;
+      document.body.appendChild(warningEl);
+      
+      setTimeout(() => {
+        warningEl.remove();
+      }, 4000);
+    }
+
+    // Parse Firebase questions to internal format
+    function parseFirebaseQuestions(firebaseData) {
+      if (!firebaseData || !Array.isArray(firebaseData)) return [];
+      
+      return firebaseData.map(q => {
+        const parsed = {
+          id: q.question_id,
+          type: q.question_type,
+          question: q.question_text,
+          image: q.image || '',
+          video: q.video || '',
+          audio: q.audio || '',
+          points: parseInt(q.points) || 10,
+          correctFeedback: q.correct_feedback || 'Well done!',
+          incorrectFeedback: q.incorrect_feedback || 'Sorry, the answer is incorrect...'
+        };
+
+        if (q.question_type === 'TF') {
+          parsed.options = [q.answer_1, q.answer_2]
+            .filter(a => a)
+            .map(a => a.replace('*', ''));
+          parsed.answer = q.answer_1.includes('*');
+        } else if (q.question_type === 'MC') {
+          parsed.options = [q.answer_1, q.answer_2, q.answer_3, q.answer_4]
+            .filter(a => a)
+            .map(a => a.replace('*', ''));
+          
+          const answers = [q.answer_1, q.answer_2, q.answer_3, q.answer_4];
+          parsed.answer = answers.findIndex(a => a && a.includes('*'));
+        } else if (q.question_type === 'MR') {
+          parsed.options = [q.answer_1, q.answer_2, q.answer_3, q.answer_4]
+            .filter(a => a)
+            .map(a => a.replace('*', ''));
+          
+          const answers = [q.answer_1, q.answer_2, q.answer_3, q.answer_4];
+          parsed.answer = answers
+            .map((a, i) => a && a.includes('*') ? i : -1)
+            .filter(i => i !== -1);
+        } else if (q.question_type === 'TI') {
+          parsed.answer = [q.answer_1, q.answer_2, q.answer_3, q.answer_4]
+            .filter(a => a && a.includes('*'))
+            .map(a => a.replace('*', '').trim());
+        } else if (q.question_type === 'MG') {
+          parsed.pairs = [q.answer_1, q.answer_2, q.answer_3, q.answer_4]
+            .filter(a => a)
+            .map(a => {
+              const [left, right] = a.split('|');
+              return { left: left.trim(), right: right.trim() };
+            });
+        } else if (q.question_type === 'SEQ') {
+          parsed.items = [q.answer_1, q.answer_2, q.answer_3, q.answer_4]
+            .filter(a => a);
+        } else if (q.question_type === 'NUMG') {
+          const correctAnswer = [q.answer_1, q.answer_2, q.answer_3, q.answer_4]
+            .find(a => a && a.includes('*'));
+          if (correctAnswer) {
+            parsed.answer = parseFloat(correctAnswer.replace('*', ''));
+            parsed.tolerance = 0;
+          }
+        }
+
+        return parsed;
+      });
+    }
+
+    // Load questions from Firebase
+    async function loadQuestionsFromFirebase() {
+      try {
+        const questionsRef = database.ref('questions');
+        const snapshot = await questionsRef.once('value');
+        
+        if (snapshot.exists()) {
+          const firebaseQuestions = snapshot.val();
+          questionsData = parseFirebaseQuestions(firebaseQuestions);
+          return true;
+        } else {
+          console.error('No questions found in Firebase');
+          return false;
+        }
+      } catch (error) {
+        console.error('Error loading questions:', error);
+        return false;
+      }
+    }
+
+    // Check if student has already taken the test
+    async function checkStudentHasSubmitted(nis) {
+      try {
+        const scoresRef = database.ref('scores');
+        const snapshot = await scoresRef.orderByChild('nis').equalTo(nis).once('value');
+        return snapshot.exists();
+      } catch (error) {
+        console.error('Error checking student submission:', error);
+        return false;
+      }
+    }
+
+    function init() {
+      initSecurityFeatures();
+      render();
+    }
+
+    function render() {
+      const app = document.getElementById('app');
+      
+      if (currentState.screen === 'login') {
+        app.innerHTML = `
+          <div class="w-full min-h-full flex items-center justify-center p-4 md:p-8">
+            <div class="question-card w-full max-w-md bg-white rounded-2xl shadow-2xl p-8">
+              <div class="text-center mb-6">
+                <img src="https://spenzaga.github.io/assets/img/logo.png" alt="Logo" class="w-24 h-24 mx-auto mb-4 object-contain" onerror="this.style.display='none'; this.alt='Logo failed to load';" />
+                <h1 class="text-2xl font-bold text-slate-800 mb-3">SMP Negeri 1 Purbalingga</h1>
+                <h2 class="text-xl font-semibold text-slate-600 mb-6">Computer Based Test</h2>
+              </div>
+              
+              <form id="loginForm" class="space-y-4">
+                <div>
+                  <label for="nisInput" class="block text-sm font-medium text-slate-700 mb-2">NIS (Nomor Induk Siswa)</label>
+                  <input 
+                    type="text" 
+                    id="nisInput" 
+                    required
+                    class="w-full px-4 py-2.5 rounded-lg border-2 border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Masukkan NIS Anda"
+                  />
+                </div>
+                
+                <div id="loginError" class="hidden p-3 bg-red-100 text-red-700 rounded-lg text-sm">
+                  NIS tidak ditemukan. Silakan coba lagi.
+                </div>
+                
+                <div id="loginLoading" class="hidden text-center">
+                  <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent"></div>
+                  <p class="mt-2 text-slate-600">Memverifikasi...</p>
+                </div>
+                
+                <button 
+                  type="submit"
+                  id="loginButton"
+                  class="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-lg font-semibold transition-all duration-300"
+                >
+                  Masuk
+                </button>
+              </form>
+            </div>
+          </div>
+        `;
+        
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+          e.preventDefault();
+          
+          const nisInput = document.getElementById('nisInput').value.trim();
+          const loginButton = document.getElementById('loginButton');
+          const loginError = document.getElementById('loginError');
+          const loginLoading = document.getElementById('loginLoading');
+          
+          if (!nisInput) return;
+          
+          loginButton.disabled = true;
+          loginButton.style.opacity = '0.5';
+          loginLoading.classList.remove('hidden');
+          loginError.classList.add('hidden');
+          
+          try {
+            // Check if student has already submitted
+            const hasSubmitted = await checkStudentHasSubmitted(nisInput);
+            
+            if (hasSubmitted) {
+              loginError.textContent = 'Anda sudah mengerjakan ujian ini. Setiap siswa hanya dapat mengerjakan satu kali.';
+              loginError.classList.remove('hidden');
+              loginButton.disabled = false;
+              loginButton.style.opacity = '1';
+              loginLoading.classList.add('hidden');
+              return;
+            }
+            
+            const questionsLoaded = await loadQuestionsFromFirebase();
+            
+            if (!questionsLoaded || questionsData.length === 0) {
+              loginError.textContent = 'Tidak ada soal tersedia. Silakan hubungi administrator.';
+              loginError.classList.remove('hidden');
+              loginButton.disabled = false;
+              loginButton.style.opacity = '1';
+              loginLoading.classList.add('hidden');
+              return;
+            }
+            
+            const studentsRef = database.ref('students');
+            const snapshot = await studentsRef.orderByChild('nis').equalTo(nisInput).once('value');
+            
+            if (snapshot.exists()) {
+              const studentData = Object.values(snapshot.val())[0];
+              currentStudent = studentData;
+              currentState.studentName = studentData.name;
+              currentState.studentClass = studentData.class;
+              currentState.studentNis = studentData.nis;
+              currentState.studentAbsen = studentData.absen;
+              currentState.screen = 'confirmation';
+              render();
+            } else {
+              loginError.textContent = 'NIS tidak ditemukan. Silakan coba lagi.';
+              loginError.classList.remove('hidden');
+              loginButton.disabled = false;
+              loginButton.style.opacity = '1';
+              loginLoading.classList.add('hidden');
+            }
+          } catch (error) {
+            console.error('Login error:', error);
+            loginError.textContent = 'Terjadi kesalahan. Silakan coba lagi.';
+            loginError.classList.remove('hidden');
+            loginButton.disabled = false;
+            loginButton.style.opacity = '1';
+            loginLoading.classList.add('hidden');
+          }
+        });
+      } else if (currentState.screen === 'confirmation') {
+        app.innerHTML = `
+          <div class="w-full min-h-full flex items-center justify-center p-4 md:p-8">
+            <div class="question-card w-full max-w-xl bg-white rounded-2xl shadow-2xl p-6 md:p-8">
+              <div class="text-center mb-8">
+                <div class="mb-6">
+                  <svg class="w-20 h-20 mx-auto text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                </div>
+                <h1 class="text-3xl font-bold text-black mb-3">Konfirmasi Data Peserta</h1>
+                <p class="text-black">Pastikan data Anda sudah benar sebelum memulai ujian</p>
+              </div>
+              
+              <div class="mb-8 bg-slate-50 p-6 rounded-xl">
+                <div class="space-y-4">
+                  <div class="flex justify-between items-center pb-3 border-b border-slate-200">
+                    <span class="font-semibold text-black">NIS</span>
+                    <span class="font-bold text-black text-lg">${currentState.studentNis}</span>
+                  </div>
+                  <div class="flex justify-between items-center pb-3 border-b border-slate-200">
+                    <span class="font-semibold text-black">Nomor Absen</span>
+                    <span class="font-bold text-black text-lg">${currentState.studentAbsen}</span>
+                  </div>
+                  <div class="flex justify-between items-center pb-3 border-b border-slate-200">
+                    <span class="font-semibold text-black">Nama Lengkap</span>
+                    <span class="font-bold text-black text-lg">${currentState.studentName}</span>
+                  </div>
+                  <div class="flex justify-between items-center pb-3">
+                    <span class="font-semibold text-black">Kelas</span>
+                    <span class="font-bold text-black text-lg">${currentState.studentClass}</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="mb-6 bg-yellow-50 border-2 border-yellow-400 p-5 rounded-xl">
+                <div class="text-center">
+                  <div class="mb-3 text-5xl">⚠️</div>
+                  <h3 class="text-xl font-black text-black mb-3 tracking-wide">PERNYATAAN KEJUJURAN</h3>
+                </div>
+                <div class="text-sm text-black leading-relaxed text-left">
+                  <p class="font-semibold mb-2">Saya berkomitmen untuk:</p>
+                  <p class="font-medium">✓ Mengerjakan ujian dengan <strong>jujur dan mandiri</strong><br/>
+                  ✓ Tidak melakukan <strong>kecurangan</strong> dalam bentuk apapun<br/>
+                  ✓ Tidak <strong>keluar dari halaman ujian</strong> atau berpindah aplikasi<br/>
+                  ✗ Pelanggaran mengakibatkan <strong>DISKUALIFIKASI OTOMATIS</strong></p>
+                </div>
+              </div>
+              
+              <div class="mb-6 bg-slate-50 p-4 rounded-lg flex items-start gap-3">
+                <input 
+                  type="checkbox" 
+                  id="agreeCheckbox" 
+                  class="mt-1 w-5 h-5 cursor-pointer accent-blue-500"
+                />
+                <label for="agreeCheckbox" class="cursor-pointer text-black leading-relaxed">
+                  Saya telah membaca dan menyetujui pernyataan kejujuran di atas, dan siap untuk memulai ujian dengan jujur
+                </label>
+              </div>
+              
+              <div class="flex gap-4">
+                <button 
+                  id="backBtn"
+                  class="flex-1 bg-slate-500 hover:bg-slate-600 text-white py-3 rounded-lg font-semibold transition-all duration-300"
+                >
+                  ← Kembali
+                </button>
+                <button 
+                  id="startTestBtn"
+                  class="flex-1 bg-blue-500 text-white py-3 rounded-lg font-semibold transition-all duration-300 opacity-50"
+                  disabled
+                >
+                  Mulai Ujian →
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        const agreeCheckbox = document.getElementById('agreeCheckbox');
+        const startTestBtn = document.getElementById('startTestBtn');
+        
+        agreeCheckbox.addEventListener('change', (e) => {
+          if (e.target.checked) {
+            startTestBtn.disabled = false;
+            startTestBtn.classList.remove('opacity-50');
+            startTestBtn.classList.add('hover:bg-blue-600');
+          } else {
+            startTestBtn.disabled = true;
+            startTestBtn.classList.add('opacity-50');
+            startTestBtn.classList.remove('hover:bg-blue-600');
+          }
+        });
+        
+        document.getElementById('backBtn').addEventListener('click', () => {
+          currentState.screen = 'login';
+          currentStudent = null;
+          render();
+        });
+        
+        document.getElementById('startTestBtn').addEventListener('click', () => {
+          currentState.screen = 'test';
+          currentState.startTime = Date.now();
+          startTimer();
+          render();
+        });
+      } else if (currentState.screen === 'test') {
+        const question = questionsData[currentState.currentQuestion];
+        const progress = ((currentState.currentQuestion + 1) / questionsData.length) * 100;
+        
+        app.innerHTML = `
+          <div class="w-full min-h-full p-4 md:p-8">
+            <div class="max-w-4xl mx-auto">
+              <div class="mb-6 bg-white p-6 rounded-xl shadow-lg">
+                <div class="flex justify-between items-center mb-4">
+                  <div>
+                    <h2 class="text-2xl font-bold text-slate-800">SMP Negeri 1 Purbalingga</h2>
+                    <p class="text-sm text-slate-600">${currentState.studentName} - ${currentState.studentClass}</p>
+                    ${currentStudent ? `<p class="text-xs text-slate-500">NIS: ${currentStudent.nis} | Absen: ${currentStudent.absen}</p>` : ''}
+                  </div>
+                  <div class="text-right">
+                    <div class="timer text-2xl font-bold text-blue-500" id="timer">00:00</div>
+                    <p class="text-xs text-slate-500">Waktu Pengerjaan</p>
+                  </div>
+                </div>
+                
+                <div class="mb-2">
+                  <div class="flex justify-between text-sm text-slate-600 mb-2">
+                    <span>Soal ${currentState.currentQuestion + 1} dari ${questionsData.length}</span>
+                    <span>${Math.round(progress)}%</span>
+                  </div>
+                  <div class="w-full bg-slate-200 rounded-full h-3">
+                    <div class="bg-blue-500 h-3 rounded-full transition-all duration-300" style="width: ${progress}%;"></div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="question-card bg-white p-8 rounded-xl shadow-lg mb-6">
+                <div class="mb-6">
+                  <span class="inline-block bg-blue-500 text-white px-4 py-2 rounded-full text-sm font-semibold mb-4">
+                    ${getQuestionTypeLabel(question.type)}
+                  </span>
+                  
+                  ${question.image ? `<div class="mb-6"><img src="${question.image}" alt="Question image" class="w-full max-w-2xl mx-auto rounded-lg shadow-md" onerror="this.style.display='none'; this.alt='Image failed to load';" /></div>` : ''}
+                  
+                  ${question.video ? `<div class="mb-6"><video controls class="w-full max-w-2xl mx-auto rounded-lg shadow-md"><source src="${question.video}" type="video/mp4">Your browser does not support video.</video></div>` : ''}
+                  
+                  ${question.audio ? `<div class="mb-6 flex justify-center"><audio controls style="width: 100%; max-width: 500px;"><source src="${question.audio}" type="audio/mpeg">Your browser does not support audio.</audio></div>` : ''}
+                  
+                  <h3 class="text-xl font-semibold text-slate-800 mb-6">
+                    ${question.question}
+                  </h3>
+                </div>
+                
+                <div id="questionContent"></div>
+              </div>
+              
+              <div class="flex justify-between gap-4">
+                <button 
+                  id="prevBtn"
+                  class="bg-slate-500 hover:bg-slate-600 text-white px-8 py-3 rounded-lg font-semibold transition-all duration-300"
+                  ${currentState.currentQuestion === 0 ? 'disabled' : ''}
+                >
+                  ← Sebelumnya
+                </button>
+                
+                <button 
+                  id="nextBtn"
+                  class="bg-blue-500 hover:bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold transition-all duration-300"
+                >
+                  ${currentState.currentQuestion === questionsData.length - 1 ? 'Selesai' : 'Selanjutnya →'}
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        renderQuestionContent(question);
+        
+        document.getElementById('prevBtn')?.addEventListener('click', () => {
+          if (currentState.currentQuestion > 0) {
+            currentState.currentQuestion--;
+            render();
+          }
+        });
+        
+        document.getElementById('nextBtn')?.addEventListener('click', () => {
+          saveCurrentAnswer();
+          if (currentState.currentQuestion < questionsData.length - 1) {
+            currentState.currentQuestion++;
+            render();
+          } else {
+            submitTest();
+          }
+        });
+      } else if (currentState.screen === 'result') {
+        const score = calculateScore();
+        const totalPoints = calculateTotalPoints();
+        const percentage = (score / totalPoints) * 100;
+        const status = percentage >= 60 ? 'Lulus' : 'Tidak Lulus';
+        
+        app.innerHTML = `
+          <div class="w-full min-h-full flex items-center justify-center p-4 md:p-6">
+            <div class="question-card w-full max-w-xl bg-white rounded-xl shadow-2xl p-6">
+              <div class="text-center mb-5">
+                <div class="mb-4">
+                  <svg class="w-16 h-16 mx-auto text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                </div>
+                <h1 class="text-2xl font-bold text-slate-800 mb-2">Ujian Selesai!</h1>
+                <p class="text-sm text-slate-600">Terima kasih telah mengerjakan ujian</p>
+              </div>
+              
+              <div class="mb-5 bg-slate-50 p-4 rounded-lg">
+                <div class="text-sm font-semibold text-slate-600 mb-3">Identitas Peserta</div>
+                <div class="space-y-2 text-sm">
+                  <div class="flex justify-between">
+                    <span class="text-slate-600">Nama</span>
+                    <span class="font-semibold text-slate-800">${currentState.studentName}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-slate-600">Kelas</span>
+                    <span class="font-semibold text-slate-800">${currentState.studentClass}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-slate-600">NIS</span>
+                    <span class="font-semibold text-slate-800">${currentState.studentNis}</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="mb-5 bg-slate-50 p-4 rounded-lg">
+                <div class="text-center mb-4">
+                  <div class="text-4xl font-bold text-blue-500 mb-1">${score}/${totalPoints}</div>
+                  <div class="text-2xl font-semibold text-slate-800 mb-3">${percentage.toFixed(1)}%</div>
+                  <div class="inline-block px-5 py-1.5 rounded-full text-base font-bold text-white ${status === 'Lulus' ? 'bg-green-500' : 'bg-red-500'}">
+                    ${status}
+                  </div>
+                </div>
+                
+                <div class="grid grid-cols-3 gap-3 mb-3">
+                  <div class="text-center bg-white p-3 rounded-lg">
+                    <div class="text-2xl font-bold text-slate-800 mb-1">${countCorrectAnswers()}</div>
+                    <div class="text-xs text-slate-600">Benar</div>
+                  </div>
+                  <div class="text-center bg-white p-3 rounded-lg">
+                    <div class="text-2xl font-bold text-slate-800 mb-1">${questionsData.length - countCorrectAnswers()}</div>
+                    <div class="text-xs text-slate-600">Salah</div>
+                  </div>
+                  <div class="text-center bg-white p-3 rounded-lg">
+                    <div class="text-2xl font-bold text-slate-800 mb-1">${questionsData.length}</div>
+                    <div class="text-xs text-slate-600">Total</div>
+                  </div>
+                </div>
+                
+                <div class="text-center bg-white p-3 rounded-lg">
+                  <div class="text-xs font-semibold text-slate-600 mb-1">Waktu Pengerjaan</div>
+                  <div class="text-xl font-bold text-blue-500">${formatTime(currentState.timeElapsed)}</div>
+                </div>
+              </div>
+              
+              <div class="text-center">
+                <p class="text-xs text-slate-500">© 2024 SMP Negeri 1 Purbalingga</p>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    function renderQuestionContent(question) {
+      const content = document.getElementById('questionContent');
+      const savedAnswer = currentState.answers[question.id];
+      
+      if (question.type === 'TF') {
+        const options = question.options || ['Benar', 'Salah'];
+        
+        content.innerHTML = `
+          <div class="space-y-4">
+            <label class="flex items-center p-4 bg-slate-50 rounded-lg border-2 border-slate-300 cursor-pointer transition-all duration-300 hover:shadow-md">
+              <input type="radio" name="answer" value="true" class="radio-custom hidden" ${savedAnswer === true ? 'checked' : ''} />
+              <span class="flex-1 font-medium text-slate-800">${options[0]}</span>
+            </label>
+            <label class="flex items-center p-4 bg-slate-50 rounded-lg border-2 border-slate-300 cursor-pointer transition-all duration-300 hover:shadow-md">
+              <input type="radio" name="answer" value="false" class="radio-custom hidden" ${savedAnswer === false ? 'checked' : ''} />
+              <span class="flex-1 font-medium text-slate-800">${options[1]}</span>
+            </label>
+          </div>
+        `;
+        
+        content.querySelectorAll('input[type="radio"]').forEach(radio => {
+          radio.addEventListener('change', (e) => {
+            content.querySelectorAll('label').forEach(label => {
+              label.classList.remove('bg-blue-500', 'border-blue-500');
+              label.classList.add('bg-slate-50', 'border-slate-300');
+              label.querySelector('span').classList.remove('text-white');
+              label.querySelector('span').classList.add('text-slate-800');
+            });
+            
+            if (e.target.checked) {
+              const label = e.target.closest('label');
+              label.classList.remove('bg-slate-50', 'border-slate-300');
+              label.classList.add('bg-blue-500', 'border-blue-500');
+              label.querySelector('span').classList.remove('text-slate-800');
+              label.querySelector('span').classList.add('text-white');
+            }
+          });
+          
+          if (radio.checked) {
+            const label = radio.closest('label');
+            label.classList.remove('bg-slate-50', 'border-slate-300');
+            label.classList.add('bg-blue-500', 'border-blue-500');
+            label.querySelector('span').classList.remove('text-slate-800');
+            label.querySelector('span').classList.add('text-white');
+          }
+        });
+      } else if (question.type === 'MC') {
+        content.innerHTML = `
+          <div class="space-y-4">
+            ${question.options.map((option, index) => `
+              <label class="flex items-center p-4 bg-slate-50 rounded-lg border-2 border-slate-300 cursor-pointer transition-all duration-300 hover:shadow-md">
+                <input type="radio" name="answer" value="${index}" class="radio-custom hidden" ${savedAnswer === index ? 'checked' : ''} />
+                <span class="flex-1 font-medium text-slate-800">${String.fromCharCode(65 + index)}. ${option}</span>
+              </label>
+            `).join('')}
+          </div>
+        `;
+        
+        content.querySelectorAll('input[type="radio"]').forEach(radio => {
+          radio.addEventListener('change', (e) => {
+            content.querySelectorAll('label').forEach(label => {
+              label.classList.remove('bg-blue-500', 'border-blue-500');
+              label.classList.add('bg-slate-50', 'border-slate-300');
+              label.querySelector('span').classList.remove('text-white');
+              label.querySelector('span').classList.add('text-slate-800');
+            });
+            
+            if (e.target.checked) {
+              const label = e.target.closest('label');
+              label.classList.remove('bg-slate-50', 'border-slate-300');
+              label.classList.add('bg-blue-500', 'border-blue-500');
+              label.querySelector('span').classList.remove('text-slate-800');
+              label.querySelector('span').classList.add('text-white');
+            }
+          });
+          
+          if (radio.checked) {
+            const label = radio.closest('label');
+            label.classList.remove('bg-slate-50', 'border-slate-300');
+            label.classList.add('bg-blue-500', 'border-blue-500');
+            label.querySelector('span').classList.remove('text-slate-800');
+            label.querySelector('span').classList.add('text-white');
+          }
+        });
+      } else if (question.type === 'MR') {
+        content.innerHTML = `
+          <div class="mb-4 bg-slate-50 p-4 rounded-lg text-sm text-slate-700">
+            <strong>Petunjuk:</strong> Pilih semua jawaban yang benar
+          </div>
+          <div class="space-y-4">
+            ${question.options.map((option, index) => `
+              <label class="flex items-center p-4 bg-slate-50 rounded-lg border-2 border-slate-300 cursor-pointer transition-all duration-300 hover:shadow-md">
+                <input type="checkbox" value="${index}" class="checkbox-custom hidden" ${savedAnswer && savedAnswer.includes(index) ? 'checked' : ''} />
+                <span class="flex-1 font-medium text-slate-800">${String.fromCharCode(65 + index)}. ${option}</span>
+              </label>
+            `).join('')}
+          </div>
+        `;
+        
+        content.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+          checkbox.addEventListener('change', (e) => {
+            const label = e.target.closest('label');
+            if (e.target.checked) {
+              label.classList.remove('bg-slate-50', 'border-slate-300');
+              label.classList.add('bg-blue-500', 'border-blue-500');
+              label.querySelector('span').classList.remove('text-slate-800');
+              label.querySelector('span').classList.add('text-white');
+            } else {
+              label.classList.remove('bg-blue-500', 'border-blue-500');
+              label.classList.add('bg-slate-50', 'border-slate-300');
+              label.querySelector('span').classList.remove('text-white');
+              label.querySelector('span').classList.add('text-slate-800');
+            }
+          });
+          
+          if (checkbox.checked) {
+            const label = checkbox.closest('label');
+            label.classList.remove('bg-slate-50', 'border-slate-300');
+            label.classList.add('bg-blue-500', 'border-blue-500');
+            label.querySelector('span').classList.remove('text-slate-800');
+            label.querySelector('span').classList.add('text-white');
+          }
+        });
+      } else if (question.type === 'TI') {
+        content.innerHTML = `
+          <input 
+            type="text" 
+            id="textAnswer"
+            class="w-full px-4 py-3 bg-slate-50 rounded-lg border-2 border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-800"
+            placeholder="Ketik jawaban Anda di sini..."
+            value="${savedAnswer || ''}"
+          />
+        `;
+      } else if (question.type === 'MG') {
+        // Shuffle right answers only if not previously saved
+        let shuffledRight;
+        if (savedAnswer?.rightOrder) {
+          shuffledRight = savedAnswer.rightOrder;
+        } else {
+          shuffledRight = [...question.pairs.map(p => p.right)].sort(() => Math.random() - 0.5);
+        }
+        
+        content.innerHTML = `
+          <div class="mb-4 bg-slate-50 p-4 rounded-lg text-sm text-slate-700">
+            <strong>Petunjuk:</strong> Seret jawaban di kanan untuk menjodohkan dengan soal di kiri
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="space-y-3">
+              <div class="font-semibold text-sm text-slate-600 mb-2">Pertanyaan</div>
+              ${question.pairs.map((pair, index) => `
+                <div class="bg-blue-500 text-white p-4 rounded-lg font-medium" style="min-height: 80px; height: 80px; display: flex; align-items: center;">
+                  ${index + 1}. ${pair.left}
+                </div>
+              `).join('')}
+            </div>
+            <div class="space-y-3" id="matchingRight">
+              <div class="font-semibold text-sm text-slate-600 mb-2">Jawaban</div>
+              ${shuffledRight.map((right, index) => `
+                <div 
+                  class="match-item bg-slate-50 border-2 border-slate-300 p-4 rounded-lg font-medium cursor-move transition-all duration-300 hover:shadow-md text-slate-800" 
+                  style="min-height: 80px; height: 80px; display: flex; align-items: center;"
+                  draggable="true"
+                  data-answer="${right}"
+                >
+                  ${right}
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+        
+        setupDragAndDrop();
+      } else if (question.type === 'SEQ') {
+        const shuffledItems = savedAnswer || [...question.items].sort(() => Math.random() - 0.5);
+        
+        content.innerHTML = `
+          <div class="mb-4 bg-slate-50 p-4 rounded-lg text-sm text-slate-700">
+            <strong>Petunjuk:</strong> Seret item untuk mengurutkan dari atas ke bawah
+          </div>
+          <div class="space-y-3" id="sequenceItems">
+            ${shuffledItems.map((item, index) => `
+              <div 
+                class="sequence-item bg-slate-50 border-2 border-slate-300 p-4 rounded-lg font-medium cursor-move transition-all duration-300 hover:shadow-md flex items-center gap-3 text-slate-800" 
+                draggable="true"
+                data-item="${item}"
+              >
+                <span class="text-blue-500 font-bold text-xl">☰</span>
+                ${item}
+              </div>
+            `).join('')}
+          </div>
+        `;
+        
+        setupSequenceDragAndDrop();
+      } else if (question.type === 'NUMG') {
+        content.innerHTML = `
+          <input 
+            type="number" 
+            id="numericAnswer"
+            class="w-full px-4 py-3 bg-slate-50 rounded-lg border-2 border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-800"
+            placeholder="Masukkan jawaban angka..."
+            value="${savedAnswer !== undefined ? savedAnswer : ''}"
+          />
+        `;
+      }
+    }
+
+    function setupDragAndDrop() {
+      const items = document.querySelectorAll('.match-item');
+      let draggedItem = null;
+      
+      items.forEach(item => {
+        item.addEventListener('dragstart', (e) => {
+          draggedItem = item;
+          item.classList.add('dragging');
+          e.dataTransfer.effectAllowed = 'move';
+        });
+        
+        item.addEventListener('dragend', () => {
+          item.classList.remove('dragging');
+        });
+        
+        item.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
+        });
+        
+        item.addEventListener('drop', (e) => {
+          e.preventDefault();
+          if (draggedItem && draggedItem !== item) {
+            const container = item.parentNode;
+            const allItems = [...container.querySelectorAll('.match-item')];
+            const draggedIndex = allItems.indexOf(draggedItem);
+            const targetIndex = allItems.indexOf(item);
+            
+            if (draggedIndex < targetIndex) {
+              container.insertBefore(draggedItem, item.nextSibling);
+            } else {
+              container.insertBefore(draggedItem, item);
+            }
+          }
+        });
+      });
+    }
+
+    function setupSequenceDragAndDrop() {
+      const items = document.querySelectorAll('.sequence-item');
+      let draggedItem = null;
+      
+      items.forEach(item => {
+        item.addEventListener('dragstart', (e) => {
+          draggedItem = item;
+          item.classList.add('dragging');
+          e.dataTransfer.effectAllowed = 'move';
+        });
+        
+        item.addEventListener('dragend', () => {
+          item.classList.remove('dragging');
+        });
+        
+        item.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
+        });
+        
+        item.addEventListener('drop', (e) => {
+          e.preventDefault();
+          if (draggedItem && draggedItem !== item) {
+            const container = item.parentNode;
+            const allItems = [...container.querySelectorAll('.sequence-item')];
+            const draggedIndex = allItems.indexOf(draggedItem);
+            const targetIndex = allItems.indexOf(item);
+            
+            if (draggedIndex < targetIndex) {
+              container.insertBefore(draggedItem, item.nextSibling);
+            } else {
+              container.insertBefore(draggedItem, item);
+            }
+          }
+        });
+      });
+    }
+
+    function saveCurrentAnswer() {
+      const question = questionsData[currentState.currentQuestion];
+      
+      if (question.type === 'TF') {
+        const selected = document.querySelector('input[name="answer"]:checked');
+        if (selected) {
+          currentState.answers[question.id] = selected.value === 'true';
+        }
+      } else if (question.type === 'MC') {
+        const selected = document.querySelector('input[name="answer"]:checked');
+        if (selected) {
+          currentState.answers[question.id] = parseInt(selected.value);
+        }
+      } else if (question.type === 'MR') {
+        const selected = [...document.querySelectorAll('input[type="checkbox"]:checked')];
+        currentState.answers[question.id] = selected.map(s => parseInt(s.value));
+      } else if (question.type === 'TI') {
+        const answer = document.getElementById('textAnswer')?.value;
+        if (answer) {
+          currentState.answers[question.id] = answer.trim();
+        }
+      } else if (question.type === 'MG') {
+        const items = [...document.querySelectorAll('.match-item')];
+        currentState.answers[question.id] = {
+          rightOrder: items.map(item => item.dataset.answer)
+        };
+      } else if (question.type === 'SEQ') {
+        const items = [...document.querySelectorAll('.sequence-item')];
+        currentState.answers[question.id] = items.map(item => item.dataset.item);
+      } else if (question.type === 'NUMG') {
+        const answer = document.getElementById('numericAnswer')?.value;
+        if (answer) {
+          currentState.answers[question.id] = parseFloat(answer);
+        }
+      }
+    }
+
+    function calculateDetailedAnswers() {
+      const detailedAnswers = [];
+      
+      questionsData.forEach(question => {
+        const userAnswer = currentState.answers[question.id];
+        let response = null;
+        let correct = false;
+        
+        if (question.type === 'TF') {
+          response = userAnswer === true ? 'True' : 'False';
+          correct = userAnswer === question.answer;
+        } else if (question.type === 'MC') {
+          response = question.options[userAnswer] || '';
+          correct = userAnswer === question.answer;
+        } else if (question.type === 'MR') {
+          response = userAnswer ? userAnswer.map(i => question.options[i]) : [];
+          correct = userAnswer && JSON.stringify(userAnswer.sort()) === JSON.stringify(question.answer.sort());
+        } else if (question.type === 'TI') {
+          response = userAnswer || '';
+          if (userAnswer && Array.isArray(question.answer)) {
+            const userAnswerNormalized = userAnswer.toLowerCase().trim();
+            correct = question.answer.some(
+              acceptableAnswer => acceptableAnswer.toLowerCase().trim() === userAnswerNormalized
+            );
+          }
+        } else if (question.type === 'MG') {
+          if (userAnswer && userAnswer.rightOrder) {
+            response = question.pairs.map((pair, index) => 
+              `${pair.left}|${userAnswer.rightOrder[index]}`
+            );
+            correct = question.pairs.every((pair, index) => 
+              userAnswer.rightOrder[index] === pair.right
+            );
+          }
+        } else if (question.type === 'SEQ') {
+          response = userAnswer || [];
+          correct = userAnswer && JSON.stringify(userAnswer) === JSON.stringify(question.items);
+        } else if (question.type === 'NUMG') {
+          response = [userAnswer !== undefined ? userAnswer.toString() : ''];
+          if (userAnswer !== undefined) {
+            const diff = Math.abs(userAnswer - question.answer);
+            correct = diff <= question.tolerance;
+          }
+        }
+        
+        detailedAnswers.push({
+          question_id: question.id,
+          response: response,
+          correct: correct,
+          points: correct ? question.points.toString() : '0'
+        });
+      });
+      
+      return detailedAnswers;
+    }
+
+    function calculateScore() {
+      let score = 0;
+      
+      questionsData.forEach(question => {
+        const userAnswer = currentState.answers[question.id];
+        let isCorrect = false;
+        
+        if (question.type === 'TF' || question.type === 'MC') {
+          isCorrect = userAnswer === question.answer;
+        } else if (question.type === 'MR') {
+          isCorrect = userAnswer && JSON.stringify(userAnswer.sort()) === JSON.stringify(question.answer.sort());
+        } else if (question.type === 'TI') {
+          if (userAnswer && Array.isArray(question.answer)) {
+            const userAnswerNormalized = userAnswer.toLowerCase().trim();
+            isCorrect = question.answer.some(
+              acceptableAnswer => acceptableAnswer.toLowerCase().trim() === userAnswerNormalized
+            );
+          }
+        } else if (question.type === 'MG') {
+          if (userAnswer && userAnswer.rightOrder) {
+            isCorrect = question.pairs.every((pair, index) => 
+              userAnswer.rightOrder[index] === pair.right
+            );
+          }
+        } else if (question.type === 'SEQ') {
+          isCorrect = userAnswer && JSON.stringify(userAnswer) === JSON.stringify(question.items);
+        } else if (question.type === 'NUMG') {
+          if (userAnswer !== undefined) {
+            const diff = Math.abs(userAnswer - question.answer);
+            isCorrect = diff <= question.tolerance;
+          }
+        }
+        
+        if (isCorrect) {
+          score += question.points;
+        }
+      });
+      
+      return score;
+    }
+
+    function calculateTotalPoints() {
+      return questionsData.reduce((sum, q) => sum + q.points, 0);
+    }
+
+    function countCorrectAnswers() {
+      let count = 0;
+      
+      questionsData.forEach(question => {
+        const userAnswer = currentState.answers[question.id];
+        let isCorrect = false;
+        
+        if (question.type === 'TF' || question.type === 'MC') {
+          isCorrect = userAnswer === question.answer;
+        } else if (question.type === 'MR') {
+          isCorrect = userAnswer && JSON.stringify(userAnswer.sort()) === JSON.stringify(question.answer.sort());
+        } else if (question.type === 'TI') {
+          if (userAnswer && Array.isArray(question.answer)) {
+            const userAnswerNormalized = userAnswer.toLowerCase().trim();
+            isCorrect = question.answer.some(
+              acceptableAnswer => acceptableAnswer.toLowerCase().trim() === userAnswerNormalized
+            );
+          }
+        } else if (question.type === 'MG') {
+          if (userAnswer && userAnswer.rightOrder) {
+            isCorrect = question.pairs.every((pair, index) => 
+              userAnswer.rightOrder[index] === pair.right
+            );
+          }
+        } else if (question.type === 'SEQ') {
+          isCorrect = userAnswer && JSON.stringify(userAnswer) === JSON.stringify(question.items);
+        } else if (question.type === 'NUMG') {
+          if (userAnswer !== undefined) {
+            const diff = Math.abs(userAnswer - question.answer);
+            isCorrect = diff <= question.tolerance;
+          }
+        }
+        
+        if (isCorrect) count++;
+      });
+      
+      return count;
+    }
+
+    async function submitTest() {
+      stopTimer();
+      currentState.screen = 'result';
+      
+      const score = calculateScore();
+      const totalPoints = calculateTotalPoints();
+      const percentage = (score / totalPoints) * 100;
+      const status = percentage >= 60 ? 'Lulus' : 'Tidak Lulus';
+      const detailedAnswers = calculateDetailedAnswers();
+      
+      // Save to Firebase scores table
+      try {
+        const scoresRef = database.ref('scores');
+        await scoresRef.push({
+          student_id: currentStudent?.student_id || '',
+          nis: currentStudent?.nis || '',
+          absen: currentStudent?.absen || '',
+          student_name: currentState.studentName,
+          student_class: currentState.studentClass,
+          answers: detailedAnswers,
+          total_score: score.toString(),
+          duration: formatTime(currentState.timeElapsed),
+          status: status,
+          submitted_at: new Date().toISOString()
+        });
+      } catch (error) {
+        console.error('Error saving to Firebase:', error);
+      }
+      
+      render();
+    }
+
+    async function forceSubmitTest(reason) {
+      stopTimer();
+      currentState.screen = 'result';
+      
+      const score = calculateScore();
+      const totalPoints = calculateTotalPoints();
+      const percentage = (score / totalPoints) * 100;
+      const status = `Diskualifikasi - ${reason}`;
+      const detailedAnswers = calculateDetailedAnswers();
+      
+      // Save to Firebase
+      try {
+        const scoresRef = database.ref('scores');
+        await scoresRef.push({
+          student_id: currentStudent?.student_id || '',
+          nis: currentStudent?.nis || '',
+          absen: currentStudent?.absen || '',
+          student_name: currentState.studentName,
+          student_class: currentState.studentClass,
+          answers: detailedAnswers,
+          total_score: score.toString(),
+          duration: formatTime(currentState.timeElapsed),
+          status: status,
+          submitted_at: new Date().toISOString()
+        });
+      } catch (error) {
+        console.error('Error saving to Firebase:', error);
+      }
+      
+      setTimeout(() => {
+        document.getElementById('securityOverlay').style.display = 'none';
+        render();
+      }, 3000);
+    }
+
+    function startTimer() {
+      currentState.timer = setInterval(() => {
+        currentState.timeElapsed++;
+        const timerEl = document.getElementById('timer');
+        if (timerEl) {
+          timerEl.textContent = formatTime(currentState.timeElapsed);
+        }
+      }, 1000);
+    }
+
+    function stopTimer() {
+      if (currentState.timer) {
+        clearInterval(currentState.timer);
+        currentState.timer = null;
+      }
+    }
+
+    function formatTime(seconds) {
+      const hours = Math.floor(seconds / 3600);
+      const mins = Math.floor((seconds % 3600) / 60);
+      const secs = seconds % 60;
+      
+      if (hours > 0) {
+        return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+      }
+      return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+
+    function getQuestionTypeLabel(type) {
+      const labels = {
+        'TF': 'Benar/Salah',
+        'MC': 'Pilihan Ganda',
+        'MR': 'Jawaban Ganda',
+        'TI': 'Jawaban Singkat',
+        'MG': 'Menjodohkan',
+        'SEQ': 'Urutan',
+        'NUMG': 'Numerik'
+      };
+      return labels[type] || type;
+    }
+
+    init();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9aa33bf422782925',t:'MTc2NTEwMjIzNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
