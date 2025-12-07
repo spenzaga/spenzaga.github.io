@@ -98,6 +98,34 @@
       background-color: #e0e7ff;
       border-color: #4f46e5;
     }
+    .floating-nav-button {
+      position: fixed;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 1000;
+      transition: all 0.3s ease;
+    }
+    .floating-nav-panel {
+      position: fixed;
+      right: -400px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 350px;
+      max-height: 80%;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      z-index: 999;
+      transition: right 0.3s ease;
+      overflow-y: auto;
+    }
+    .floating-nav-panel.active {
+      right: 20px;
+    }
+    .floating-nav-button.hidden {
+      right: -100px;
+    }
   </style>
   <style>@view-transition { navigation: auto; }</style>
   <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
@@ -151,12 +179,24 @@
        </div>
       </div>
      </div>
-    </div><!-- Question Navigation -->
-    <div class="w-full bg-gray-100 border-b border-gray-300">
-     <div class="max-w-6xl mx-auto px-4 py-3">
-      <div class="flex items-center gap-2 overflow-x-auto pb-2"><span class="text-sm font-medium text-gray-700 whitespace-nowrap">Nomor Soal:</span>
-       <div id="questionNav" class="flex gap-2"></div>
+    </div><!-- Floating Navigation Button --> <button id="floatingNavButton" class="floating-nav-button bg-blue-600 text-white px-4 py-3 rounded-l-lg shadow-lg hover:bg-blue-700 transition">
+     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+     </svg>
+     <div class="text-xs mt-1">
+      Navigasi
+     </div></button> <!-- Floating Navigation Panel -->
+    <div id="floatingNavPanel" class="floating-nav-panel">
+     <div class="sticky top-0 bg-white border-b border-gray-200 p-4 rounded-t-lg">
+      <div class="flex justify-between items-center">
+       <h3 class="font-bold text-gray-800">Navigasi Soal</h3><button id="closeNavPanel" class="text-gray-500 hover:text-gray-700">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg></button>
       </div>
+      <div class="mt-2 text-sm text-gray-600"><span id="answeredCount">0</span> dari <span id="totalCount">0</span> soal terjawab
+      </div>
+     </div>
+     <div class="p-4">
+      <div id="floatingQuestionNav" class="grid grid-cols-5 gap-3"></div>
      </div>
     </div><!-- Question Area -->
     <div class="w-full">
@@ -178,6 +218,14 @@
       </div>
       <h2 class="text-2xl font-bold mb-2">Ujian Selesai!</h2>
       <p class="text-gray-600 mb-6">Jawaban Anda telah berhasil dikirim</p>
+      <div class="bg-gray-50 rounded-lg p-4 mb-4 text-left">
+       <div class="flex items-center mb-2"><span class="text-sm text-gray-600 w-20">Nama:</span> <span class="font-medium text-gray-800" id="resultStudentName">-</span>
+       </div>
+       <div class="flex items-center mb-2"><span class="text-sm text-gray-600 w-20">NIS:</span> <span class="font-medium text-gray-800" id="resultStudentNIS">-</span>
+       </div>
+       <div class="flex items-center"><span class="text-sm text-gray-600 w-20">Kelas:</span> <span class="font-medium text-gray-800" id="resultStudentClass">-</span>
+       </div>
+      </div>
       <div class="bg-blue-50 rounded-lg p-6 mb-6">
        <p class="text-sm text-gray-600 mb-2">Skor Anda</p>
        <p class="text-4xl font-bold text-blue-600" id="finalScore">0</p>
@@ -472,6 +520,33 @@
       renderQuestionNav();
       renderQuestion();
       startTimer();
+      setupFloatingNav();
+    }
+
+    function setupFloatingNav() {
+      const floatingButton = document.getElementById('floatingNavButton');
+      const floatingPanel = document.getElementById('floatingNavPanel');
+      const closeButton = document.getElementById('closeNavPanel');
+
+      floatingButton.onclick = () => {
+        floatingPanel.classList.add('active');
+        floatingButton.classList.add('hidden');
+      };
+
+      closeButton.onclick = () => {
+        floatingPanel.classList.remove('active');
+        floatingButton.classList.remove('hidden');
+      };
+
+      // Close when clicking outside
+      document.addEventListener('click', (e) => {
+        if (!floatingPanel.contains(e.target) && !floatingButton.contains(e.target)) {
+          if (floatingPanel.classList.contains('active')) {
+            floatingPanel.classList.remove('active');
+            floatingButton.classList.remove('hidden');
+          }
+        }
+      });
     }
 
     function startTimer() {
@@ -499,30 +574,40 @@
     }
 
     function renderQuestionNav() {
-      const nav = document.getElementById('questionNav');
+      const nav = document.getElementById('floatingQuestionNav');
       nav.innerHTML = '';
+      
+      let answeredCount = 0;
       
       questions.forEach((q, index) => {
         const btn = document.createElement('button');
         btn.textContent = index + 1;
-        btn.className = 'w-10 h-10 rounded-lg font-medium transition';
+        btn.className = 'w-12 h-12 rounded-lg font-medium transition flex items-center justify-center';
         
         if (answers[index] !== undefined) {
-          btn.className += ' bg-green-500 text-white';
+          btn.className += ' bg-green-500 text-white hover:bg-green-600';
+          answeredCount++;
         } else if (index === currentQuestionIndex) {
-          btn.className += ' bg-blue-600 text-white';
+          btn.className += ' bg-blue-600 text-white ring-2 ring-blue-300';
         } else {
-          btn.className += ' bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-100';
+          btn.className += ' bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-100 hover:border-blue-400';
         }
         
         btn.onclick = () => {
           currentQuestionIndex = index;
           renderQuestion();
           renderQuestionNav();
+          // Close panel after selection
+          document.getElementById('floatingNavPanel').classList.remove('active');
+          document.getElementById('floatingNavButton').classList.remove('hidden');
         };
         
         nav.appendChild(btn);
       });
+
+      // Update counter
+      document.getElementById('answeredCount').textContent = answeredCount;
+      document.getElementById('totalCount').textContent = questions.length;
     }
 
     function renderQuestion() {
@@ -867,6 +952,9 @@
         document.getElementById('resultScreen').style.display = 'flex';
         document.getElementById('finalScore').textContent = score;
         document.getElementById('totalQuestions').textContent = questions.length;
+        document.getElementById('resultStudentName').textContent = currentStudent.nama;
+        document.getElementById('resultStudentNIS').textContent = currentStudent.nis;
+        document.getElementById('resultStudentClass').textContent = currentStudent.kelas;
         
         // Show confetti for high scores (80 or above)
         if (score >= 80) {
@@ -1019,5 +1107,5 @@
     // Initialize app
     loadData();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a9f9fd342d4f8da',t:'MTc2NTA2NDM4NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9aa05798e448d899',t:'MTc2NTA3MTkxMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
