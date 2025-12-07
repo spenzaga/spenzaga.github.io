@@ -1,0 +1,929 @@
+<!doctype html>
+<html lang="id">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard CBT - SMP Negeri 1 Purbalingga</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100%;
+            width: 100%;
+        }
+
+        .dashboard-container {
+            width: 100%;
+            min-height: 100%;
+            padding: 24px;
+        }
+
+        .header {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 24px;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #64748b;
+            font-size: 16px;
+        }
+
+        .navigation {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+
+        .nav-button {
+            background: white;
+            border: 2px solid #667eea;
+            color: #667eea;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .nav-button:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .nav-button.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .content-card {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+
+        .content-card.active {
+            display: block;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-left: 4px solid;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            flex-shrink: 0;
+        }
+
+        .stat-content {
+            flex: 1;
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 4px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th {
+            background: #f8fafc;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #475569;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+            color: #334155;
+        }
+
+        tr:hover {
+            background: #f8fafc;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #64748b;
+        }
+
+        .spinner {
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin-top: 24px;
+        }
+
+        .question-card {
+            background: #f8fafc;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            border-left: 4px solid #667eea;
+        }
+
+        .question-title {
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 8px;
+        }
+
+        .question-detail {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .badge-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .error-message {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 16px;
+        }
+    </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body>
+  <div class="dashboard-container">
+   <div class="header">
+    <h1 id="school-name">SMP NEGERI 1 PURBALINGGA</h1>
+    <p id="dashboard-title">Dashboard Computer Based Test</p>
+   </div>
+   <div class="navigation"><button class="nav-button active" data-page="recap" id="menu-recap">📊 Rekapitulasi Skor</button> <button class="nav-button" data-page="participants" id="menu-participants">👥 Daftar Peserta</button> <button class="nav-button" data-page="incomplete" id="menu-incomplete">⏳ Belum Mengerjakan</button> <button class="nav-button" data-page="questions" id="menu-questions">📝 Detail Soal</button> <button class="nav-button" data-page="chart" id="menu-chart">📈 Grafik Statistik</button>
+   </div>
+   <div id="recap-page" class="content-card active">
+    <h2 style="color: #334155; margin-bottom: 16px; font-size: 24px;">Rekapitulasi Skor Test</h2>
+    <div class="stats-grid" id="recap-stats"></div><input type="text" id="recap-search" class="search-box" placeholder="🔍 Cari berdasarkan nama atau kelas...">
+    <div class="loading" id="recap-loading">
+     <div class="spinner"></div>
+     <p>Memuat data rekapitulasi...</p>
+    </div>
+    <div class="table-container" id="recap-table-container" style="display: none;"></div>
+   </div>
+   <div id="participants-page" class="content-card">
+    <h2 style="color: #334155; margin-bottom: 16px; font-size: 24px;">Daftar Peserta Test</h2>
+    <div class="stats-grid" id="participants-stats"></div><input type="text" id="participants-search" class="search-box" placeholder="🔍 Cari berdasarkan nama atau kelas...">
+    <div class="loading" id="participants-loading">
+     <div class="spinner"></div>
+     <p>Memuat data peserta...</p>
+    </div>
+    <div class="table-container" id="participants-table-container" style="display: none;"></div>
+   </div>
+   <div id="incomplete-page" class="content-card">
+    <h2 style="color: #334155; margin-bottom: 16px; font-size: 24px;">Peserta Belum Mengerjakan Test</h2>
+    <div class="stats-grid" id="incomplete-stats"></div><input type="text" id="incomplete-search" class="search-box" placeholder="🔍 Cari berdasarkan nama atau kelas...">
+    <div class="loading" id="incomplete-loading">
+     <div class="spinner"></div>
+     <p>Menganalisis data peserta...</p>
+    </div>
+    <div class="table-container" id="incomplete-table-container" style="display: none;"></div>
+   </div>
+   <div id="questions-page" class="content-card">
+    <h2 style="color: #334155; margin-bottom: 16px; font-size: 24px;">Detail Tipe dan Jumlah Soal</h2>
+    <div class="loading" id="questions-loading">
+     <div class="spinner"></div>
+     <p>Memuat data soal...</p>
+    </div>
+    <div id="questions-content" style="display: none;"></div>
+   </div>
+   <div id="chart-page" class="content-card">
+    <h2 style="color: #334155; margin-bottom: 16px; font-size: 24px;">Grafik Statistik Skor per Kelas</h2>
+    <div class="loading" id="chart-loading">
+     <div class="spinner"></div>
+     <p>Memuat grafik statistik...</p>
+    </div>
+    <div class="chart-container" style="display: none;">
+     <canvas id="statsChart"></canvas>
+    </div>
+   </div>
+  </div>
+  <script>
+        const defaultConfig = {
+            school_name: "SMP NEGERI 1 PURBALINGGA",
+            dashboard_title: "Dashboard Computer Based Test",
+            menu_recap: "📊 Rekapitulasi Skor",
+            menu_participants: "👥 Daftar Peserta",
+            menu_incomplete: "⏳ Belum Mengerjakan",
+            menu_questions: "📝 Detail Soal",
+            menu_chart: "📈 Grafik Statistik",
+            primary_color: "#667eea",
+            secondary_color: "#764ba2",
+            background_color: "#f8fafc",
+            text_color: "#334155",
+            accent_color: "#ffffff"
+        };
+
+        const state = {
+            recapData: [],
+            participantsData: [],
+            questionsData: [],
+            currentPage: 'recap'
+        };
+
+        async function fetchCSVData(url) {
+            try {
+                const response = await fetch(url);
+                const text = await response.text();
+                const lines = text.split('\n').filter(line => line.trim());
+                const headers = lines[0].split(',').map(h => h.trim());
+                
+                return lines.slice(1).map(line => {
+                    const values = line.split(',').map(v => v.trim());
+                    const obj = {};
+                    headers.forEach((header, index) => {
+                        obj[header] = values[index] || '';
+                    });
+                    return obj;
+                });
+            } catch (error) {
+                console.error('Error fetching CSV:', error);
+                return [];
+            }
+        }
+
+        async function loadAllData() {
+            const [recap, participants, questions] = await Promise.all([
+                fetchCSVData('https://docs.google.com/spreadsheets/d/e/2PACX-1vShD-FggVnTmZjkm_VYH6raebmwcCW9qLdY8JPrJzMHZSGlI5O1lF9prNziinNA7YwyoPgZQal_nlkm/pub?gid=1311227559&single=true&output=csv'),
+                fetchCSVData('https://docs.google.com/spreadsheets/d/e/2PACX-1vShD-FggVnTmZjkm_VYH6raebmwcCW9qLdY8JPrJzMHZSGlI5O1lF9prNziinNA7YwyoPgZQal_nlkm/pub?gid=1534064510&single=true&output=csv'),
+                fetchCSVData('https://docs.google.com/spreadsheets/d/e/2PACX-1vShD-FggVnTmZjkm_VYH6raebmwcCW9qLdY8JPrJzMHZSGlI5O1lF9prNziinNA7YwyoPgZQal_nlkm/pub?gid=1299383846&single=true&output=csv')
+            ]);
+
+            state.recapData = recap;
+            state.participantsData = participants;
+            state.questionsData = questions;
+
+            renderRecapPage();
+            renderParticipantsPage();
+            renderIncompletePage();
+            renderQuestionsPage();
+            renderChartPage();
+        }
+
+        function renderRecapPage() {
+            const loading = document.getElementById('recap-loading');
+            const container = document.getElementById('recap-table-container');
+            const statsContainer = document.getElementById('recap-stats');
+
+            if (state.recapData.length === 0) {
+                loading.innerHTML = '<div class="error-message">Tidak ada data rekapitulasi skor</div>';
+                return;
+            }
+
+            const scores = state.recapData.map(d => parseFloat(d.Skor || d.Score || 0)).filter(s => !isNaN(s));
+            const avgScore = scores.length > 0 ? (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(2) : 0;
+            const maxScore = scores.length > 0 ? Math.max(...scores).toFixed(2) : 0;
+            const minScore = scores.length > 0 ? Math.min(...scores).toFixed(2) : 0;
+
+            statsContainer.innerHTML = `
+                <div class="stat-card" style="border-left-color: #3b82f6;">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);">
+                        ✅
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value">${state.recapData.length}</div>
+                        <div class="stat-label">Total Peserta Selesai</div>
+                    </div>
+                </div>
+                <div class="stat-card" style="border-left-color: #8b5cf6;">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);">
+                        📊
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value">${avgScore}</div>
+                        <div class="stat-label">Rata-rata Skor</div>
+                    </div>
+                </div>
+                <div class="stat-card" style="border-left-color: #10b981;">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                        🏆
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value">${maxScore}</div>
+                        <div class="stat-label">Skor Tertinggi</div>
+                    </div>
+                </div>
+                <div class="stat-card" style="border-left-color: #f59e0b;">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                        📉
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value">${minScore}</div>
+                        <div class="stat-label">Skor Terendah</div>
+                    </div>
+                </div>
+            `;
+
+            const headers = Object.keys(state.recapData[0]);
+            let tableHTML = '<table><thead><tr>';
+            headers.forEach(header => {
+                tableHTML += `<th>${header}</th>`;
+            });
+            tableHTML += '</tr></thead><tbody id="recap-tbody">';
+            
+            state.recapData.forEach(row => {
+                tableHTML += '<tr>';
+                headers.forEach(header => {
+                    tableHTML += `<td>${row[header]}</td>`;
+                });
+                tableHTML += '</tr>';
+            });
+            
+            tableHTML += '</tbody></table>';
+            container.innerHTML = tableHTML;
+
+            loading.style.display = 'none';
+            container.style.display = 'block';
+
+            document.getElementById('recap-search').addEventListener('input', (e) => {
+                filterTable('recap-tbody', e.target.value);
+            });
+        }
+
+        function renderParticipantsPage() {
+            const loading = document.getElementById('participants-loading');
+            const container = document.getElementById('participants-table-container');
+            const statsContainer = document.getElementById('participants-stats');
+
+            if (state.participantsData.length === 0) {
+                loading.innerHTML = '<div class="error-message">Tidak ada data peserta</div>';
+                return;
+            }
+
+            const classes = [...new Set(state.participantsData.map(d => d.Kelas || d.Class || ''))].filter(c => c);
+            
+            statsContainer.innerHTML = `
+                <div class="stat-card" style="border-left-color: #06b6d4;">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);">
+                        👥
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value">${state.participantsData.length}</div>
+                        <div class="stat-label">Total Peserta Terdaftar</div>
+                    </div>
+                </div>
+                <div class="stat-card" style="border-left-color: #ec4899;">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);">
+                        🏫
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value">${classes.length}</div>
+                        <div class="stat-label">Jumlah Kelas</div>
+                    </div>
+                </div>
+            `;
+
+            const headers = Object.keys(state.participantsData[0]);
+            let tableHTML = '<table><thead><tr>';
+            headers.forEach(header => {
+                tableHTML += `<th>${header}</th>`;
+            });
+            tableHTML += '</tr></thead><tbody id="participants-tbody">';
+            
+            state.participantsData.forEach(row => {
+                tableHTML += '<tr>';
+                headers.forEach(header => {
+                    tableHTML += `<td>${row[header]}</td>`;
+                });
+                tableHTML += '</tr>';
+            });
+            
+            tableHTML += '</tbody></table>';
+            container.innerHTML = tableHTML;
+
+            loading.style.display = 'none';
+            container.style.display = 'block';
+
+            document.getElementById('participants-search').addEventListener('input', (e) => {
+                filterTable('participants-tbody', e.target.value);
+            });
+        }
+
+        function renderIncompletePage() {
+            const loading = document.getElementById('incomplete-loading');
+            const container = document.getElementById('incomplete-table-container');
+            const statsContainer = document.getElementById('incomplete-stats');
+
+            const completedNames = new Set(state.recapData.map(d => 
+                (d.Nama || d.Name || d.nama || '').toLowerCase().trim()
+            ));
+
+            const incompleteStudents = state.participantsData.filter(student => {
+                const studentName = (student.Nama || student.Name || student.nama || '').toLowerCase().trim();
+                return !completedNames.has(studentName);
+            });
+
+            const completePercentage = state.participantsData.length > 0 
+                ? ((state.recapData.length / state.participantsData.length) * 100).toFixed(1)
+                : 0;
+
+            statsContainer.innerHTML = `
+                <div class="stat-card" style="border-left-color: #ef4444;">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+                        ⏳
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value">${incompleteStudents.length}</div>
+                        <div class="stat-label">Belum Mengerjakan</div>
+                    </div>
+                </div>
+                <div class="stat-card" style="border-left-color: #10b981;">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                        ✔️
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value">${state.recapData.length}</div>
+                        <div class="stat-label">Sudah Mengerjakan</div>
+                    </div>
+                </div>
+                <div class="stat-card" style="border-left-color: #6366f1;">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);">
+                        📈
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value">${completePercentage}%</div>
+                        <div class="stat-label">Persentase Selesai</div>
+                    </div>
+                </div>
+            `;
+
+            if (incompleteStudents.length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 40px; color: #10b981; font-weight: 600;">🎉 Semua peserta sudah mengerjakan test!</div>';
+            } else {
+                const headers = Object.keys(state.participantsData[0]);
+                let tableHTML = '<table><thead><tr>';
+                headers.forEach(header => {
+                    tableHTML += `<th>${header}</th>`;
+                });
+                tableHTML += '<th>Status</th></tr></thead><tbody id="incomplete-tbody">';
+                
+                incompleteStudents.forEach(row => {
+                    tableHTML += '<tr>';
+                    headers.forEach(header => {
+                        tableHTML += `<td>${row[header]}</td>`;
+                    });
+                    tableHTML += '<td><span class="badge badge-warning">Belum Mengerjakan</span></td>';
+                    tableHTML += '</tr>';
+                });
+                
+                tableHTML += '</tbody></table>';
+                container.innerHTML = tableHTML;
+
+                document.getElementById('incomplete-search').addEventListener('input', (e) => {
+                    filterTable('incomplete-tbody', e.target.value);
+                });
+            }
+
+            loading.style.display = 'none';
+            container.style.display = 'block';
+        }
+
+        function renderQuestionsPage() {
+            const loading = document.getElementById('questions-loading');
+            const container = document.getElementById('questions-content');
+
+            if (state.questionsData.length === 0) {
+                loading.innerHTML = '<div class="error-message">Tidak ada data soal</div>';
+                return;
+            }
+
+            const questionTypes = {};
+            let totalQuestions = 0;
+
+            state.questionsData.forEach(q => {
+                const type = q['Tipe Soal'] || q['Question Type'] || q.Type || 'Lainnya';
+                const count = parseInt(q['Jumlah'] || q['Count'] || q.Jumlah || 1);
+                
+                if (!questionTypes[type]) {
+                    questionTypes[type] = 0;
+                }
+                questionTypes[type] += count;
+                totalQuestions += count;
+            });
+
+            let contentHTML = `
+                <div class="stats-grid">
+                    <div class="stat-card" style="border-left-color: #f97316;">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);">
+                            📝
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value">${totalQuestions}</div>
+                            <div class="stat-label">Total Soal</div>
+                        </div>
+                    </div>
+                    <div class="stat-card" style="border-left-color: #14b8a6;">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);">
+                            🎯
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value">${Object.keys(questionTypes).length}</div>
+                            <div class="stat-label">Tipe Soal</div>
+                        </div>
+                    </div>
+                </div>
+                <h3 style="color: #334155; margin: 24px 0 16px; font-size: 18px;">Rincian Soal per Tipe</h3>
+            `;
+
+            Object.entries(questionTypes).forEach(([type, count]) => {
+                contentHTML += `
+                    <div class="question-card">
+                        <div class="question-title">${type}</div>
+                        <div class="question-detail">Jumlah Soal: <strong>${count}</strong></div>
+                    </div>
+                `;
+            });
+
+            const headers = Object.keys(state.questionsData[0]);
+            contentHTML += '<h3 style="color: #334155; margin: 24px 0 16px; font-size: 18px;">Detail Lengkap Soal</h3>';
+            contentHTML += '<div class="table-container"><table><thead><tr>';
+            headers.forEach(header => {
+                contentHTML += `<th>${header}</th>`;
+            });
+            contentHTML += '</tr></thead><tbody>';
+            
+            state.questionsData.forEach(row => {
+                contentHTML += '<tr>';
+                headers.forEach(header => {
+                    contentHTML += `<td>${row[header]}</td>`;
+                });
+                contentHTML += '</tr>';
+            });
+            
+            contentHTML += '</tbody></table></div>';
+            container.innerHTML = contentHTML;
+
+            loading.style.display = 'none';
+            container.style.display = 'block';
+        }
+
+        function renderChartPage() {
+            const loading = document.getElementById('chart-loading');
+            const chartContainer = document.querySelector('.chart-container');
+
+            if (state.recapData.length === 0) {
+                loading.innerHTML = '<div class="error-message">Tidak ada data untuk ditampilkan dalam grafik</div>';
+                return;
+            }
+
+            const classSummary = {};
+
+            state.recapData.forEach(student => {
+                const className = student.Kelas || student.Class || student.kelas || 'Tidak Diketahui';
+                const score = parseFloat(student.Skor || student.Score || student.skor || 0);
+
+                if (!classSummary[className]) {
+                    classSummary[className] = [];
+                }
+                classSummary[className].push(score);
+            });
+
+            const labels = Object.keys(classSummary).sort();
+            const maxScores = labels.map(cls => Math.max(...classSummary[cls]));
+            const minScores = labels.map(cls => Math.min(...classSummary[cls]));
+            const avgScores = labels.map(cls => {
+                const scores = classSummary[cls];
+                return (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(2);
+            });
+
+            const ctx = document.getElementById('statsChart');
+            if (window.statsChartInstance) {
+                window.statsChartInstance.destroy();
+            }
+
+            window.statsChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Skor Tertinggi',
+                            data: maxScores,
+                            backgroundColor: 'rgba(34, 197, 94, 0.7)',
+                            borderColor: 'rgba(34, 197, 94, 1)',
+                            borderWidth: 2
+                        },
+                        {
+                            label: 'Skor Rata-rata',
+                            data: avgScores,
+                            backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                            borderColor: 'rgba(59, 130, 246, 1)',
+                            borderWidth: 2
+                        },
+                        {
+                            label: 'Skor Terendah',
+                            data: minScores,
+                            backgroundColor: 'rgba(239, 68, 68, 0.7)',
+                            borderColor: 'rgba(239, 68, 68, 1)',
+                            borderWidth: 2
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Perbandingan Skor Tertinggi, Rata-rata, dan Terendah per Kelas',
+                            font: {
+                                size: 16
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Skor'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Kelas'
+                            }
+                        }
+                    }
+                }
+            });
+
+            loading.style.display = 'none';
+            chartContainer.style.display = 'block';
+        }
+
+        function filterTable(tbodyId, searchTerm) {
+            const tbody = document.getElementById(tbodyId);
+            const rows = tbody.getElementsByTagName('tr');
+            const term = searchTerm.toLowerCase();
+
+            for (let row of rows) {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(term) ? '' : 'none';
+            }
+        }
+
+        document.querySelectorAll('.nav-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const page = button.dataset.page;
+                
+                document.querySelectorAll('.nav-button').forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                
+                document.querySelectorAll('.content-card').forEach(card => card.classList.remove('active'));
+                document.getElementById(`${page}-page`).classList.add('active');
+                
+                state.currentPage = page;
+            });
+        });
+
+        async function onConfigChange(config) {
+            const schoolNameEl = document.getElementById('school-name');
+            const dashboardTitleEl = document.getElementById('dashboard-title');
+            const menuRecapEl = document.getElementById('menu-recap');
+            const menuParticipantsEl = document.getElementById('menu-participants');
+            const menuIncompleteEl = document.getElementById('menu-incomplete');
+            const menuQuestionsEl = document.getElementById('menu-questions');
+            const menuChartEl = document.getElementById('menu-chart');
+
+            schoolNameEl.textContent = config.school_name || defaultConfig.school_name;
+            dashboardTitleEl.textContent = config.dashboard_title || defaultConfig.dashboard_title;
+            menuRecapEl.textContent = config.menu_recap || defaultConfig.menu_recap;
+            menuParticipantsEl.textContent = config.menu_participants || defaultConfig.menu_participants;
+            menuIncompleteEl.textContent = config.menu_incomplete || defaultConfig.menu_incomplete;
+            menuQuestionsEl.textContent = config.menu_questions || defaultConfig.menu_questions;
+            menuChartEl.textContent = config.menu_chart || defaultConfig.menu_chart;
+
+            const primaryColor = config.primary_color || defaultConfig.primary_color;
+            const secondaryColor = config.secondary_color || defaultConfig.secondary_color;
+
+            document.querySelector('body').style.background = `linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%)`;
+
+            document.querySelectorAll('.nav-button').forEach(btn => {
+                btn.style.borderColor = primaryColor;
+                btn.style.color = primaryColor;
+            });
+
+            document.querySelectorAll('.nav-button.active').forEach(btn => {
+                btn.style.background = primaryColor;
+                btn.style.color = config.accent_color || defaultConfig.accent_color;
+            });
+
+            document.querySelectorAll('.nav-button').forEach(btn => {
+                btn.addEventListener('mouseenter', function() {
+                    if (!this.classList.contains('active')) {
+                        this.style.background = primaryColor;
+                        this.style.color = config.accent_color || defaultConfig.accent_color;
+                    }
+                });
+                btn.addEventListener('mouseleave', function() {
+                    if (!this.classList.contains('active')) {
+                        this.style.background = config.accent_color || defaultConfig.accent_color;
+                        this.style.color = primaryColor;
+                    }
+                });
+            });
+
+            document.querySelector('.header h1').style.color = primaryColor;
+
+            document.querySelectorAll('.spinner').forEach(spinner => {
+                spinner.style.borderTopColor = primaryColor;
+            });
+
+            document.querySelectorAll('.question-card').forEach(card => {
+                card.style.borderLeftColor = primaryColor;
+            });
+
+            document.querySelectorAll('.stat-value').forEach(val => {
+                val.style.background = `linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%)`;
+                val.style.webkitBackgroundClip = 'text';
+                val.style.webkitTextFillColor = 'transparent';
+                val.style.backgroundClip = 'text';
+            });
+        }
+
+        if (window.elementSdk) {
+            window.elementSdk.init({
+                defaultConfig: defaultConfig,
+                onConfigChange: onConfigChange,
+                mapToCapabilities: (config) => ({
+                    recolorables: [
+                        {
+                            get: () => config.primary_color || defaultConfig.primary_color,
+                            set: (value) => {
+                                config.primary_color = value;
+                                window.elementSdk.setConfig({ primary_color: value });
+                            }
+                        },
+                        {
+                            get: () => config.secondary_color || defaultConfig.secondary_color,
+                            set: (value) => {
+                                config.secondary_color = value;
+                                window.elementSdk.setConfig({ secondary_color: value });
+                            }
+                        },
+                        {
+                            get: () => config.background_color || defaultConfig.background_color,
+                            set: (value) => {
+                                config.background_color = value;
+                                window.elementSdk.setConfig({ background_color: value });
+                            }
+                        },
+                        {
+                            get: () => config.text_color || defaultConfig.text_color,
+                            set: (value) => {
+                                config.text_color = value;
+                                window.elementSdk.setConfig({ text_color: value });
+                            }
+                        },
+                        {
+                            get: () => config.accent_color || defaultConfig.accent_color,
+                            set: (value) => {
+                                config.accent_color = value;
+                                window.elementSdk.setConfig({ accent_color: value });
+                            }
+                        }
+                    ],
+                    borderables: [],
+                    fontEditable: undefined,
+                    fontSizeable: undefined
+                }),
+                mapToEditPanelValues: (config) => new Map([
+                    ["school_name", config.school_name || defaultConfig.school_name],
+                    ["dashboard_title", config.dashboard_title || defaultConfig.dashboard_title],
+                    ["menu_recap", config.menu_recap || defaultConfig.menu_recap],
+                    ["menu_participants", config.menu_participants || defaultConfig.menu_participants],
+                    ["menu_incomplete", config.menu_incomplete || defaultConfig.menu_incomplete],
+                    ["menu_questions", config.menu_questions || defaultConfig.menu_questions],
+                    ["menu_chart", config.menu_chart || defaultConfig.menu_chart]
+                ])
+            });
+        }
+
+        loadAllData();
+    </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9aa0d1355178fe21',t:'MTc2NTA3Njg5My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
