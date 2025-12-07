@@ -81,6 +81,129 @@
     .no-screenshot {
       pointer-events: auto;
     }
+    
+    .question-nav {
+      position: fixed;
+      right: -320px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 300px;
+      max-height: 80%;
+      background: white;
+      border-radius: 16px 0 0 16px;
+      box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
+      transition: right 0.3s ease;
+      z-index: 1000;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .question-nav.open {
+      right: 0;
+    }
+    
+    .nav-toggle {
+      position: fixed;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #3b82f6;
+      color: white;
+      padding: 16px 12px;
+      border-radius: 12px 0 0 12px;
+      cursor: pointer;
+      box-shadow: -4px 0 12px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+      z-index: 1001;
+      font-weight: bold;
+      font-size: 14px;
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+    }
+    
+    .nav-toggle:hover {
+      background: #2563eb;
+      padding-right: 16px;
+    }
+    
+    .nav-toggle.hidden {
+      right: 300px;
+    }
+    
+    .question-nav-item {
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 2px solid #e2e8f0;
+    }
+    
+    .question-nav-item:hover {
+      transform: scale(1.05);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .question-nav-item.answered {
+      background: #3b82f6;
+      color: white;
+      border-color: #3b82f6;
+    }
+    
+    .question-nav-item.current {
+      background: #fbbf24;
+      color: white;
+      border-color: #fbbf24;
+      animation: pulse-current 2s infinite;
+    }
+    
+    .question-nav-item.unanswered {
+      background: white;
+      color: #64748b;
+      border-color: #e2e8f0;
+    }
+    
+    @keyframes pulse-current {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.7); }
+      50% { box-shadow: 0 0 0 8px rgba(251, 191, 36, 0); }
+    }
+    
+    .confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      background: #ffd700;
+      position: absolute;
+      animation: confetti-fall linear forwards;
+      z-index: 10000;
+    }
+    
+    @keyframes confetti-fall {
+      to {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+    
+    @keyframes scale-in {
+      from {
+        transform: scale(0.9);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+    
+    .animate-scale-in {
+      animation: scale-in 0.3s ease-out;
+    }
   </style>
   <style>@view-transition { navigation: auto; }</style>
   <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
@@ -91,7 +214,7 @@
   <div id="securityOverlay" class="security-overlay" style="display: none;">
    <div>
     <div style="font-size: 48px; margin-bottom: 20px;">
-     ⚠️
+     ���️
     </div>
     <div id="securityMessage">
      Peringatan Keamanan
@@ -357,38 +480,38 @@
       if (currentState.screen === 'login') {
         app.innerHTML = `
           <div class="w-full min-h-full flex items-center justify-center p-4 md:p-8">
-            <div class="question-card w-full max-w-md bg-white rounded-2xl shadow-2xl p-8">
-              <div class="text-center mb-6">
-                <img src="https://spenzaga.github.io/assets/img/logo.png" alt="Logo" class="w-24 h-24 mx-auto mb-4 object-contain" onerror="this.style.display='none'; this.alt='Logo failed to load';" />
-                <h1 class="text-2xl font-bold text-slate-800 mb-3">SMP Negeri 1 Purbalingga</h1>
-                <h2 class="text-xl font-semibold text-slate-600 mb-6">Computer Based Test</h2>
+            <div class="question-card w-full max-w-md bg-white rounded-2xl shadow-2xl p-6">
+              <div class="text-center mb-4">
+                <img src="https://spenzaga.github.io/assets/img/logo.png" alt="Logo" class="w-16 h-16 mx-auto mb-3 object-contain" onerror="this.style.display='none'; this.alt='Logo failed to load';" />
+                <h1 class="text-xl font-bold text-slate-800 mb-2">SMP Negeri 1 Purbalingga</h1>
+                <h2 class="text-lg font-semibold text-slate-600 mb-4">Computer Based Test</h2>
               </div>
               
-              <form id="loginForm" class="space-y-4">
+              <form id="loginForm" class="space-y-3">
                 <div>
-                  <label for="nisInput" class="block text-sm font-medium text-slate-700 mb-2">NIS (Nomor Induk Siswa)</label>
+                  <label for="nisInput" class="block text-sm font-medium text-slate-700 mb-1.5">NIS (Nomor Induk Siswa)</label>
                   <input 
                     type="text" 
                     id="nisInput" 
                     required
-                    class="w-full px-4 py-2.5 rounded-lg border-2 border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    class="w-full px-3 py-2 rounded-lg border-2 border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                     placeholder="Masukkan NIS Anda"
                   />
                 </div>
                 
-                <div id="loginError" class="hidden p-3 bg-red-100 text-red-700 rounded-lg text-sm">
+                <div id="loginError" class="hidden p-2.5 bg-red-100 text-red-700 rounded-lg text-xs">
                   NIS tidak ditemukan. Silakan coba lagi.
                 </div>
                 
                 <div id="loginLoading" class="hidden text-center">
-                  <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent"></div>
-                  <p class="mt-2 text-slate-600">Memverifikasi...</p>
+                  <div class="inline-block animate-spin rounded-full h-6 w-6 border-3 border-blue-500 border-t-transparent"></div>
+                  <p class="mt-1.5 text-slate-600 text-sm">Memverifikasi...</p>
                 </div>
                 
                 <button 
                   type="submit"
                   id="loginButton"
-                  class="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-lg font-semibold transition-all duration-300"
+                  class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2.5 rounded-lg font-semibold transition-all duration-300 text-sm"
                 >
                   Masuk
                 </button>
@@ -467,45 +590,45 @@
       } else if (currentState.screen === 'confirmation') {
         app.innerHTML = `
           <div class="w-full min-h-full flex items-center justify-center p-4 md:p-8">
-            <div class="question-card w-full max-w-xl bg-white rounded-2xl shadow-2xl p-6 md:p-8">
-              <div class="text-center mb-8">
-                <div class="mb-6">
-                  <svg class="w-20 h-20 mx-auto text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="question-card w-full max-w-lg bg-white rounded-2xl shadow-2xl p-5">
+              <div class="text-center mb-5">
+                <div class="mb-3">
+                  <svg class="w-14 h-14 mx-auto text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                   </svg>
                 </div>
-                <h1 class="text-3xl font-bold text-black mb-3">Konfirmasi Data Peserta</h1>
-                <p class="text-black">Pastikan data Anda sudah benar sebelum memulai ujian</p>
+                <h1 class="text-2xl font-bold text-black mb-2">Konfirmasi Data Peserta</h1>
+                <p class="text-black text-sm">Pastikan data Anda sudah benar sebelum memulai ujian</p>
               </div>
               
-              <div class="mb-8 bg-slate-50 p-6 rounded-xl">
-                <div class="space-y-4">
-                  <div class="flex justify-between items-center pb-3 border-b border-slate-200">
-                    <span class="font-semibold text-black">NIS</span>
-                    <span class="font-bold text-black text-lg">${currentState.studentNis}</span>
+              <div class="mb-5 bg-slate-50 p-4 rounded-xl">
+                <div class="space-y-3">
+                  <div class="flex justify-between items-center pb-2 border-b border-slate-200">
+                    <span class="font-semibold text-black text-sm">NIS</span>
+                    <span class="font-bold text-black">${currentState.studentNis}</span>
                   </div>
-                  <div class="flex justify-between items-center pb-3 border-b border-slate-200">
-                    <span class="font-semibold text-black">Nomor Absen</span>
-                    <span class="font-bold text-black text-lg">${currentState.studentAbsen}</span>
+                  <div class="flex justify-between items-center pb-2 border-b border-slate-200">
+                    <span class="font-semibold text-black text-sm">Nomor Absen</span>
+                    <span class="font-bold text-black">${currentState.studentAbsen}</span>
                   </div>
-                  <div class="flex justify-between items-center pb-3 border-b border-slate-200">
-                    <span class="font-semibold text-black">Nama Lengkap</span>
-                    <span class="font-bold text-black text-lg">${currentState.studentName}</span>
+                  <div class="flex justify-between items-center pb-2 border-b border-slate-200">
+                    <span class="font-semibold text-black text-sm">Nama Lengkap</span>
+                    <span class="font-bold text-black">${currentState.studentName}</span>
                   </div>
-                  <div class="flex justify-between items-center pb-3">
-                    <span class="font-semibold text-black">Kelas</span>
-                    <span class="font-bold text-black text-lg">${currentState.studentClass}</span>
+                  <div class="flex justify-between items-center pb-2">
+                    <span class="font-semibold text-black text-sm">Kelas</span>
+                    <span class="font-bold text-black">${currentState.studentClass}</span>
                   </div>
                 </div>
               </div>
               
-              <div class="mb-6 bg-yellow-50 border-2 border-yellow-400 p-5 rounded-xl">
+              <div class="mb-4 bg-yellow-50 border-2 border-yellow-400 p-4 rounded-xl">
                 <div class="text-center">
-                  <div class="mb-3 text-5xl">⚠️</div>
-                  <h3 class="text-xl font-black text-black mb-3 tracking-wide">PERNYATAAN KEJUJURAN</h3>
+                  <div class="mb-2 text-3xl">⚠️</div>
+                  <h3 class="text-lg font-black text-black mb-2 tracking-wide">PERNYATAAN KEJUJURAN</h3>
                 </div>
-                <div class="text-sm text-black leading-relaxed text-left">
-                  <p class="font-semibold mb-2">Saya berkomitmen untuk:</p>
+                <div class="text-xs text-black leading-relaxed text-left">
+                  <p class="font-semibold mb-1.5">Saya berkomitmen untuk:</p>
                   <p class="font-medium">✓ Mengerjakan ujian dengan <strong>jujur dan mandiri</strong><br/>
                   ✓ Tidak melakukan <strong>kecurangan</strong> dalam bentuk apapun<br/>
                   ✓ Tidak <strong>keluar dari halaman ujian</strong> atau berpindah aplikasi<br/>
@@ -513,27 +636,27 @@
                 </div>
               </div>
               
-              <div class="mb-6 bg-slate-50 p-4 rounded-lg flex items-start gap-3">
+              <div class="mb-4 bg-slate-50 p-3 rounded-lg flex items-start gap-2">
                 <input 
                   type="checkbox" 
                   id="agreeCheckbox" 
-                  class="mt-1 w-5 h-5 cursor-pointer accent-blue-500"
+                  class="mt-0.5 w-4 h-4 cursor-pointer accent-blue-500"
                 />
-                <label for="agreeCheckbox" class="cursor-pointer text-black leading-relaxed">
+                <label for="agreeCheckbox" class="cursor-pointer text-black leading-relaxed text-xs">
                   Saya telah membaca dan menyetujui pernyataan kejujuran di atas, dan siap untuk memulai ujian dengan jujur
                 </label>
               </div>
               
-              <div class="flex gap-4">
+              <div class="flex gap-3">
                 <button 
                   id="backBtn"
-                  class="flex-1 bg-slate-500 hover:bg-slate-600 text-white py-3 rounded-lg font-semibold transition-all duration-300"
+                  class="flex-1 bg-slate-500 hover:bg-slate-600 text-white py-2.5 rounded-lg font-semibold transition-all duration-300 text-sm"
                 >
                   ← Kembali
                 </button>
                 <button 
                   id="startTestBtn"
-                  class="flex-1 bg-blue-500 text-white py-3 rounded-lg font-semibold transition-all duration-300 opacity-50"
+                  class="flex-1 bg-blue-500 text-white py-2.5 rounded-lg font-semibold transition-all duration-300 opacity-50 text-sm"
                   disabled
                 >
                   Mulai Ujian →
@@ -577,43 +700,43 @@
         app.innerHTML = `
           <div class="w-full min-h-full p-4 md:p-8">
             <div class="max-w-4xl mx-auto">
-              <div class="mb-6 bg-white p-6 rounded-xl shadow-lg">
-                <div class="flex justify-between items-center mb-4">
+              <div class="mb-4 bg-white p-4 rounded-xl shadow-lg">
+                <div class="flex justify-between items-center mb-3">
                   <div>
-                    <h2 class="text-2xl font-bold text-slate-800">SMP Negeri 1 Purbalingga</h2>
-                    <p class="text-sm text-slate-600">${currentState.studentName} - ${currentState.studentClass}</p>
+                    <h2 class="text-lg font-bold text-slate-800">SMP Negeri 1 Purbalingga</h2>
+                    <p class="text-xs text-slate-600">${currentState.studentName} - ${currentState.studentClass}</p>
                     ${currentStudent ? `<p class="text-xs text-slate-500">NIS: ${currentStudent.nis} | Absen: ${currentStudent.absen}</p>` : ''}
                   </div>
                   <div class="text-right">
-                    <div class="timer text-2xl font-bold text-blue-500" id="timer">00:00</div>
-                    <p class="text-xs text-slate-500">Waktu Pengerjaan</p>
+                    <div class="timer text-xl font-bold text-blue-500" id="timer">00:00</div>
+                    <p class="text-xs text-slate-500">Waktu</p>
                   </div>
                 </div>
                 
                 <div class="mb-2">
-                  <div class="flex justify-between text-sm text-slate-600 mb-2">
+                  <div class="flex justify-between text-xs text-slate-600 mb-1.5">
                     <span>Soal ${currentState.currentQuestion + 1} dari ${questionsData.length}</span>
                     <span>${Math.round(progress)}%</span>
                   </div>
-                  <div class="w-full bg-slate-200 rounded-full h-3">
-                    <div class="bg-blue-500 h-3 rounded-full transition-all duration-300" style="width: ${progress}%;"></div>
+                  <div class="w-full bg-slate-200 rounded-full h-2">
+                    <div class="bg-blue-500 h-2 rounded-full transition-all duration-300" style="width: ${progress}%;"></div>
                   </div>
                 </div>
               </div>
               
-              <div class="question-card bg-white p-8 rounded-xl shadow-lg mb-6">
-                <div class="mb-6">
-                  <span class="inline-block bg-blue-500 text-white px-4 py-2 rounded-full text-sm font-semibold mb-4">
+              <div class="question-card bg-white p-5 rounded-xl shadow-lg mb-4">
+                <div class="mb-4">
+                  <span class="inline-block bg-blue-500 text-white px-3 py-1.5 rounded-full text-xs font-semibold mb-3">
                     ${getQuestionTypeLabel(question.type)}
                   </span>
                   
-                  ${question.image ? `<div class="mb-6"><img src="${question.image}" alt="Question image" class="w-full max-w-2xl mx-auto rounded-lg shadow-md" onerror="this.style.display='none'; this.alt='Image failed to load';" /></div>` : ''}
+                  ${question.image ? `<div class="mb-4"><img src="${question.image}" alt="Question image" class="w-full max-w-xl mx-auto rounded-lg shadow-md" onerror="this.style.display='none'; this.alt='Image failed to load';" /></div>` : ''}
                   
-                  ${question.video ? `<div class="mb-6"><video controls class="w-full max-w-2xl mx-auto rounded-lg shadow-md"><source src="${question.video}" type="video/mp4">Your browser does not support video.</video></div>` : ''}
+                  ${question.video ? `<div class="mb-4"><video controls class="w-full max-w-xl mx-auto rounded-lg shadow-md"><source src="${question.video}" type="video/mp4">Your browser does not support video.</video></div>` : ''}
                   
-                  ${question.audio ? `<div class="mb-6 flex justify-center"><audio controls style="width: 100%; max-width: 500px;"><source src="${question.audio}" type="audio/mpeg">Your browser does not support audio.</audio></div>` : ''}
+                  ${question.audio ? `<div class="mb-4 flex justify-center"><audio controls style="width: 100%; max-width: 400px;"><source src="${question.audio}" type="audio/mpeg">Your browser does not support audio.</audio></div>` : ''}
                   
-                  <h3 class="text-xl font-semibold text-slate-800 mb-6">
+                  <h3 class="text-base font-semibold text-slate-800 mb-4">
                     ${question.question}
                   </h3>
                 </div>
@@ -621,10 +744,10 @@
                 <div id="questionContent"></div>
               </div>
               
-              <div class="flex justify-between gap-4">
+              <div class="flex justify-between gap-3">
                 <button 
                   id="prevBtn"
-                  class="bg-slate-500 hover:bg-slate-600 text-white px-8 py-3 rounded-lg font-semibold transition-all duration-300"
+                  class="bg-slate-500 hover:bg-slate-600 text-white px-6 py-2.5 rounded-lg font-semibold transition-all duration-300 text-sm"
                   ${currentState.currentQuestion === 0 ? 'disabled' : ''}
                 >
                   ← Sebelumnya
@@ -632,16 +755,85 @@
                 
                 <button 
                   id="nextBtn"
-                  class="bg-blue-500 hover:bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold transition-all duration-300"
+                  class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2.5 rounded-lg font-semibold transition-all duration-300 text-sm"
                 >
                   ${currentState.currentQuestion === questionsData.length - 1 ? 'Selesai' : 'Selanjutnya →'}
                 </button>
+              </div>
+            </div>
+            
+            <!-- Question Navigation Panel -->
+            <div id="navToggle" class="nav-toggle">
+              NAVIGASI SOAL
+            </div>
+            
+            <div id="questionNav" class="question-nav">
+              <div class="p-5 border-b border-slate-200">
+                <h3 class="font-bold text-lg text-slate-800">Navigasi Soal</h3>
+                <p class="text-xs text-slate-600 mt-1">Klik nomor untuk ke soal</p>
+              </div>
+              
+              <div class="flex-1 overflow-y-auto p-4">
+                <div class="grid grid-cols-5 gap-3" id="navItems">
+                  ${questionsData.map((q, index) => {
+                    const isAnswered = currentState.answers[q.id] !== undefined;
+                    const isCurrent = index === currentState.currentQuestion;
+                    let className = 'question-nav-item ';
+                    if (isCurrent) className += 'current';
+                    else if (isAnswered) className += 'answered';
+                    else className += 'unanswered';
+                    
+                    return `<div class="${className}" data-question="${index}">${index + 1}</div>`;
+                  }).join('')}
+                </div>
+              </div>
+              
+              <div class="p-4 border-t border-slate-200 bg-slate-50">
+                <div class="grid grid-cols-3 gap-2 text-xs">
+                  <div class="flex items-center gap-2">
+                    <div class="w-6 h-6 rounded bg-yellow-400"></div>
+                    <span class="text-slate-700">Aktif</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <div class="w-6 h-6 rounded bg-blue-500"></div>
+                    <span class="text-slate-700">Dijawab</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <div class="w-6 h-6 rounded border-2 border-slate-300 bg-white"></div>
+                    <span class="text-slate-700">Kosong</span>
+                  </div>
+                </div>
+                
+                <div class="mt-3 p-2 bg-blue-100 rounded-lg text-center">
+                  <div class="text-sm font-semibold text-blue-800">
+                    <span id="answeredCount">${Object.keys(currentState.answers).length}</span> / ${questionsData.length} Terjawab
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         `;
         
         renderQuestionContent(question);
+        
+        // Setup navigation panel
+        const navToggle = document.getElementById('navToggle');
+        const questionNav = document.getElementById('questionNav');
+        
+        navToggle.addEventListener('click', () => {
+          questionNav.classList.toggle('open');
+          navToggle.classList.toggle('hidden');
+        });
+        
+        // Navigation item click
+        document.querySelectorAll('.question-nav-item').forEach(item => {
+          item.addEventListener('click', (e) => {
+            const questionIndex = parseInt(e.target.dataset.question);
+            saveCurrentAnswer();
+            currentState.currentQuestion = questionIndex;
+            render();
+          });
+        });
         
         document.getElementById('prevBtn')?.addEventListener('click', () => {
           if (currentState.currentQuestion > 0) {
@@ -656,7 +848,7 @@
             currentState.currentQuestion++;
             render();
           } else {
-            submitTest();
+            showSubmitConfirmation();
           }
         });
       } else if (currentState.screen === 'result') {
@@ -664,6 +856,45 @@
         const totalPoints = calculateTotalPoints();
         const percentage = (score / totalPoints) * 100;
         const status = percentage >= 60 ? 'Lulus' : 'Tidak Lulus';
+        
+        // Trigger confetti for scores 80% and above
+        if (percentage >= 80) {
+          setTimeout(() => {
+            createConfetti();
+          }, 500);
+        }
+        
+        // Start auto-logout countdown
+        let countdownSeconds = 20;
+        const countdownInterval = setInterval(() => {
+          countdownSeconds--;
+          const countdownEl = document.getElementById('autoLogoutCountdown');
+          if (countdownEl) {
+            countdownEl.textContent = countdownSeconds;
+          }
+          
+          if (countdownSeconds <= 0) {
+            clearInterval(countdownInterval);
+            // Reset to login screen
+            currentState = {
+              screen: 'login',
+              studentName: '',
+              studentClass: '',
+              studentNis: '',
+              studentAbsen: '',
+              currentQuestion: 0,
+              answers: {},
+              startTime: null,
+              timer: null,
+              timeElapsed: 0
+            };
+            currentStudent = null;
+            questionsData = [];
+            securityViolated = false;
+            tabSwitchCount = 0;
+            render();
+          }
+        }, 1000);
         
         app.innerHTML = `
           <div class="w-full min-h-full flex items-center justify-center p-4 md:p-6">
@@ -678,20 +909,25 @@
                 <p class="text-sm text-slate-600">Terima kasih telah mengerjakan ujian</p>
               </div>
               
+              <div class="mb-5 bg-yellow-50 border-2 border-yellow-400 p-4 rounded-lg text-center">
+                <div class="text-yellow-700 font-semibold mb-2">⏱️ Otomatis kembali ke login dalam:</div>
+                <div class="text-3xl font-bold text-yellow-600"><span id="autoLogoutCountdown">20</span> detik</div>
+              </div>
+              
               <div class="mb-5 bg-slate-50 p-4 rounded-lg">
-                <div class="text-sm font-semibold text-slate-600 mb-3">Identitas Peserta</div>
+                <div class="text-sm font-semibold text-black mb-3">Identitas Peserta</div>
                 <div class="space-y-2 text-sm">
                   <div class="flex justify-between">
-                    <span class="text-slate-600">Nama</span>
-                    <span class="font-semibold text-slate-800">${currentState.studentName}</span>
+                    <span class="text-black">NIS</span>
+                    <span class="font-semibold text-black">${currentState.studentNis}</span>
                   </div>
                   <div class="flex justify-between">
-                    <span class="text-slate-600">Kelas</span>
-                    <span class="font-semibold text-slate-800">${currentState.studentClass}</span>
+                    <span class="text-black">Nama</span>
+                    <span class="font-semibold text-black">${currentState.studentName}</span>
                   </div>
                   <div class="flex justify-between">
-                    <span class="text-slate-600">NIS</span>
-                    <span class="font-semibold text-slate-800">${currentState.studentNis}</span>
+                    <span class="text-black">Kelas</span>
+                    <span class="font-semibold text-black">${currentState.studentClass}</span>
                   </div>
                 </div>
               </div>
@@ -726,12 +962,136 @@
                 </div>
               </div>
               
+              <button 
+                id="reviewBtn"
+                class="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-lg font-semibold transition-all duration-300 mb-4 flex items-center justify-center gap-2"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                Review Jawaban
+              </button>
+              
               <div class="text-center">
                 <p class="text-xs text-slate-500">© 2024 SMP Negeri 1 Purbalingga</p>
               </div>
             </div>
           </div>
         `;
+        
+        document.getElementById('reviewBtn').addEventListener('click', () => {
+          clearInterval(countdownInterval);
+          currentState.screen = 'review';
+          currentState.reviewQuestion = 0;
+          render();
+        });
+      } else if (currentState.screen === 'review') {
+        const question = questionsData[currentState.reviewQuestion];
+        const userAnswer = currentState.answers[question.id];
+        const isCorrect = checkAnswerCorrect(question, userAnswer);
+        
+        app.innerHTML = `
+          <div class="w-full min-h-full p-4 md:p-8">
+            <div class="max-w-4xl mx-auto">
+              <div class="mb-6 bg-white p-6 rounded-xl shadow-lg">
+                <div class="flex justify-between items-center mb-4">
+                  <div>
+                    <h2 class="text-2xl font-bold text-slate-800">Review Jawaban</h2>
+                    <p class="text-sm text-slate-600">${currentState.studentName} - ${currentState.studentClass}</p>
+                  </div>
+                  <button 
+                    id="backToResultBtn"
+                    class="bg-slate-500 hover:bg-slate-600 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-300 text-sm"
+                  >
+                    ← Kembali ke Hasil
+                  </button>
+                </div>
+                
+                <div class="mb-2">
+                  <div class="flex justify-between text-sm text-slate-600 mb-2">
+                    <span>Soal ${currentState.reviewQuestion + 1} dari ${questionsData.length}</span>
+                    <span class="font-semibold ${isCorrect ? 'text-green-600' : 'text-red-600'}">${isCorrect ? '✓ Benar' : '✗ Salah'}</span>
+                  </div>
+                  <div class="w-full bg-slate-200 rounded-full h-3">
+                    <div class="bg-blue-500 h-3 rounded-full transition-all duration-300" style="width: ${((currentState.reviewQuestion + 1) / questionsData.length) * 100}%;"></div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="question-card bg-white p-8 rounded-xl shadow-lg mb-6">
+                <div class="mb-6">
+                  <div class="flex items-center gap-3 mb-4">
+                    <span class="inline-block bg-blue-500 text-white px-4 py-2 rounded-full text-sm font-semibold">
+                      ${getQuestionTypeLabel(question.type)}
+                    </span>
+                    <span class="inline-block ${isCorrect ? 'bg-green-500' : 'bg-red-500'} text-white px-4 py-2 rounded-full text-sm font-semibold">
+                      ${isCorrect ? '✓ Benar' : '✗ Salah'} (${isCorrect ? question.points : 0}/${question.points} poin)
+                    </span>
+                  </div>
+                  
+                  ${question.image ? `<div class="mb-6"><img src="${question.image}" alt="Question image" class="w-full max-w-2xl mx-auto rounded-lg shadow-md" onerror="this.style.display='none'; this.alt='Image failed to load';" /></div>` : ''}
+                  
+                  ${question.video ? `<div class="mb-6"><video controls class="w-full max-w-2xl mx-auto rounded-lg shadow-md"><source src="${question.video}" type="video/mp4">Your browser does not support video.</video></div>` : ''}
+                  
+                  ${question.audio ? `<div class="mb-6 flex justify-center"><audio controls style="width: 100%; max-width: 500px;"><source src="${question.audio}" type="audio/mpeg">Your browser does not support audio.</audio></div>` : ''}
+                  
+                  <h3 class="text-xl font-semibold text-slate-800 mb-6">
+                    ${question.question}
+                  </h3>
+                </div>
+                
+                <div id="reviewContent"></div>
+                
+                <div class="mt-6 p-4 rounded-lg ${isCorrect ? 'bg-green-50 border-2 border-green-500' : 'bg-red-50 border-2 border-red-500'}">
+                  <div class="font-semibold ${isCorrect ? 'text-green-800' : 'text-red-800'} mb-2">
+                    ${isCorrect ? '✓ ' + question.correctFeedback : '✗ ' + question.incorrectFeedback}
+                  </div>
+                </div>
+              </div>
+              
+              <div class="flex justify-between gap-4">
+                <button 
+                  id="prevReviewBtn"
+                  class="bg-slate-500 hover:bg-slate-600 text-white px-8 py-3 rounded-lg font-semibold transition-all duration-300"
+                  ${currentState.reviewQuestion === 0 ? 'disabled' : ''}
+                >
+                  ← Soal Sebelumnya
+                </button>
+                
+                <button 
+                  id="nextReviewBtn"
+                  class="bg-blue-500 hover:bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold transition-all duration-300"
+                >
+                  ${currentState.reviewQuestion === questionsData.length - 1 ? 'Selesai Review' : 'Soal Selanjutnya →'}
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        renderReviewContent(question, userAnswer);
+        
+        document.getElementById('backToResultBtn').addEventListener('click', () => {
+          currentState.screen = 'result';
+          render();
+        });
+        
+        document.getElementById('prevReviewBtn')?.addEventListener('click', () => {
+          if (currentState.reviewQuestion > 0) {
+            currentState.reviewQuestion--;
+            render();
+          }
+        });
+        
+        document.getElementById('nextReviewBtn')?.addEventListener('click', () => {
+          if (currentState.reviewQuestion < questionsData.length - 1) {
+            currentState.reviewQuestion++;
+            render();
+          } else {
+            currentState.screen = 'result';
+            render();
+          }
+        });
       }
     }
 
@@ -826,8 +1186,8 @@
           </div>
           <div class="space-y-4">
             ${question.options.map((option, index) => `
-              <label class="flex items-center p-4 bg-slate-50 rounded-lg border-2 border-slate-300 cursor-pointer transition-all duration-300 hover:shadow-md">
-                <input type="checkbox" value="${index}" class="checkbox-custom hidden" ${savedAnswer && savedAnswer.includes(index) ? 'checked' : ''} />
+              <label class="flex items-center gap-4 p-4 bg-slate-50 rounded-lg border-2 border-slate-300 cursor-pointer transition-all duration-300 hover:shadow-md">
+                <input type="checkbox" value="${index}" class="checkbox-custom w-5 h-5 accent-blue-500 cursor-pointer" ${savedAnswer && savedAnswer.includes(index) ? 'checked' : ''} />
                 <span class="flex-1 font-medium text-slate-800">${String.fromCharCode(65 + index)}. ${option}</span>
               </label>
             `).join('')}
@@ -839,23 +1199,17 @@
             const label = e.target.closest('label');
             if (e.target.checked) {
               label.classList.remove('bg-slate-50', 'border-slate-300');
-              label.classList.add('bg-blue-500', 'border-blue-500');
-              label.querySelector('span').classList.remove('text-slate-800');
-              label.querySelector('span').classList.add('text-white');
+              label.classList.add('bg-blue-100', 'border-blue-500');
             } else {
-              label.classList.remove('bg-blue-500', 'border-blue-500');
+              label.classList.remove('bg-blue-100', 'border-blue-500');
               label.classList.add('bg-slate-50', 'border-slate-300');
-              label.querySelector('span').classList.remove('text-white');
-              label.querySelector('span').classList.add('text-slate-800');
             }
           });
           
           if (checkbox.checked) {
             const label = checkbox.closest('label');
             label.classList.remove('bg-slate-50', 'border-slate-300');
-            label.classList.add('bg-blue-500', 'border-blue-500');
-            label.querySelector('span').classList.remove('text-slate-800');
-            label.querySelector('span').classList.add('text-white');
+            label.classList.add('bg-blue-100', 'border-blue-500');
           }
         });
       } else if (question.type === 'TI') {
@@ -1053,6 +1407,87 @@
           currentState.answers[question.id] = parseFloat(answer);
         }
       }
+    }
+
+    function showSubmitConfirmation() {
+      const answeredCount = Object.keys(currentState.answers).length;
+      const unansweredCount = questionsData.length - answeredCount;
+      
+      const confirmationModal = document.createElement('div');
+      confirmationModal.id = 'submitConfirmationModal';
+      confirmationModal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+      confirmationModal.innerHTML = `
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 animate-scale-in">
+          <div class="text-center mb-4">
+            <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-3">
+              <svg class="w-10 h-10 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+              </svg>
+            </div>
+            <h3 class="text-xl font-bold text-slate-800 mb-1.5">Konfirmasi Pengiriman Jawaban</h3>
+            <p class="text-slate-600 text-sm">Apakah Anda yakin ingin mengirim jawaban?</p>
+          </div>
+          
+          <div class="mb-4 bg-slate-50 p-4 rounded-xl">
+            <div class="grid grid-cols-2 gap-3 mb-3">
+              <div class="text-center p-2.5 bg-white rounded-lg">
+                <div class="text-2xl font-bold text-blue-500">${answeredCount}</div>
+                <div class="text-xs text-slate-600 mt-0.5">Soal Terjawab</div>
+              </div>
+              <div class="text-center p-2.5 bg-white rounded-lg">
+                <div class="text-2xl font-bold ${unansweredCount > 0 ? 'text-red-500' : 'text-green-500'}">${unansweredCount}</div>
+                <div class="text-xs text-slate-600 mt-0.5">Soal Kosong</div>
+              </div>
+            </div>
+            
+            ${unansweredCount > 0 ? `
+              <div class="bg-yellow-50 border-2 border-yellow-400 p-2.5 rounded-lg">
+                <p class="text-xs text-yellow-800 text-center font-semibold">
+                  ⚠️ Anda masih memiliki ${unansweredCount} soal yang belum dijawab
+                </p>
+              </div>
+            ` : `
+              <div class="bg-green-50 border-2 border-green-400 p-2.5 rounded-lg">
+                <p class="text-xs text-green-800 text-center font-semibold">
+                  ✓ Semua soal sudah dijawab
+                </p>
+              </div>
+            `}
+          </div>
+          
+          <div class="mb-4 bg-red-50 border-2 border-red-400 p-3 rounded-xl">
+            <p class="text-xs text-red-800 text-center font-semibold">
+              ⚠️ Setelah mengirim, Anda TIDAK DAPAT mengubah jawaban lagi!
+            </p>
+          </div>
+          
+          <div class="flex gap-3">
+            <button 
+              id="cancelSubmitBtn"
+              class="flex-1 bg-slate-500 hover:bg-slate-600 text-white py-2.5 rounded-lg font-semibold transition-all duration-300 text-sm"
+            >
+              Periksa Lagi
+            </button>
+            <button 
+              id="confirmSubmitBtn"
+              class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2.5 rounded-lg font-semibold transition-all duration-300 text-sm"
+            >
+              Ya, Kirim Jawaban
+            </button>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(confirmationModal);
+      
+      document.getElementById('cancelSubmitBtn').addEventListener('click', () => {
+        confirmationModal.remove();
+      });
+      
+      document.getElementById('confirmSubmitBtn').addEventListener('click', () => {
+        confirmationModal.remove();
+        submitTest();
+      });
     }
 
     function calculateDetailedAnswers() {
@@ -1290,6 +1725,32 @@
       return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
     }
 
+    function createConfetti() {
+      const colors = ['#ffd700', '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7', '#dfe6e9', '#ff7675', '#74b9ff', '#a29bfe', '#fd79a8', '#fdcb6e'];
+      const confettiCount = 150;
+      
+      for (let i = 0; i < confettiCount; i++) {
+        setTimeout(() => {
+          const confetti = document.createElement('div');
+          confetti.className = 'confetti';
+          confetti.style.left = Math.random() * 100 + '%';
+          confetti.style.top = '-10px';
+          confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+          confetti.style.width = (Math.random() * 10 + 5) + 'px';
+          confetti.style.height = (Math.random() * 10 + 5) + 'px';
+          confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+          confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
+          confetti.style.animationDelay = '0s';
+          
+          document.body.appendChild(confetti);
+          
+          setTimeout(() => {
+            confetti.remove();
+          }, 5000);
+        }, i * 30);
+      }
+    }
+
     function getQuestionTypeLabel(type) {
       const labels = {
         'TF': 'Benar/Salah',
@@ -1303,7 +1764,289 @@
       return labels[type] || type;
     }
 
+    function checkAnswerCorrect(question, userAnswer) {
+      if (question.type === 'TF' || question.type === 'MC') {
+        return userAnswer === question.answer;
+      } else if (question.type === 'MR') {
+        return userAnswer && JSON.stringify(userAnswer.sort()) === JSON.stringify(question.answer.sort());
+      } else if (question.type === 'TI') {
+        if (userAnswer && Array.isArray(question.answer)) {
+          const userAnswerNormalized = userAnswer.toLowerCase().trim();
+          return question.answer.some(
+            acceptableAnswer => acceptableAnswer.toLowerCase().trim() === userAnswerNormalized
+          );
+        }
+        return false;
+      } else if (question.type === 'MG') {
+        if (userAnswer && userAnswer.rightOrder) {
+          return question.pairs.every((pair, index) => 
+            userAnswer.rightOrder[index] === pair.right
+          );
+        }
+        return false;
+      } else if (question.type === 'SEQ') {
+        return userAnswer && JSON.stringify(userAnswer) === JSON.stringify(question.items);
+      } else if (question.type === 'NUMG') {
+        if (userAnswer !== undefined) {
+          const diff = Math.abs(userAnswer - question.answer);
+          return diff <= question.tolerance;
+        }
+        return false;
+      }
+      return false;
+    }
+
+    function renderReviewContent(question, userAnswer) {
+      const content = document.getElementById('reviewContent');
+      const isCorrect = checkAnswerCorrect(question, userAnswer);
+      
+      if (question.type === 'TF') {
+        const options = question.options || ['Benar', 'Salah'];
+        const correctAnswer = question.answer;
+        
+        content.innerHTML = `
+          <div class="space-y-3">
+            <div class="font-semibold text-slate-700 mb-3">Pilihan Jawaban:</div>
+            ${options.map((option, index) => {
+              const isThisCorrect = (index === 0) === correctAnswer;
+              const isUserChoice = (index === 0) === userAnswer;
+              
+              let bgColor = 'bg-slate-50';
+              let borderColor = 'border-slate-300';
+              let icon = '';
+              
+              if (isThisCorrect) {
+                bgColor = 'bg-green-100';
+                borderColor = 'border-green-500';
+                icon = '<span class="text-green-600 font-bold">✓ Jawaban Benar</span>';
+              }
+              
+              if (isUserChoice && !isCorrect) {
+                bgColor = 'bg-red-100';
+                borderColor = 'border-red-500';
+                icon = '<span class="text-red-600 font-bold">✗ Jawaban Anda</span>';
+              }
+              
+              if (isUserChoice && isCorrect) {
+                icon = '<span class="text-green-600 font-bold">✓ Jawaban Anda (Benar)</span>';
+              }
+              
+              return `
+                <div class="flex items-center justify-between p-4 ${bgColor} rounded-lg border-2 ${borderColor}">
+                  <span class="font-medium text-slate-800">${option}</span>
+                  ${icon}
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+      } else if (question.type === 'MC') {
+        content.innerHTML = `
+          <div class="space-y-3">
+            <div class="font-semibold text-slate-700 mb-3">Pilihan Jawaban:</div>
+            ${question.options.map((option, index) => {
+              const isThisCorrect = index === question.answer;
+              const isUserChoice = index === userAnswer;
+              
+              let bgColor = 'bg-slate-50';
+              let borderColor = 'border-slate-300';
+              let icon = '';
+              
+              if (isThisCorrect) {
+                bgColor = 'bg-green-100';
+                borderColor = 'border-green-500';
+                icon = '<span class="text-green-600 font-bold">✓ Jawaban Benar</span>';
+              }
+              
+              if (isUserChoice && !isCorrect) {
+                bgColor = 'bg-red-100';
+                borderColor = 'border-red-500';
+                icon = '<span class="text-red-600 font-bold">✗ Jawaban Anda</span>';
+              }
+              
+              if (isUserChoice && isCorrect) {
+                icon = '<span class="text-green-600 font-bold">✓ Jawaban Anda (Benar)</span>';
+              }
+              
+              return `
+                <div class="flex items-center justify-between p-4 ${bgColor} rounded-lg border-2 ${borderColor}">
+                  <span class="font-medium text-slate-800">${String.fromCharCode(65 + index)}. ${option}</span>
+                  ${icon}
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+      } else if (question.type === 'MR') {
+        content.innerHTML = `
+          <div class="space-y-3">
+            <div class="font-semibold text-slate-700 mb-3">Pilihan Jawaban (pilih semua yang benar):</div>
+            ${question.options.map((option, index) => {
+              const isThisCorrect = question.answer.includes(index);
+              const isUserChoice = userAnswer && userAnswer.includes(index);
+              
+              let bgColor = 'bg-slate-50';
+              let borderColor = 'border-slate-300';
+              let icon = '';
+              
+              if (isThisCorrect && isUserChoice) {
+                bgColor = 'bg-green-100';
+                borderColor = 'border-green-500';
+                icon = '<span class="text-green-600 font-bold">✓ Benar (Anda Pilih)</span>';
+              } else if (isThisCorrect && !isUserChoice) {
+                bgColor = 'bg-yellow-100';
+                borderColor = 'border-yellow-500';
+                icon = '<span class="text-yellow-700 font-bold">✓ Seharusnya Dipilih</span>';
+              } else if (!isThisCorrect && isUserChoice) {
+                bgColor = 'bg-red-100';
+                borderColor = 'border-red-500';
+                icon = '<span class="text-red-600 font-bold">✗ Salah Pilih</span>';
+              }
+              
+              return `
+                <div class="flex items-center justify-between p-4 ${bgColor} rounded-lg border-2 ${borderColor}">
+                  <span class="font-medium text-slate-800">${String.fromCharCode(65 + index)}. ${option}</span>
+                  ${icon}
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+      } else if (question.type === 'TI') {
+        const correctAnswers = Array.isArray(question.answer) ? question.answer : [question.answer];
+        
+        content.innerHTML = `
+          <div class="space-y-4">
+            <div>
+              <div class="font-semibold text-slate-700 mb-2">Jawaban Anda:</div>
+              <div class="p-4 rounded-lg border-2 ${isCorrect ? 'bg-green-100 border-green-500' : 'bg-red-100 border-red-500'}">
+                <div class="flex items-center justify-between">
+                  <span class="font-medium text-slate-800">${userAnswer || '(Tidak dijawab)'}</span>
+                  <span class="font-bold ${isCorrect ? 'text-green-600' : 'text-red-600'}">${isCorrect ? '✓ Benar' : '✗ Salah'}</span>
+                </div>
+              </div>
+            </div>
+            
+            ${!isCorrect ? `
+              <div>
+                <div class="font-semibold text-slate-700 mb-2">Jawaban yang Benar:</div>
+                <div class="p-4 bg-green-100 rounded-lg border-2 border-green-500">
+                  <span class="font-medium text-slate-800">${correctAnswers.join(' atau ')}</span>
+                </div>
+              </div>
+            ` : ''}
+          </div>
+        `;
+      } else if (question.type === 'MG') {
+        content.innerHTML = `
+          <div class="space-y-4">
+            <div class="font-semibold text-slate-700 mb-3">Penjodohan:</div>
+            <div class="space-y-3">
+              ${question.pairs.map((pair, index) => {
+                const userRight = userAnswer?.rightOrder ? userAnswer.rightOrder[index] : '';
+                const isThisCorrect = userRight === pair.right;
+                
+                return `
+                  <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
+                    <div class="p-3 bg-blue-100 border-2 border-blue-500 rounded-lg font-medium text-slate-800">
+                      ${index + 1}. ${pair.left}
+                    </div>
+                    <div class="text-center text-2xl">→</div>
+                    <div>
+                      ${userRight ? `
+                        <div class="p-3 rounded-lg border-2 ${isThisCorrect ? 'bg-green-100 border-green-500' : 'bg-red-100 border-red-500'}">
+                          <div class="flex items-center justify-between">
+                            <span class="font-medium text-slate-800">${userRight}</span>
+                            <span class="font-bold ${isThisCorrect ? 'text-green-600' : 'text-red-600'}">${isThisCorrect ? '✓' : '✗'}</span>
+                          </div>
+                        </div>
+                        ${!isThisCorrect ? `
+                          <div class="mt-2 p-3 bg-green-100 border-2 border-green-500 rounded-lg">
+                            <span class="text-xs text-green-700 font-semibold">Seharusnya: </span>
+                            <span class="font-medium text-slate-800">${pair.right}</span>
+                          </div>
+                        ` : ''}
+                      ` : `
+                        <div class="p-3 bg-slate-100 border-2 border-slate-300 rounded-lg">
+                          <span class="text-slate-500 italic">(Tidak dijawab)</span>
+                        </div>
+                        <div class="mt-2 p-3 bg-green-100 border-2 border-green-500 rounded-lg">
+                          <span class="text-xs text-green-700 font-semibold">Jawaban: </span>
+                          <span class="font-medium text-slate-800">${pair.right}</span>
+                        </div>
+                      `}
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      } else if (question.type === 'SEQ') {
+        content.innerHTML = `
+          <div class="space-y-4">
+            <div>
+              <div class="font-semibold text-slate-700 mb-2">Urutan Jawaban Anda:</div>
+              <div class="space-y-2">
+                ${userAnswer ? userAnswer.map((item, index) => {
+                  const correctItem = question.items[index];
+                  const isThisCorrect = item === correctItem;
+                  
+                  return `
+                    <div class="flex items-center gap-3 p-3 rounded-lg border-2 ${isThisCorrect ? 'bg-green-100 border-green-500' : 'bg-red-100 border-red-500'}">
+                      <span class="font-bold text-lg text-slate-600">${index + 1}.</span>
+                      <span class="flex-1 font-medium text-slate-800">${item}</span>
+                      <span class="font-bold ${isThisCorrect ? 'text-green-600' : 'text-red-600'}">${isThisCorrect ? '✓' : '✗'}</span>
+                    </div>
+                  `;
+                }).join('') : '<p class="text-slate-500 italic">(Tidak dijawab)</p>'}
+              </div>
+            </div>
+            
+            ${!isCorrect ? `
+              <div>
+                <div class="font-semibold text-slate-700 mb-2">Urutan yang Benar:</div>
+                <div class="space-y-2">
+                  ${question.items.map((item, index) => `
+                    <div class="flex items-center gap-3 p-3 bg-green-100 rounded-lg border-2 border-green-500">
+                      <span class="font-bold text-lg text-slate-600">${index + 1}.</span>
+                      <span class="flex-1 font-medium text-slate-800">${item}</span>
+                      <span class="font-bold text-green-600">✓</span>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            ` : ''}
+          </div>
+        `;
+      } else if (question.type === 'NUMG') {
+        content.innerHTML = `
+          <div class="space-y-4">
+            <div>
+              <div class="font-semibold text-slate-700 mb-2">Jawaban Anda:</div>
+              <div class="p-4 rounded-lg border-2 ${isCorrect ? 'bg-green-100 border-green-500' : 'bg-red-100 border-red-500'}">
+                <div class="flex items-center justify-between">
+                  <span class="font-medium text-slate-800 text-xl">${userAnswer !== undefined ? userAnswer : '(Tidak dijawab)'}</span>
+                  <span class="font-bold ${isCorrect ? 'text-green-600' : 'text-red-600'}">${isCorrect ? '✓ Benar' : '✗ Salah'}</span>
+                </div>
+              </div>
+            </div>
+            
+            ${!isCorrect ? `
+              <div>
+                <div class="font-semibold text-slate-700 mb-2">Jawaban yang Benar:</div>
+                <div class="p-4 bg-green-100 rounded-lg border-2 border-green-500">
+                  <span class="font-medium text-slate-800 text-xl">${question.answer}</span>
+                  ${question.tolerance > 0 ? `<span class="text-sm text-slate-600 ml-2">(± ${question.tolerance})</span>` : ''}
+                </div>
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }
+    }
+
     init();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9aa33bf422782925',t:'MTc2NTEwMjIzNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9aa5405dc4bafd21',t:'MTc2NTEyMzM4OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
