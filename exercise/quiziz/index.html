@@ -481,37 +481,37 @@
         app.innerHTML = `
           <div class="w-full min-h-full flex items-center justify-center p-4 md:p-8">
             <div class="question-card w-full max-w-md bg-white rounded-2xl shadow-2xl p-6">
-              <div class="text-center mb-4">
-                <img src="https://spenzaga.github.io/assets/img/logo.png" alt="Logo" class="w-16 h-16 mx-auto mb-3 object-contain" onerror="this.style.display='none'; this.alt='Logo failed to load';" />
-                <h1 class="text-xl font-bold text-slate-800 mb-2">SMP Negeri 1 Purbalingga</h1>
-                <h2 class="text-lg font-semibold text-slate-600 mb-4">Computer Based Test</h2>
+              <div class="text-center mb-6">
+                <img src="https://spenzaga.github.io/assets/img/logo.png" alt="Logo" class="w-24 h-24 mx-auto mb-4 object-contain" onerror="this.style.display='none'; this.alt='Logo failed to load';" />
+                <h1 class="text-2xl font-bold text-slate-800 mb-2">SMP Negeri 1 Purbalingga</h1>
+                <h2 class="text-xl font-semibold text-slate-600 mb-6">Computer Based Test</h2>
               </div>
               
-              <form id="loginForm" class="space-y-3">
+              <form id="loginForm" class="space-y-4">
                 <div>
-                  <label for="nisInput" class="block text-sm font-medium text-slate-700 mb-1.5">NIS (Nomor Induk Siswa)</label>
+                  <label for="nisInput" class="block text-sm font-medium text-slate-700 mb-2">NIS (Nomor Induk Siswa)</label>
                   <input 
                     type="text" 
                     id="nisInput" 
                     required
-                    class="w-full px-3 py-2 rounded-lg border-2 border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                    class="w-full px-4 py-3 rounded-lg border-2 border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Masukkan NIS Anda"
                   />
                 </div>
                 
-                <div id="loginError" class="hidden p-2.5 bg-red-100 text-red-700 rounded-lg text-xs">
+                <div id="loginError" class="hidden p-3 bg-red-100 text-red-700 rounded-lg text-sm">
                   NIS tidak ditemukan. Silakan coba lagi.
                 </div>
                 
                 <div id="loginLoading" class="hidden text-center">
-                  <div class="inline-block animate-spin rounded-full h-6 w-6 border-3 border-blue-500 border-t-transparent"></div>
-                  <p class="mt-1.5 text-slate-600 text-sm">Memverifikasi...</p>
+                  <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent"></div>
+                  <p class="mt-2 text-slate-600">Memverifikasi...</p>
                 </div>
                 
                 <button 
                   type="submit"
                   id="loginButton"
-                  class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2.5 rounded-lg font-semibold transition-all duration-300 text-sm"
+                  class="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-lg font-semibold transition-all duration-300"
                 >
                   Masuk
                 </button>
@@ -590,45 +590,45 @@
       } else if (currentState.screen === 'confirmation') {
         app.innerHTML = `
           <div class="w-full min-h-full flex items-center justify-center p-4 md:p-8">
-            <div class="question-card w-full max-w-lg bg-white rounded-2xl shadow-2xl p-5">
-              <div class="text-center mb-5">
-                <div class="mb-3">
-                  <svg class="w-14 h-14 mx-auto text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="question-card w-full max-w-lg bg-white rounded-2xl shadow-2xl p-8">
+              <div class="text-center mb-6">
+                <div class="mb-4">
+                  <svg class="w-20 h-20 mx-auto text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                   </svg>
                 </div>
-                <h1 class="text-2xl font-bold text-black mb-2">Konfirmasi Data Peserta</h1>
-                <p class="text-black text-sm">Pastikan data Anda sudah benar sebelum memulai ujian</p>
+                <h1 class="text-3xl font-bold text-black mb-3">Konfirmasi Data Peserta</h1>
+                <p class="text-black">Pastikan data Anda sudah benar sebelum memulai ujian</p>
               </div>
               
-              <div class="mb-5 bg-slate-50 p-4 rounded-xl">
-                <div class="space-y-3">
-                  <div class="flex justify-between items-center pb-2 border-b border-slate-200">
-                    <span class="font-semibold text-black text-sm">NIS</span>
-                    <span class="font-bold text-black">${currentState.studentNis}</span>
+              <div class="mb-6 bg-slate-50 p-5 rounded-xl">
+                <div class="space-y-4">
+                  <div class="flex justify-between items-center pb-3 border-b border-slate-200">
+                    <span class="font-semibold text-black">NIS</span>
+                    <span class="font-bold text-black text-lg">${currentState.studentNis}</span>
                   </div>
-                  <div class="flex justify-between items-center pb-2 border-b border-slate-200">
-                    <span class="font-semibold text-black text-sm">Nomor Absen</span>
-                    <span class="font-bold text-black">${currentState.studentAbsen}</span>
+                  <div class="flex justify-between items-center pb-3 border-b border-slate-200">
+                    <span class="font-semibold text-black">Nomor Absen</span>
+                    <span class="font-bold text-black text-lg">${currentState.studentAbsen}</span>
                   </div>
-                  <div class="flex justify-between items-center pb-2 border-b border-slate-200">
-                    <span class="font-semibold text-black text-sm">Nama Lengkap</span>
-                    <span class="font-bold text-black">${currentState.studentName}</span>
+                  <div class="flex justify-between items-center pb-3 border-b border-slate-200">
+                    <span class="font-semibold text-black">Nama Lengkap</span>
+                    <span class="font-bold text-black text-lg">${currentState.studentName}</span>
                   </div>
-                  <div class="flex justify-between items-center pb-2">
-                    <span class="font-semibold text-black text-sm">Kelas</span>
-                    <span class="font-bold text-black">${currentState.studentClass}</span>
+                  <div class="flex justify-between items-center pb-3">
+                    <span class="font-semibold text-black">Kelas</span>
+                    <span class="font-bold text-black text-lg">${currentState.studentClass}</span>
                   </div>
                 </div>
               </div>
               
-              <div class="mb-4 bg-yellow-50 border-2 border-yellow-400 p-4 rounded-xl">
+              <div class="mb-6 bg-yellow-50 border-2 border-yellow-400 p-5 rounded-xl">
                 <div class="text-center">
-                  <div class="mb-2 text-3xl">⚠️</div>
-                  <h3 class="text-lg font-black text-black mb-2 tracking-wide">PERNYATAAN KEJUJURAN</h3>
+                  <div class="mb-3 text-4xl">⚠️</div>
+                  <h3 class="text-xl font-black text-black mb-3 tracking-wide">PERNYATAAN KEJUJURAN</h3>
                 </div>
-                <div class="text-xs text-black leading-relaxed text-left">
-                  <p class="font-semibold mb-1.5">Saya berkomitmen untuk:</p>
+                <div class="text-sm text-black leading-relaxed text-left">
+                  <p class="font-semibold mb-2">Saya berkomitmen untuk:</p>
                   <p class="font-medium">✓ Mengerjakan ujian dengan <strong>jujur dan mandiri</strong><br/>
                   ✓ Tidak melakukan <strong>kecurangan</strong> dalam bentuk apapun<br/>
                   ✓ Tidak <strong>keluar dari halaman ujian</strong> atau berpindah aplikasi<br/>
@@ -636,27 +636,27 @@
                 </div>
               </div>
               
-              <div class="mb-4 bg-slate-50 p-3 rounded-lg flex items-start gap-2">
+              <div class="mb-6 bg-slate-50 p-4 rounded-lg flex items-start gap-3">
                 <input 
                   type="checkbox" 
                   id="agreeCheckbox" 
-                  class="mt-0.5 w-4 h-4 cursor-pointer accent-blue-500"
+                  class="mt-1 w-5 h-5 cursor-pointer accent-blue-500"
                 />
-                <label for="agreeCheckbox" class="cursor-pointer text-black leading-relaxed text-xs">
+                <label for="agreeCheckbox" class="cursor-pointer text-black leading-relaxed">
                   Saya telah membaca dan menyetujui pernyataan kejujuran di atas, dan siap untuk memulai ujian dengan jujur
                 </label>
               </div>
               
-              <div class="flex gap-3">
+              <div class="flex gap-4">
                 <button 
                   id="backBtn"
-                  class="flex-1 bg-slate-500 hover:bg-slate-600 text-white py-2.5 rounded-lg font-semibold transition-all duration-300 text-sm"
+                  class="flex-1 bg-slate-500 hover:bg-slate-600 text-white py-3 rounded-lg font-semibold transition-all duration-300"
                 >
                   ← Kembali
                 </button>
                 <button 
                   id="startTestBtn"
-                  class="flex-1 bg-blue-500 text-white py-2.5 rounded-lg font-semibold transition-all duration-300 opacity-50 text-sm"
+                  class="flex-1 bg-blue-500 text-white py-3 rounded-lg font-semibold transition-all duration-300 opacity-50"
                   disabled
                 >
                   Mulai Ujian →
@@ -700,43 +700,43 @@
         app.innerHTML = `
           <div class="w-full min-h-full p-4 md:p-8">
             <div class="max-w-4xl mx-auto">
-              <div class="mb-4 bg-white p-4 rounded-xl shadow-lg">
-                <div class="flex justify-between items-center mb-3">
+              <div class="mb-6 bg-white p-6 rounded-xl shadow-lg">
+                <div class="flex justify-between items-center mb-4">
                   <div>
-                    <h2 class="text-lg font-bold text-slate-800">SMP Negeri 1 Purbalingga</h2>
-                    <p class="text-xs text-slate-600">${currentState.studentName} - ${currentState.studentClass}</p>
+                    <h2 class="text-2xl font-bold text-slate-800">SMP Negeri 1 Purbalingga</h2>
+                    <p class="text-sm text-slate-600">${currentState.studentName} - ${currentState.studentClass}</p>
                     ${currentStudent ? `<p class="text-xs text-slate-500">NIS: ${currentStudent.nis} | Absen: ${currentStudent.absen}</p>` : ''}
                   </div>
                   <div class="text-right">
-                    <div class="timer text-xl font-bold text-blue-500" id="timer">00:00</div>
-                    <p class="text-xs text-slate-500">Waktu</p>
+                    <div class="timer text-3xl font-bold text-blue-500" id="timer">00:00</div>
+                    <p class="text-sm text-slate-500">Waktu</p>
                   </div>
                 </div>
                 
                 <div class="mb-2">
-                  <div class="flex justify-between text-xs text-slate-600 mb-1.5">
+                  <div class="flex justify-between text-sm text-slate-600 mb-2">
                     <span>Soal ${currentState.currentQuestion + 1} dari ${questionsData.length}</span>
                     <span>${Math.round(progress)}%</span>
                   </div>
-                  <div class="w-full bg-slate-200 rounded-full h-2">
-                    <div class="bg-blue-500 h-2 rounded-full transition-all duration-300" style="width: ${progress}%;"></div>
+                  <div class="w-full bg-slate-200 rounded-full h-3">
+                    <div class="bg-blue-500 h-3 rounded-full transition-all duration-300" style="width: ${progress}%;"></div>
                   </div>
                 </div>
               </div>
               
-              <div class="question-card bg-white p-5 rounded-xl shadow-lg mb-4">
-                <div class="mb-4">
-                  <span class="inline-block bg-blue-500 text-white px-3 py-1.5 rounded-full text-xs font-semibold mb-3">
+              <div class="question-card bg-white p-8 rounded-xl shadow-lg mb-6">
+                <div class="mb-6">
+                  <span class="inline-block bg-blue-500 text-white px-4 py-2 rounded-full text-sm font-semibold mb-4">
                     ${getQuestionTypeLabel(question.type)}
                   </span>
                   
-                  ${question.image ? `<div class="mb-4"><img src="${question.image}" alt="Question image" class="w-full max-w-xl mx-auto rounded-lg shadow-md" onerror="this.style.display='none'; this.alt='Image failed to load';" /></div>` : ''}
+                  ${question.image ? `<div class="mb-6"><img src="${question.image}" alt="Question image" class="w-full max-w-2xl mx-auto rounded-lg shadow-md" onerror="this.style.display='none'; this.alt='Image failed to load';" /></div>` : ''}
                   
-                  ${question.video ? `<div class="mb-4"><video controls class="w-full max-w-xl mx-auto rounded-lg shadow-md"><source src="${question.video}" type="video/mp4">Your browser does not support video.</video></div>` : ''}
+                  ${question.video ? `<div class="mb-6"><video controls class="w-full max-w-2xl mx-auto rounded-lg shadow-md"><source src="${question.video}" type="video/mp4">Your browser does not support video.</video></div>` : ''}
                   
-                  ${question.audio ? `<div class="mb-4 flex justify-center"><audio controls style="width: 100%; max-width: 400px;"><source src="${question.audio}" type="audio/mpeg">Your browser does not support audio.</audio></div>` : ''}
+                  ${question.audio ? `<div class="mb-6 flex justify-center"><audio controls style="width: 100%; max-width: 500px;"><source src="${question.audio}" type="audio/mpeg">Your browser does not support audio.</audio></div>` : ''}
                   
-                  <h3 class="text-base font-semibold text-slate-800 mb-4">
+                  <h3 class="text-xl font-semibold text-slate-800 mb-6">
                     ${question.question}
                   </h3>
                 </div>
@@ -744,10 +744,10 @@
                 <div id="questionContent"></div>
               </div>
               
-              <div class="flex justify-between gap-3">
+              <div class="flex justify-between gap-4">
                 <button 
                   id="prevBtn"
-                  class="bg-slate-500 hover:bg-slate-600 text-white px-6 py-2.5 rounded-lg font-semibold transition-all duration-300 text-sm"
+                  class="bg-slate-500 hover:bg-slate-600 text-white px-8 py-3 rounded-lg font-semibold transition-all duration-300"
                   ${currentState.currentQuestion === 0 ? 'disabled' : ''}
                 >
                   ← Sebelumnya
@@ -755,7 +755,7 @@
                 
                 <button 
                   id="nextBtn"
-                  class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2.5 rounded-lg font-semibold transition-all duration-300 text-sm"
+                  class="bg-blue-500 hover:bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold transition-all duration-300"
                 >
                   ${currentState.currentQuestion === questionsData.length - 1 ? 'Selesai' : 'Selanjutnya →'}
                 </button>
@@ -1417,60 +1417,60 @@
       confirmationModal.id = 'submitConfirmationModal';
       confirmationModal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
       confirmationModal.innerHTML = `
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 animate-scale-in">
-          <div class="text-center mb-4">
-            <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-3">
-              <svg class="w-10 h-10 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 animate-scale-in">
+          <div class="text-center mb-6">
+            <div class="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg class="w-12 h-12 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
               </svg>
             </div>
-            <h3 class="text-xl font-bold text-slate-800 mb-1.5">Konfirmasi Pengiriman Jawaban</h3>
-            <p class="text-slate-600 text-sm">Apakah Anda yakin ingin mengirim jawaban?</p>
+            <h3 class="text-2xl font-bold text-slate-800 mb-2">Konfirmasi Pengiriman Jawaban</h3>
+            <p class="text-slate-600">Apakah Anda yakin ingin mengirim jawaban?</p>
           </div>
           
-          <div class="mb-4 bg-slate-50 p-4 rounded-xl">
-            <div class="grid grid-cols-2 gap-3 mb-3">
-              <div class="text-center p-2.5 bg-white rounded-lg">
-                <div class="text-2xl font-bold text-blue-500">${answeredCount}</div>
-                <div class="text-xs text-slate-600 mt-0.5">Soal Terjawab</div>
+          <div class="mb-6 bg-slate-50 p-5 rounded-xl">
+            <div class="grid grid-cols-2 gap-4 mb-4">
+              <div class="text-center p-4 bg-white rounded-lg">
+                <div class="text-3xl font-bold text-blue-500">${answeredCount}</div>
+                <div class="text-sm text-slate-600 mt-1">Soal Terjawab</div>
               </div>
-              <div class="text-center p-2.5 bg-white rounded-lg">
-                <div class="text-2xl font-bold ${unansweredCount > 0 ? 'text-red-500' : 'text-green-500'}">${unansweredCount}</div>
-                <div class="text-xs text-slate-600 mt-0.5">Soal Kosong</div>
+              <div class="text-center p-4 bg-white rounded-lg">
+                <div class="text-3xl font-bold ${unansweredCount > 0 ? 'text-red-500' : 'text-green-500'}">${unansweredCount}</div>
+                <div class="text-sm text-slate-600 mt-1">Soal Kosong</div>
               </div>
             </div>
             
             ${unansweredCount > 0 ? `
-              <div class="bg-yellow-50 border-2 border-yellow-400 p-2.5 rounded-lg">
-                <p class="text-xs text-yellow-800 text-center font-semibold">
+              <div class="bg-yellow-50 border-2 border-yellow-400 p-3 rounded-lg">
+                <p class="text-sm text-yellow-800 text-center font-semibold">
                   ⚠️ Anda masih memiliki ${unansweredCount} soal yang belum dijawab
                 </p>
               </div>
             ` : `
-              <div class="bg-green-50 border-2 border-green-400 p-2.5 rounded-lg">
-                <p class="text-xs text-green-800 text-center font-semibold">
+              <div class="bg-green-50 border-2 border-green-400 p-3 rounded-lg">
+                <p class="text-sm text-green-800 text-center font-semibold">
                   ✓ Semua soal sudah dijawab
                 </p>
               </div>
             `}
           </div>
           
-          <div class="mb-4 bg-red-50 border-2 border-red-400 p-3 rounded-xl">
-            <p class="text-xs text-red-800 text-center font-semibold">
+          <div class="mb-6 bg-red-50 border-2 border-red-400 p-4 rounded-xl">
+            <p class="text-sm text-red-800 text-center font-semibold">
               ⚠️ Setelah mengirim, Anda TIDAK DAPAT mengubah jawaban lagi!
             </p>
           </div>
           
-          <div class="flex gap-3">
+          <div class="flex gap-4">
             <button 
               id="cancelSubmitBtn"
-              class="flex-1 bg-slate-500 hover:bg-slate-600 text-white py-2.5 rounded-lg font-semibold transition-all duration-300 text-sm"
+              class="flex-1 bg-slate-500 hover:bg-slate-600 text-white py-3 rounded-lg font-semibold transition-all duration-300"
             >
               Periksa Lagi
             </button>
             <button 
               id="confirmSubmitBtn"
-              class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2.5 rounded-lg font-semibold transition-all duration-300 text-sm"
+              class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-lg font-semibold transition-all duration-300"
             >
               Ya, Kirim Jawaban
             </button>
@@ -2048,5 +2048,5 @@
 
     init();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9aa5405dc4bafd21',t:'MTc2NTEyMzM4OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9ab33b95f6b5c63b',t:'MTc2NTI2OTk5NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
