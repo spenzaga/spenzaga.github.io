@@ -935,7 +935,7 @@
                   `;
                   answerInfo = `Jawaban: ${cleanOption(answers.find(a => hasAsterisk(a)))}`;
                 } else if (questionType === 'MC') {
-                  typeLabel = '��� MC';
+                  typeLabel = '📝 MC';
                   optionsHTML = answers.map((ans, i) => `
                     <div style="padding: 8px 12px; background: ${hasAsterisk(ans) ? '#d1fae5' : 'white'}; border-radius: 6px; border: 1px solid #e5e7eb;">
                       <span style="font-weight: 600; margin-right: 8px;">${i + 1}.</span>${cleanOption(ans)} ${hasAsterisk(ans) ? '✓' : ''}
