@@ -3,13 +3,14 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Data Siswa Ekstrakurikuler</title>
+  <title>Data Siswa Manager</title>
   <script src="/_sdk/element_sdk.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     body {
       box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     
     .table-container {
@@ -21,12 +22,25 @@
     }
     
     th, td {
-      border: 1px solid #e5e7eb;
+      text-align: left;
+      padding: 12px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    
+    th {
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    
+    tr:hover {
+      background-color: #f9fafb;
     }
     
     .loading-spinner {
       border: 3px solid #f3f4f6;
-      border-top: 3px solid #3b82f6;
+      border-top: 3px solid currentColor;
       border-radius: 50%;
       width: 40px;
       height: 40px;
@@ -42,352 +56,343 @@
   <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
  </head>
  <body class="h-full">
-  <div id="app" class="h-full w-full"></div>
+  <div id="app" class="h-full w-full" style="background-color: #f3f4f6;">
+   <div style="max-width: 1400px; margin: 0 auto; padding: 24px; height: 100%; overflow-auto;"><!-- Header -->
+    <div style="background-color: #ffffff; border-radius: 12px; padding: 24px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+     <h1 id="app-title" style="font-size: 32px; font-weight: 700; margin: 0; color: #1f2937;">Data Siswa Manager</h1>
+     <p style="margin-top: 8px; color: #6b7280; font-size: 16px;">Kelola dan analisis data siswa dengan mudah</p>
+    </div><!-- Controls -->
+    <div style="background-color: #ffffff; border-radius: 12px; padding: 24px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+     <div style="display: flex; gap: 16px; flex-wrap: wrap; align-items: center;">
+      <div style="flex: 1; min-width: 200px;"><label for="class-filter" style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151; font-size: 14px;">Filter Kelas</label> <select id="class-filter" style="width: 100%; padding: 10px 12px; border: 2px solid #d1d5db; border-radius: 8px; font-size: 14px; background-color: #ffffff; color: #1f2937; cursor: pointer;"> <option value="">Semua Kelas</option> </select>
+      </div>
+      <div style="display: flex; gap: 12px; align-items: flex-end;"><button id="refresh-btn" style="padding: 10px 20px; background-color: #3b82f6; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; transition: background-color 0.2s;"> 🔄 Muat Ulang </button> <button id="download-btn" style="padding: 10px 20px; background-color: #10b981; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; transition: background-color 0.2s;"> 📥 Download Excel </button>
+      </div>
+     </div>
+     <div id="status-message" style="margin-top: 16px; padding: 12px; border-radius: 8px; display: none; font-size: 14px;"></div>
+    </div><!-- Table Container -->
+    <div style="background-color: #ffffff; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+     <div id="loading-state" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px;">
+      <div class="loading-spinner" style="color: #3b82f6;"></div>
+      <p style="margin-top: 16px; color: #6b7280; font-size: 16px;">Memuat data siswa...</p>
+     </div>
+     <div id="table-container" class="table-container" style="display: none;">
+      <table id="students-table" style="width: 100%; background-color: #ffffff;">
+       <thead>
+        <tr style="background-color: #f9fafb;">
+         <th style="color: #374151;">NO</th>
+         <th style="color: #374151;">NAMA SISWA</th>
+         <th style="color: #374151;">L/P</th>
+         <th style="color: #374151;">AGAMA</th>
+         <th style="color: #374151;">KELAS</th>
+         <th style="color: #374151;">EKSTRAKURIKULER</th>
+         <th style="color: #374151;">NILAI KUALITATIF</th>
+         <th style="color: #374151;">DESKRIPSI</th>
+        </tr>
+       </thead>
+       <tbody id="table-body">
+       </tbody>
+      </table>
+     </div>
+     <div id="empty-state" style="display: none; text-align: center; padding: 60px 20px;">
+      <div style="font-size: 48px; margin-bottom: 16px;">
+       📋
+      </div>
+      <p style="color: #6b7280; font-size: 18px; font-weight: 600;">Tidak ada data siswa</p>
+      <p style="color: #9ca3af; font-size: 14px; margin-top: 8px;">Periksa URL Google Sheets Anda</p>
+     </div>
+    </div>
+   </div>
+  </div>
   <script>
     const defaultConfig = {
-      app_title: "Data Siswa Ekstrakurikuler",
-      loading_text: "Memuat data...",
-      download_button_text: "Download Excel",
-      background_color: "#f0f9ff",
+      app_title: "Data Siswa Manager",
+      sheet_url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRZlP2jxYlJYN66MdMCi385WgZ2S5A7QqNJrSO_KXpE9HvYn7HMKPMtIugyUcI8fA/pub?gid=566527892&single=true&output=csv",
+      primary_color: "#3b82f6",
+      secondary_color: "#10b981",
+      background_color: "#f3f4f6",
       surface_color: "#ffffff",
-      text_color: "#1e293b",
-      primary_action_color: "#3b82f6",
-      secondary_action_color: "#64748b",
-      font_family: "Inter",
-      font_size: 14
+      text_color: "#1f2937"
     };
 
     let studentsData = [];
-    let filteredData = [];
-    let selectedClass = "Semua";
+    let allClasses = [];
 
-    async function fetchCSVData() {
-      const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRjRwF4nfSv3NoMaYibgqlxKC2ZCIEwFoUKL-GxRUYhIzA_M1l8dUgA7pmMbuF6jw/pub?gid=1127408738&single=true&output=csv";
+    async function onConfigChange(config) {
+      const title = config.app_title || defaultConfig.app_title;
+      const primaryColor = config.primary_color || defaultConfig.primary_color;
+      const secondaryColor = config.secondary_color || defaultConfig.secondary_color;
+      const backgroundColor = config.background_color || defaultConfig.background_color;
+      const surfaceColor = config.surface_color || defaultConfig.surface_color;
+      const textColor = config.text_color || defaultConfig.text_color;
+      
+      document.getElementById('app-title').textContent = title;
+      document.getElementById('app').style.backgroundColor = backgroundColor;
+      
+      const surfaces = document.querySelectorAll('#app > div > div');
+      surfaces.forEach(surface => {
+        surface.style.backgroundColor = surfaceColor;
+      });
+      
+      document.getElementById('refresh-btn').style.backgroundColor = primaryColor;
+      document.getElementById('download-btn').style.backgroundColor = secondaryColor;
+      
+      const headers = document.querySelectorAll('th');
+      headers.forEach(header => {
+        header.style.color = textColor;
+      });
+      
+      document.getElementById('app-title').style.color = textColor;
+      
+      const sheetUrl = config.sheet_url || defaultConfig.sheet_url;
+      if (sheetUrl !== (window.lastLoadedUrl || defaultConfig.sheet_url)) {
+        window.lastLoadedUrl = sheetUrl;
+        await loadData();
+      }
+    }
+
+    async function loadData() {
+      const config = window.elementSdk ? window.elementSdk.config : defaultConfig;
+      const csvUrl = config.sheet_url || defaultConfig.sheet_url;
+      
+      showLoading();
       
       try {
-        const response = await fetch(url);
+        const response = await fetch(csvUrl);
+        if (!response.ok) throw new Error('Gagal memuat data');
+        
         const csvText = await response.text();
-        return parseCSV(csvText);
+        const rows = csvText.split('\n').filter(row => row.trim());
+        
+        if (rows.length < 2) {
+          showEmptyState();
+          return;
+        }
+        
+        const headers = rows[0].split(',').map(h => h.trim().replace(/"/g, ''));
+        studentsData = [];
+        allClasses = new Set();
+        
+        for (let i = 1; i < rows.length; i++) {
+          const values = rows[i].split(',').map(v => v.trim().replace(/"/g, ''));
+          if (values.length >= 8) {
+            const student = {
+              no: values[0],
+              nama: values[1],
+              gender: values[2],
+              agama: values[3],
+              kelas: values[4],
+              ekstrakurikuler: values[5],
+              nilai: values[6],
+              deskripsi: values[7]
+            };
+            studentsData.push(student);
+            if (student.kelas) allClasses.add(student.kelas);
+          }
+        }
+        
+        updateClassFilter();
+        renderTable(studentsData);
+        showSuccess(`Berhasil memuat ${studentsData.length} data siswa`);
       } catch (error) {
-        console.error("Error fetching data:", error);
-        return [];
+        showError('Gagal memuat data. Pastikan URL Google Sheets sudah benar dan dipublikasikan.');
+        showEmptyState();
       }
     }
 
-    function parseCSV(csv) {
-      const lines = csv.split('\n');
-      const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
-      const data = [];
+    function updateClassFilter() {
+      const classFilter = document.getElementById('class-filter');
+      const currentValue = classFilter.value;
+      
+      classFilter.innerHTML = '<option value="">Semua Kelas</option>';
+      
+      const sortedClasses = Array.from(allClasses).sort();
+      sortedClasses.forEach(kelas => {
+        const option = document.createElement('option');
+        option.value = kelas;
+        option.textContent = kelas;
+        classFilter.appendChild(option);
+      });
+      
+      classFilter.value = currentValue;
+    }
 
-      for (let i = 1; i < lines.length; i++) {
-        if (lines[i].trim() === '') continue;
-        
-        const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
-        const row = {};
-        
-        headers.forEach((header, index) => {
-          row[header] = values[index] || '';
-        });
-        
-        if (row['NO']) {
-          data.push(row);
-        }
+    function renderTable(data) {
+      const tbody = document.getElementById('table-body');
+      tbody.innerHTML = '';
+      
+      if (data.length === 0) {
+        showEmptyState();
+        return;
       }
       
-      return data;
-    }
-
-    function getUniqueClasses(data) {
-      const classes = new Set();
       data.forEach(student => {
-        if (student['KELAS']) {
-          classes.add(student['KELAS']);
-        }
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td style="color: #6b7280; font-weight: 500;">${student.no}</td>
+          <td style="color: #1f2937; font-weight: 600;">${student.nama}</td>
+          <td style="color: #6b7280;">${student.gender}</td>
+          <td style="color: #6b7280;">${student.agama}</td>
+          <td><span style="background-color: #dbeafe; color: #1e40af; padding: 4px 12px; border-radius: 12px; font-size: 13px; font-weight: 600;">${student.kelas}</span></td>
+          <td style="color: #6b7280;">${student.ekstrakurikuler}</td>
+          <td><span style="background-color: #d1fae5; color: #065f46; padding: 4px 12px; border-radius: 12px; font-size: 13px; font-weight: 600;">${student.nilai}</span></td>
+          <td style="color: #6b7280; max-width: 300px;">${student.deskripsi}</td>
+        `;
+        tbody.appendChild(row);
       });
-      return Array.from(classes).sort();
+      
+      document.getElementById('loading-state').style.display = 'none';
+      document.getElementById('empty-state').style.display = 'none';
+      document.getElementById('table-container').style.display = 'block';
     }
 
-    function filterByClass(className) {
-      selectedClass = className;
-      if (className === "Semua") {
-        filteredData = [...studentsData];
-      } else {
-        filteredData = studentsData.filter(student => student['KELAS'] === className);
-      }
-      renderTable();
+    function showLoading() {
+      document.getElementById('loading-state').style.display = 'flex';
+      document.getElementById('table-container').style.display = 'none';
+      document.getElementById('empty-state').style.display = 'none';
+    }
+
+    function showEmptyState() {
+      document.getElementById('loading-state').style.display = 'none';
+      document.getElementById('table-container').style.display = 'none';
+      document.getElementById('empty-state').style.display = 'block';
+    }
+
+    function showSuccess(message) {
+      const statusEl = document.getElementById('status-message');
+      statusEl.textContent = message;
+      statusEl.style.backgroundColor = '#d1fae5';
+      statusEl.style.color = '#065f46';
+      statusEl.style.display = 'block';
+      setTimeout(() => statusEl.style.display = 'none', 3000);
+    }
+
+    function showError(message) {
+      const statusEl = document.getElementById('status-message');
+      statusEl.textContent = message;
+      statusEl.style.backgroundColor = '#fee2e2';
+      statusEl.style.color = '#991b1b';
+      statusEl.style.display = 'block';
+      setTimeout(() => statusEl.style.display = 'none', 5000);
     }
 
     function downloadExcel() {
-      const dataToExport = filteredData.map(student => ({
-        'NO': student['NO'],
-        'NAMA SISWA': student['NAMA SISWA'],
-        'L/P': student['L/P'],
-        'AGAMA': student['AGAMA'],
-        'KELAS': student['KELAS'],
-        'EKSTRAKURIKULER': student['EKSTRAKURIKULER'],
-        'NILAI KUALITATIF': student['NILAI KUALITATIF'],
-        'DESKRIPSI': student['DESKRIPSI']
-      }));
-
-      const worksheet = XLSX.utils.json_to_sheet(dataToExport);
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Data Siswa");
+      const classFilter = document.getElementById('class-filter').value;
+      const dataToExport = classFilter 
+        ? studentsData.filter(s => s.kelas === classFilter)
+        : studentsData;
       
-      const fileName = selectedClass === "Semua" ? "data_siswa_semua.xlsx" : `data_siswa_${selectedClass}.xlsx`;
-      XLSX.writeFile(workbook, fileName);
-    }
-
-    function renderTable() {
-      const config = window.elementSdk?.config || defaultConfig;
-      const baseSize = config.font_size || defaultConfig.font_size;
-      const fontFamily = config.font_family || defaultConfig.font_family;
-      
-      const tableContainer = document.getElementById('table-container');
-      
-      if (filteredData.length === 0) {
-        tableContainer.innerHTML = `
-          <div style="text-align: center; padding: 48px 16px; color: ${config.text_color || defaultConfig.text_color}; font-family: ${fontFamily}, Arial, sans-serif; font-size: ${baseSize}px;">
-            Tidak ada data untuk ditampilkan
-          </div>
-        `;
+      if (dataToExport.length === 0) {
+        showError('Tidak ada data untuk diunduh');
         return;
       }
-
-      const tableHTML = `
-        <table style="width: 100%; font-family: ${fontFamily}, Arial, sans-serif; font-size: ${baseSize * 0.9}px;">
-          <thead>
-            <tr style="background-color: ${config.primary_action_color || defaultConfig.primary_action_color}; color: white;">
-              <th style="padding: 12px 16px; text-align: left; font-weight: 600; font-size: ${baseSize * 0.95}px;">NO</th>
-              <th style="padding: 12px 16px; text-align: left; font-weight: 600; font-size: ${baseSize * 0.95}px;">NAMA SISWA</th>
-              <th style="padding: 12px 16px; text-align: left; font-weight: 600; font-size: ${baseSize * 0.95}px;">L/P</th>
-              <th style="padding: 12px 16px; text-align: left; font-weight: 600; font-size: ${baseSize * 0.95}px;">AGAMA</th>
-              <th style="padding: 12px 16px; text-align: left; font-weight: 600; font-size: ${baseSize * 0.95}px;">KELAS</th>
-              <th style="padding: 12px 16px; text-align: left; font-weight: 600; font-size: ${baseSize * 0.95}px;">EKSTRAKURIKULER</th>
-              <th style="padding: 12px 16px; text-align: left; font-weight: 600; font-size: ${baseSize * 0.95}px;">NILAI KUALITATIF</th>
-              <th style="padding: 12px 16px; text-align: left; font-weight: 600; font-size: ${baseSize * 0.95}px;">DESKRIPSI</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${filteredData.map((student, index) => `
-              <tr style="background-color: ${index % 2 === 0 ? config.surface_color || defaultConfig.surface_color : '#f9fafb'}; color: ${config.text_color || defaultConfig.text_color};">
-                <td style="padding: 10px 16px;">${student['NO']}</td>
-                <td style="padding: 10px 16px;">${student['NAMA SISWA']}</td>
-                <td style="padding: 10px 16px;">${student['L/P']}</td>
-                <td style="padding: 10px 16px;">${student['AGAMA']}</td>
-                <td style="padding: 10px 16px;">${student['KELAS']}</td>
-                <td style="padding: 10px 16px;">${student['EKSTRAKURIKULER']}</td>
-                <td style="padding: 10px 16px;">${student['NILAI KUALITATIF']}</td>
-                <td style="padding: 10px 16px;">${student['DESKRIPSI']}</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      `;
       
-      tableContainer.innerHTML = tableHTML;
+      const wsData = [
+        ['NO', 'NAMA SISWA', 'L/P', 'AGAMA', 'KELAS', 'EKSTRAKURIKULER', 'NILAI KUALITATIF', 'DESKRIPSI']
+      ];
+      
+      dataToExport.forEach(student => {
+        wsData.push([
+          student.no,
+          student.nama,
+          student.gender,
+          student.agama,
+          student.kelas,
+          student.ekstrakurikuler,
+          student.nilai,
+          student.deskripsi
+        ]);
+      });
+      
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.aoa_to_sheet(wsData);
+      
+      ws['!cols'] = [
+        { wch: 5 },
+        { wch: 25 },
+        { wch: 5 },
+        { wch: 12 },
+        { wch: 10 },
+        { wch: 20 },
+        { wch: 15 },
+        { wch: 40 }
+      ];
+      
+      XLSX.utils.book_append_sheet(wb, ws, 'Data Siswa');
+      
+      const filename = classFilter 
+        ? `data_siswa_${classFilter}.xlsx`
+        : 'data_siswa_semua.xlsx';
+      
+      XLSX.writeFile(wb, filename);
+      showSuccess(`File ${filename} berhasil diunduh`);
     }
 
-    async function renderApp() {
-      const config = window.elementSdk?.config || defaultConfig;
-      const baseSize = config.font_size || defaultConfig.font_size;
-      const fontFamily = config.font_family || defaultConfig.font_family;
-      
-      const app = document.getElementById('app');
-      app.style.backgroundColor = config.background_color || defaultConfig.background_color;
-      app.style.width = '100%';
-      app.style.height = '100%';
-      app.style.overflowY = 'auto';
-      app.style.fontFamily = `${fontFamily}, Arial, sans-serif`;
-      
-      app.innerHTML = `
-        <div style="max-width: 1400px; margin: 0 auto; padding: 32px 24px;">
-          <div style="background-color: ${config.surface_color || defaultConfig.surface_color}; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 32px; margin-bottom: 24px;">
-            <h1 style="font-size: ${baseSize * 2}px; font-weight: 700; color: ${config.text_color || defaultConfig.text_color}; margin: 0 0 8px 0; font-family: ${fontFamily}, Arial, sans-serif;">
-              ${config.app_title || defaultConfig.app_title}
-            </h1>
-            <p style="font-size: ${baseSize * 0.95}px; color: ${config.secondary_action_color || defaultConfig.secondary_action_color}; margin: 0; font-family: ${fontFamily}, Arial, sans-serif;">
-              Kelola dan unduh data siswa ekstrakurikuler
-            </p>
-          </div>
+    document.getElementById('class-filter').addEventListener('change', function() {
+      const selectedClass = this.value;
+      const filteredData = selectedClass 
+        ? studentsData.filter(s => s.kelas === selectedClass)
+        : studentsData;
+      renderTable(filteredData);
+    });
 
-          <div id="loading" style="background-color: ${config.surface_color || defaultConfig.surface_color}; border-radius: 12px; padding: 48px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-            <div class="loading-spinner" style="margin: 0 auto 16px;"></div>
-            <p style="font-size: ${baseSize}px; color: ${config.text_color || defaultConfig.text_color}; font-family: ${fontFamily}, Arial, sans-serif;">
-              ${config.loading_text || defaultConfig.loading_text}
-            </p>
-          </div>
-
-          <div id="content" style="display: none;">
-            <div style="background-color: ${config.surface_color || defaultConfig.surface_color}; border-radius: 12px; padding: 24px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-              <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between;">
-                <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
-                  <label style="font-size: ${baseSize}px; font-weight: 600; color: ${config.text_color || defaultConfig.text_color}; font-family: ${fontFamily}, Arial, sans-serif;">
-                    Filter Kelas:
-                  </label>
-                  <div id="class-filters"></div>
-                </div>
-                <button id="download-btn" style="background-color: ${config.primary_action_color || defaultConfig.primary_action_color}; color: white; padding: 10px 24px; border-radius: 8px; border: none; font-size: ${baseSize}px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; font-family: ${fontFamily}, Arial, sans-serif;">
-                  ${config.download_button_text || defaultConfig.download_button_text}
-                </button>
-              </div>
-            </div>
-
-            <div style="background-color: ${config.surface_color || defaultConfig.surface_color}; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-              <div class="table-container" id="table-container"></div>
-            </div>
-          </div>
-        </div>
-      `;
-
-      const downloadBtn = document.getElementById('download-btn');
-      downloadBtn.addEventListener('mouseenter', () => {
-        downloadBtn.style.opacity = '0.9';
-      });
-      downloadBtn.addEventListener('mouseleave', () => {
-        downloadBtn.style.opacity = '1';
-      });
-      downloadBtn.addEventListener('click', downloadExcel);
-
-      const data = await fetchCSVData();
-      studentsData = data;
-      filteredData = [...data];
-
-      const classes = getUniqueClasses(data);
-      const classFilters = document.getElementById('class-filters');
-      
-      const allButton = document.createElement('button');
-      allButton.textContent = 'Semua';
-      allButton.className = 'class-filter-btn';
-      allButton.style.cssText = `
-        background-color: ${config.primary_action_color || defaultConfig.primary_action_color};
-        color: white;
-        padding: 8px 16px;
-        border-radius: 6px;
-        border: none;
-        font-size: ${baseSize * 0.9}px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: opacity 0.2s;
-        font-family: ${fontFamily}, Arial, sans-serif;
-      `;
-      allButton.addEventListener('mouseenter', () => allButton.style.opacity = '0.9');
-      allButton.addEventListener('mouseleave', () => allButton.style.opacity = '1');
-      allButton.addEventListener('click', () => {
-        document.querySelectorAll('.class-filter-btn').forEach(btn => {
-          btn.style.backgroundColor = config.secondary_action_color || defaultConfig.secondary_action_color;
-        });
-        allButton.style.backgroundColor = config.primary_action_color || defaultConfig.primary_action_color;
-        filterByClass('Semua');
-      });
-      classFilters.appendChild(allButton);
-
-      classes.forEach(className => {
-        const btn = document.createElement('button');
-        btn.textContent = className;
-        btn.className = 'class-filter-btn';
-        btn.style.cssText = `
-          background-color: ${config.secondary_action_color || defaultConfig.secondary_action_color};
-          color: white;
-          padding: 8px 16px;
-          border-radius: 6px;
-          border: none;
-          font-size: ${baseSize * 0.9}px;
-          font-weight: 500;
-          cursor: pointer;
-          transition: opacity 0.2s;
-          font-family: ${fontFamily}, Arial, sans-serif;
-        `;
-        btn.addEventListener('mouseenter', () => btn.style.opacity = '0.9');
-        btn.addEventListener('mouseleave', () => btn.style.opacity = '1');
-        btn.addEventListener('click', () => {
-          document.querySelectorAll('.class-filter-btn').forEach(b => {
-            b.style.backgroundColor = config.secondary_action_color || defaultConfig.secondary_action_color;
-          });
-          btn.style.backgroundColor = config.primary_action_color || defaultConfig.primary_action_color;
-          filterByClass(className);
-        });
-        classFilters.appendChild(btn);
-      });
-
-      renderTable();
-
-      document.getElementById('loading').style.display = 'none';
-      document.getElementById('content').style.display = 'block';
-    }
-
-    async function onConfigChange(config) {
-      await renderApp();
-    }
-
-    const element = {
-      defaultConfig,
-      onConfigChange,
-      mapToCapabilities: (config) => ({
-        recolorables: [
-          {
-            get: () => config.background_color || defaultConfig.background_color,
-            set: (value) => {
-              config.background_color = value;
-              window.elementSdk.setConfig({ background_color: value });
-            }
-          },
-          {
-            get: () => config.surface_color || defaultConfig.surface_color,
-            set: (value) => {
-              config.surface_color = value;
-              window.elementSdk.setConfig({ surface_color: value });
-            }
-          },
-          {
-            get: () => config.text_color || defaultConfig.text_color,
-            set: (value) => {
-              config.text_color = value;
-              window.elementSdk.setConfig({ text_color: value });
-            }
-          },
-          {
-            get: () => config.primary_action_color || defaultConfig.primary_action_color,
-            set: (value) => {
-              config.primary_action_color = value;
-              window.elementSdk.setConfig({ primary_action_color: value });
-            }
-          },
-          {
-            get: () => config.secondary_action_color || defaultConfig.secondary_action_color,
-            set: (value) => {
-              config.secondary_action_color = value;
-              window.elementSdk.setConfig({ secondary_action_color: value });
-            }
-          }
-        ],
-        borderables: [],
-        fontEditable: {
-          get: () => config.font_family || defaultConfig.font_family,
-          set: (value) => {
-            config.font_family = value;
-            window.elementSdk.setConfig({ font_family: value });
-          }
-        },
-        fontSizeable: {
-          get: () => config.font_size || defaultConfig.font_size,
-          set: (value) => {
-            config.font_size = value;
-            window.elementSdk.setConfig({ font_size: value });
-          }
-        }
-      }),
-      mapToEditPanelValues: (config) => new Map([
-        ["app_title", config.app_title || defaultConfig.app_title],
-        ["loading_text", config.loading_text || defaultConfig.loading_text],
-        ["download_button_text", config.download_button_text || defaultConfig.download_button_text]
-      ])
-    };
+    document.getElementById('refresh-btn').addEventListener('click', loadData);
+    document.getElementById('download-btn').addEventListener('click', downloadExcel);
 
     if (window.elementSdk) {
-      window.elementSdk.init(element);
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange,
+        mapToCapabilities: (config) => ({
+          recolorables: [
+            {
+              get: () => config.background_color || defaultConfig.background_color,
+              set: (value) => {
+                config.background_color = value;
+                window.elementSdk.setConfig({ background_color: value });
+              }
+            },
+            {
+              get: () => config.surface_color || defaultConfig.surface_color,
+              set: (value) => {
+                config.surface_color = value;
+                window.elementSdk.setConfig({ surface_color: value });
+              }
+            },
+            {
+              get: () => config.text_color || defaultConfig.text_color,
+              set: (value) => {
+                config.text_color = value;
+                window.elementSdk.setConfig({ text_color: value });
+              }
+            },
+            {
+              get: () => config.primary_color || defaultConfig.primary_color,
+              set: (value) => {
+                config.primary_color = value;
+                window.elementSdk.setConfig({ primary_color: value });
+              }
+            },
+            {
+              get: () => config.secondary_color || defaultConfig.secondary_color,
+              set: (value) => {
+                config.secondary_color = value;
+                window.elementSdk.setConfig({ secondary_color: value });
+              }
+            }
+          ],
+          borderables: [],
+          fontEditable: undefined,
+          fontSizeable: undefined
+        }),
+        mapToEditPanelValues: (config) => new Map([
+          ['app_title', config.app_title || defaultConfig.app_title],
+          ['sheet_url', config.sheet_url || defaultConfig.sheet_url]
+        ])
+      });
+    } else {
+      loadData();
     }
-
-    renderApp();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9adc650b90c1ce05',t:'MTc2NTcwMTYwOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9ade4cb22669fd89',t:'MTc2NTcyMTU4Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
