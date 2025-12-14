@@ -1,0 +1,264 @@
+{
+  "students": [
+  {
+    "student_id": "S1",
+    "absen": "1",
+    "nis": "1001",
+    "name": "Didik",
+    "class": "7A"
+  },
+  {
+    "student_id": "S2",
+    "absen": "2",
+    "nis": "1002",
+    "name": "Joko",
+    "class": "7A"
+  },
+  {
+    "student_id": "S3",
+    "absen": "3",
+    "nis": "1003",
+    "name": "Agus",
+    "class": "7A"
+  },
+  {
+    "student_id": "S4",
+    "absen": "4",
+    "nis": "1004",
+    "name": "Raja",
+    "class": "7A"
+  },
+  {
+    "student_id": "S5",
+    "absen": "5",
+    "nis": "1005",
+    "name": "Maya",
+    "class": "7B"
+  },
+  {
+    "student_id": "S6",
+    "absen": "6",
+    "nis": "1006",
+    "name": "Sumina",
+    "class": "7C"
+  },
+  {
+    "student_id": "S7",
+    "absen": "7",
+    "nis": "1007",
+    "name": "Rahayu",
+    "class": "7D"
+  },
+  {
+    "student_id": "S8",
+    "absen": "8",
+    "nis": "1008",
+    "name": "Sukini",
+    "class": "7E"
+  },
+  {
+    "student_id": "S9",
+    "absen": "9",
+    "nis": "1009",
+    "name": "Joni",
+    "class": "7G"
+  },
+  {
+    "student_id": "S10",
+    "absen": "10",
+    "nis": "1010",
+    "name": "Rima",
+    "class": "7H"
+  },
+  {
+    "student_id": "S11",
+    "absen": "11",
+    "nis": "1011",
+    "name": "Raya",
+    "class": "7E"
+  }
+  ],
+  "admin": [
+    {
+      "username": "admin",
+      "password": "admin123"
+    }
+  ],
+  "questions": [
+  { "question_id": "Q1",
+    "question_type": "TF",
+    "question_text": "In 1492 Christopher Columbus landed on Bahama island of Guanahani, thinking that he had found Asia.",
+    "image": "",
+    "video": "",
+    "audio": "https://basicenglishspeaking.com/wp-content/uploads/audio/QA/QA-01.mp3",
+    "question_paragraph": "",
+    "answer_1": "*True",
+    "answer_2": "False",
+    "answer_3": "",
+    "answer_4": "",
+    "correct_feedback": "Well done! ",
+    "incorrect_feedback": "Sorry, the answer is incorrect...",
+    "points": "10"
+  },
+  {
+    "question_id": "Q2",
+    "question_type": "MC",
+    "question_text": "The Statue of Liberty, proud lady of welcome for millions of newly arrived Americans is a gift of (choose the name of the people)",
+    "image": "https://raw.githubusercontent.com/didikkamseno/mypic/refs/heads/main/ab1.png",
+    "video": "",
+    "audio": "",
+    "question_paragraph": "Ambil data dari firebase dengan halaman <b>login</b> hanya menggunakan 'nis' sesuai struktur data berikut. Ambil data dari firebase dengan halaman login hanya menggunakan 'nis' sesuai struktur data berikut",
+    "answer_1": "*the French",
+    "answer_2": "the Swedish",
+    "answer_3": "the English",
+    "answer_4": "the Ship",
+    "correct_feedback": "Well done!",
+    "incorrect_feedback": "Sorry, the answer is incorrect...",
+    "points": "10"
+  },
+  {
+    "question_id": "Q3",
+    "question_type": "MR",
+    "question_text": "Yellowstone, the oldest American national park, is located in three of the following states (tick the names of three states):",
+    "image": "https://raw.githubusercontent.com/didikkamseno/mypic/refs/heads/main/ab1.png",
+    "video": "",
+    "audio": "",
+    "question_paragraph": "",
+    "answer_1": "Indiana",
+    "answer_2": "Idaho",
+    "answer_3": "*Montana",
+    "answer_4": "*Wyoming",
+    "correct_feedback": "Well done!",
+    "incorrect_feedback": "Sorry, the answer is incorrect...",
+    "points": "10"
+  },
+  {
+    "question_id": "Q4",
+    "question_type": "TI",
+    "question_text": "Margaret Mitchell wrote just one book - yet_________ remains a best-selling novel, still in print more than 60 years after its debut.",
+    "image": "https://raw.githubusercontent.com/didikkamseno/mypic/refs/heads/main/ab1.png",
+    "video": "",
+    "audio": "",
+    "question_paragraph": "",
+    "answer_1": "*Gone With the Wind",
+    "answer_2": "*gone with the wind",
+    "answer_3": "*Gone with the Wind",
+    "answer_4": "*Gone with the wind",
+    "correct_feedback": "Well done!",
+    "incorrect_feedback": "Sorry, the answer is incorrect...",
+    "points": "10"
+  },
+  {
+    "question_id": "Q5",
+    "question_type": "MG",
+    "question_text": "Match the names of the states with their nicknames:",
+    "image": "https://raw.githubusercontent.com/didikkamseno/mypic/refs/heads/main/ab1.png",
+    "video": "",
+    "audio": "",
+    "question_paragraph": "",
+    "answer_1": "North Carolina|Tar Heel State",
+    "answer_2": "Texas|Lone Star State",
+    "answer_3": "Wyoming|Cowboy State",
+    "answer_4": "New York|Empire State",
+    "correct_feedback": "Well done!",
+    "incorrect_feedback": "Sorry, the answer is incorrect...",
+    "points": "10"
+  },
+  {
+    "question_id": "Q6",
+    "question_type": "SEQ",
+    "question_text": "Put the names of the US presidents according to the times of their presidency from the earliest to the latest using drag and drop:",
+    "image": "https://raw.githubusercontent.com/didikkamseno/mypic/refs/heads/main/ab1.png",
+    "video": "",
+    "audio": "",
+    "question_paragraph": "",
+    "answer_1": "George Washington",
+    "answer_2": "Thomas Jefferson",
+    "answer_3": "Abraham Lincoln",
+    "answer_4": "Franklin D. Roosevelt",
+    "correct_feedback": "Well done!",
+    "incorrect_feedback": "Sorry, the answer is incorrect...",
+    "points": "10"
+  },
+  {
+    "question_id": "Q7",
+    "question_type": "NUMG",
+    "question_text": "This is the question",
+    "image": "https://raw.githubusercontent.com/didikkamseno/mypic/refs/heads/main/ab1.png",
+    "video": "",
+    "audio": "",
+    "question_paragraph": "",
+    "answer_1": "*10",
+    "answer_2": "",
+    "answer_3": "",
+    "answer_4": "",
+    "correct_feedback": "Well done!",
+    "incorrect_feedback": "Sorry, the answer is incorrect...",
+    "points": "10"
+  }
+  ],
+  "scores": [
+    {
+      "student_id": "S1",
+      "answers": [
+        {
+          "question_id": "Q1",
+          "response": "True",
+          "correct": true,
+          "points": "10"
+        },
+        {
+          "question_id": "Q2",
+          "response": "the French",
+          "correct": true,
+          "points": "10"
+        },
+        {
+          "question_id": "Q3",
+          "response": ["Idaho", "Montana", "Wyoming"],
+          "correct": true,
+          "points": "10"
+        },
+        {
+          "question_id": "Q4",
+          "response": "Gone With the Wind",
+          "correct": true,
+          "points": "10"
+        },
+        {
+          "question_id": "Q5",
+          "response": [
+            "North Carolina|Tar Heel State",
+            "Texas|Lone Star State",
+            "Wyoming|Cowboy State",
+            "New York|Empire State"
+          ],
+          "correct": true,
+          "points_awarded": "10"
+        },
+        {
+          "question_id": "Q6",
+          "response": [
+            "George Washington",
+            "Thomas Jefferson",
+            "Abraham Lincoln",
+            "Franklin D. Roosevelt"
+          ],
+          "correct": true,
+          "points_awarded": "10"
+        },
+        {
+          "question_id": "Q7",
+          "response": [
+            "10"
+          ],
+          "correct": true,
+          "points_awarded": "10"
+        }
+      ],
+      "total_score": "100",
+      "duration": "00:32:10",
+      "status": "Lulus"
+    }
+  ]
+}
