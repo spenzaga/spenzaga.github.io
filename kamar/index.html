@@ -121,14 +121,24 @@
       return used;
     }
 
+    function normalizeText(text) {
+      // Normalize text: lowercase, trim spaces, remove extra spaces
+      return text.toLowerCase().trim().replace(/\s+/g, ' ');
+    }
+
     function searchStudents(query, excludeNames = []) {
       if (!query || query.length < 1) return [];
       
-      const lowerQuery = query.toLowerCase();
-      return students.filter(student => 
-        student.name.toLowerCase().includes(lowerQuery) &&
-        !excludeNames.some(name => name.toLowerCase() === student.name.toLowerCase())
-      ).slice(0, 5);
+      const normalizedQuery = normalizeText(query);
+      const normalizedExcluded = excludeNames.map(name => normalizeText(name));
+      
+      return students.filter(student => {
+        const normalizedName = normalizeText(student.name);
+        const isExcluded = normalizedExcluded.includes(normalizedName);
+        const matchesQuery = normalizedName.includes(normalizedQuery);
+        
+        return matchesQuery && !isExcluded;
+      }).slice(0, 5);
     }
 
     function getExcludedNames(currentInputId) {
@@ -518,5 +528,5 @@
 
     init();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9adf0a1eb0db9c86',t:'MTc2NTcyOTM0MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9adf108e30e5fede',t:'MTc2NTcyOTYwNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
