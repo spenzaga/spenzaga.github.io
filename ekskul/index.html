@@ -63,11 +63,9 @@
      <p style="margin-top: 8px; color: #6b7280; font-size: 16px;">Kelola dan analisis data siswa dengan mudah</p>
     </div><!-- Controls -->
     <div style="background-color: #ffffff; border-radius: 12px; padding: 24px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-     <div style="display: flex; gap: 16px; flex-wrap: wrap; align-items: center;">
+     <div style="display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end;">
       <div style="flex: 1; min-width: 200px;"><label for="class-filter" style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151; font-size: 14px;">Filter Kelas</label> <select id="class-filter" style="width: 100%; padding: 10px 12px; border: 2px solid #d1d5db; border-radius: 8px; font-size: 14px; background-color: #ffffff; color: #1f2937; cursor: pointer;"> <option value="">Semua Kelas</option> </select>
-      </div>
-      <div style="display: flex; gap: 12px; align-items: flex-end;"><button id="refresh-btn" style="padding: 10px 20px; background-color: #3b82f6; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; transition: background-color 0.2s;"> 🔄 Muat Ulang </button> <button id="download-btn" style="padding: 10px 20px; background-color: #10b981; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; transition: background-color 0.2s;"> 📥 Download Excel </button>
-      </div>
+      </div><button id="refresh-btn" style="padding: 10px 20px; background-color: #3b82f6; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; transition: background-color 0.2s; height: 42px;"> 🔄 Muat Ulang </button> <button id="download-btn" style="padding: 10px 20px; background-color: #10b981; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; transition: background-color 0.2s; height: 42px;"> 📥 Download Excel </button>
      </div>
      <div id="status-message" style="margin-top: 16px; padding: 12px; border-radius: 8px; display: none; font-size: 14px;"></div>
     </div><!-- Table Container -->
@@ -151,6 +149,34 @@
       }
     }
 
+    function parseCSVLine(line) {
+      const result = [];
+      let current = '';
+      let inQuotes = false;
+      
+      for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        const nextChar = line[i + 1];
+        
+        if (char === '"') {
+          if (inQuotes && nextChar === '"') {
+            current += '"';
+            i++;
+          } else {
+            inQuotes = !inQuotes;
+          }
+        } else if (char === ',' && !inQuotes) {
+          result.push(current.trim());
+          current = '';
+        } else {
+          current += char;
+        }
+      }
+      
+      result.push(current.trim());
+      return result;
+    }
+
     async function loadData() {
       const config = window.elementSdk ? window.elementSdk.config : defaultConfig;
       const csvUrl = config.sheet_url || defaultConfig.sheet_url;
@@ -169,12 +195,11 @@
           return;
         }
         
-        const headers = rows[0].split(',').map(h => h.trim().replace(/"/g, ''));
         studentsData = [];
         allClasses = new Set();
         
         for (let i = 1; i < rows.length; i++) {
-          const values = rows[i].split(',').map(v => v.trim().replace(/"/g, ''));
+          const values = parseCSVLine(rows[i]);
           if (values.length >= 8) {
             const student = {
               no: values[0],
@@ -394,5 +419,5 @@
       loadData();
     }
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9ade4cb22669fd89',t:'MTc2NTcyMTU4Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9ade5505f7e4fd89',t:'MTc2NTcyMTkyMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
