@@ -1,0 +1,522 @@
+<!doctype html>
+<html lang="id" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pendataan Kamar Hotel</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+    }
+    
+    .search-results {
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    
+    .search-item:hover {
+      background-color: #f3f4f6;
+    }
+    
+    .loading-spinner {
+      border: 3px solid #f3f4f6;
+      border-top: 3px solid #3b82f6;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full">
+  <div id="app" class="w-full h-full"></div>
+  <script>
+    const defaultConfig = {
+      background_color: "#f0f9ff",
+      surface_color: "#ffffff",
+      text_color: "#1e293b",
+      primary_action_color: "#3b82f6",
+      secondary_action_color: "#64748b",
+      font_family: "Inter",
+      font_size: 16,
+      form_title: "Formulir Pendataan Kamar Hotel",
+      form_subtitle: "Silakan isi data ketua dan anggota kamar (maksimal 4 siswa per kamar)",
+      success_message: "Terima kasih! Data Anda telah tersimpan ke Google Sheets."
+    };
+
+    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyxTDsTxrS4WzX7BumlA8cOK0VJzLLOvzPq0ZsH7jKZimB0cQ6lVdQn7Cu5GRgN9Xjr/exec';
+
+    let students = [];
+    let roomRegistrations = [];
+    let isLoading = false;
+    let showSuccess = false;
+
+    const formData = {
+      leader: null,
+      members: [null, null, null]
+    };
+
+    async function fetchStudentData() {
+      try {
+        const response = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vSHanvd-0D-I8T82IxI517m6deBEQOGUx3rHY64IWzHgFLx1lKc7Xhiv9cfGsuHxKtoo7Myzgn9Rppo/pub?gid=566527892&single=true&output=csv');
+        const csvText = await response.text();
+        const lines = csvText.split('\n');
+        
+        students = [];
+        for (let i = 1; i < lines.length; i++) {
+          const line = lines[i].trim();
+          if (line) {
+            const cols = parseCSVLine(line);
+            if (cols.length >= 3 && cols[0]) {
+              students.push({
+                name: cols[0].trim(),
+                class: cols[1].trim(),
+                bus: cols[2].trim()
+              });
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    }
+
+    function parseCSVLine(line) {
+      const result = [];
+      let current = '';
+      let inQuotes = false;
+      
+      for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        
+        if (char === '"') {
+          inQuotes = !inQuotes;
+        } else if (char === ',' && !inQuotes) {
+          result.push(current);
+          current = '';
+        } else {
+          current += char;
+        }
+      }
+      result.push(current);
+      
+      return result;
+    }
+
+    function getUsedStudentsInCurrentForm() {
+      const used = [];
+      if (formData.leader) used.push(formData.leader.name);
+      formData.members.forEach(member => {
+        if (member) used.push(member.name);
+      });
+      return used;
+    }
+
+    function searchStudents(query, excludeNames = []) {
+      if (!query || query.length < 1) return [];
+      
+      const lowerQuery = query.toLowerCase();
+      return students.filter(student => 
+        student.name.toLowerCase().includes(lowerQuery) &&
+        !excludeNames.some(name => name.toLowerCase() === student.name.toLowerCase())
+      ).slice(0, 5);
+    }
+
+    function getExcludedNames(currentInputId) {
+      const excluded = getUsedStudentsInCurrentForm();
+      
+      if (currentInputId === 'leader' && formData.leader) {
+        const idx = excluded.indexOf(formData.leader.name);
+        if (idx !== -1) excluded.splice(idx, 1);
+      } else if (currentInputId.startsWith('member')) {
+        const memberIndex = parseInt(currentInputId.replace('member', ''));
+        if (formData.members[memberIndex]) {
+          const idx = excluded.indexOf(formData.members[memberIndex].name);
+          if (idx !== -1) excluded.splice(idx, 1);
+        }
+      }
+      
+      return excluded;
+    }
+
+    function renderSearchResults(results, inputId) {
+      if (results.length === 0) return '';
+      
+      return `
+        <div class="search-results absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg mt-1">
+          ${results.map((student) => {
+            const escapedName = student.name.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+            const escapedClass = student.class.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+            const escapedBus = student.bus.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+            return `
+              <div class="search-item p-3 cursor-pointer border-b last:border-b-0" 
+                   onclick="handleStudentSelect('${inputId}', '${escapedName}', '${escapedClass}', '${escapedBus}')">
+                <div style="color: ${window.elementSdk?.config?.text_color || defaultConfig.text_color}; font-family: ${window.elementSdk?.config?.font_family || defaultConfig.font_family}, Arial, sans-serif; font-size: ${(window.elementSdk?.config?.font_size || defaultConfig.font_size) * 0.9}px;" class="font-medium">${student.name}</div>
+                <div style="color: ${window.elementSdk?.config?.secondary_action_color || defaultConfig.secondary_action_color}; font-family: ${window.elementSdk?.config?.font_family || defaultConfig.font_family}, Arial, sans-serif; font-size: ${(window.elementSdk?.config?.font_size || defaultConfig.font_size) * 0.8}px;">Kelas: ${student.class} | Bus: ${student.bus}</div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+
+    window.handleStudentSelect = function(inputId, name, studentClass, bus) {
+      const student = { name, class: studentClass, bus };
+      
+      if (inputId === 'leader') {
+        formData.leader = student;
+      } else {
+        const memberIndex = parseInt(inputId.replace('member', ''));
+        formData.members[memberIndex] = student;
+      }
+      
+      const searchInput = document.getElementById(`${inputId}-input`);
+      if (searchInput) {
+        searchInput.value = '';
+      }
+      
+      render();
+    };
+
+    window.handleSearch = function(inputId, value) {
+      if (!value || value.length < 1) {
+        const resultsContainer = document.getElementById(`${inputId}-results`);
+        if (resultsContainer) {
+          resultsContainer.innerHTML = '';
+        }
+        return;
+      }
+      
+      const excludedNames = getExcludedNames(inputId);
+      const results = searchStudents(value, excludedNames);
+      const resultsContainer = document.getElementById(`${inputId}-results`);
+      if (resultsContainer) {
+        if (results.length === 0 && value.length >= 2) {
+          resultsContainer.innerHTML = `
+            <div class="absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg mt-1 p-3">
+              <p style="color: ${window.elementSdk?.config?.secondary_action_color || defaultConfig.secondary_action_color}; font-size: ${(window.elementSdk?.config?.font_size || defaultConfig.font_size) * 0.9}px;">Tidak ada siswa ditemukan</p>
+            </div>
+          `;
+        } else {
+          resultsContainer.innerHTML = renderSearchResults(results, inputId);
+        }
+      }
+    };
+
+    window.clearStudent = function(inputId) {
+      if (inputId === 'leader') {
+        formData.leader = null;
+      } else {
+        const memberIndex = parseInt(inputId.replace('member', ''));
+        formData.members[memberIndex] = null;
+      }
+      render();
+    };
+
+    function showNotification(message, isError = false) {
+      const config = window.elementSdk?.config || defaultConfig;
+      const notification = document.createElement('div');
+      notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: ${isError ? '#fee2e2' : '#d1fae5'};
+        border: 2px solid ${isError ? '#ef4444' : '#10b981'};
+        color: ${isError ? '#991b1b' : '#065f46'};
+        padding: 16px 24px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        z-index: 1000;
+        font-family: ${config.font_family}, Arial, sans-serif;
+        font-size: ${config.font_size}px;
+        max-width: 90%;
+      `;
+      notification.textContent = message;
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.remove();
+      }, 4000);
+    }
+
+    window.handleSubmit = async function(event) {
+      event.preventDefault();
+      
+      if (!formData.leader) {
+        showNotification('Silakan pilih ketua kamar terlebih dahulu', true);
+        return;
+      }
+
+      isLoading = true;
+      render();
+
+      const nextRoomNumber = roomRegistrations.length + 1;
+      const roomId = `Kamar ${nextRoomNumber}`;
+
+      const registrationData = {
+        kamar: roomId,
+        leader_name: formData.leader.name,
+        leader_class: formData.leader.class,
+        leader_bus: formData.leader.bus,
+        member1_name: formData.members[0]?.name || '',
+        member1_class: formData.members[0]?.class || '',
+        member1_bus: formData.members[0]?.bus || '',
+        member2_name: formData.members[1]?.name || '',
+        member2_class: formData.members[1]?.class || '',
+        member2_bus: formData.members[1]?.bus || '',
+        member3_name: formData.members[2]?.name || '',
+        member3_class: formData.members[2]?.class || '',
+        member3_bus: formData.members[2]?.bus || '',
+        timestamp: new Date().toISOString()
+      };
+
+      try {
+        const response = await fetch(GOOGLE_SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(registrationData)
+        });
+
+        // Mode no-cors tidak mengembalikan response, jadi asumsikan berhasil
+        roomRegistrations.push({
+          kamar: roomId,
+          leader: formData.leader,
+          members: formData.members.filter(m => m !== null),
+          timestamp: registrationData.timestamp
+        });
+        
+        isLoading = false;
+        showSuccess = true;
+        formData.leader = null;
+        formData.members = [null, null, null];
+        
+        setTimeout(() => {
+          showSuccess = false;
+          render();
+        }, 3000);
+        
+      } catch (error) {
+        isLoading = false;
+        showNotification('Terjadi kesalahan saat menyimpan data. Silakan coba lagi.', true);
+      }
+      
+      render();
+    };
+
+    function renderStudentField(label, inputId, selectedStudent, required = false) {
+      const config = window.elementSdk?.config || defaultConfig;
+      
+      return `
+        <div class="mb-6">
+          <label style="color: ${config.text_color}; font-family: ${config.font_family}, Arial, sans-serif; font-size: ${config.font_size}px;" class="block font-medium mb-2">
+            ${label} ${required ? '<span style="color: #ef4444;">*</span>' : ''}
+          </label>
+          
+          ${selectedStudent ? `
+            <div style="background-color: ${config.surface_color}; border: 2px solid ${config.primary_action_color};" class="p-4 rounded-lg">
+              <div class="flex justify-between items-start">
+                <div class="flex-1">
+                  <div style="color: ${config.text_color}; font-family: ${config.font_family}, Arial, sans-serif; font-size: ${config.font_size * 1.1}px;" class="font-bold mb-1">${selectedStudent.name}</div>
+                  <div style="color: ${config.secondary_action_color}; font-family: ${config.font_family}, Arial, sans-serif; font-size: ${config.font_size * 0.9}px;">Kelas: ${selectedStudent.class}</div>
+                  <div style="color: ${config.secondary_action_color}; font-family: ${config.font_family}, Arial, sans-serif; font-size: ${config.font_size * 0.9}px;">No Bus: ${selectedStudent.bus}</div>
+                </div>
+                <button type="button" onclick="clearStudent('${inputId}')" 
+                        style="color: ${config.secondary_action_color}; font-family: ${config.font_family}, Arial, sans-serif; font-size: ${config.font_size * 0.9}px;"
+                        class="px-3 py-1 rounded hover:opacity-80">
+                  Hapus
+                </button>
+              </div>
+            </div>
+          ` : `
+            <div class="relative">
+              <input type="text" 
+                     id="${inputId}-input"
+                     placeholder="Ketik nama siswa untuk mencari..."
+                     oninput="handleSearch('${inputId}', this.value)"
+                     style="background-color: ${config.surface_color}; color: ${config.text_color}; border: 1px solid #d1d5db; font-family: ${config.font_family}, Arial, sans-serif; font-size: ${config.font_size}px;"
+                     class="w-full px-4 py-3 rounded-lg focus:outline-none focus:ring-2"
+                     ${isLoading ? 'disabled' : ''}>
+              <div id="${inputId}-results"></div>
+            </div>
+          `}
+        </div>
+      `;
+    }
+
+    function render() {
+      const config = window.elementSdk?.config || defaultConfig;
+      
+      const app = document.getElementById('app');
+      app.style.backgroundColor = config.background_color;
+      app.style.fontFamily = `${config.font_family}, Arial, sans-serif`;
+      
+      if (showSuccess) {
+        app.innerHTML = `
+          <div class="min-h-full flex items-center justify-center p-4">
+            <div style="background-color: ${config.surface_color};" class="max-w-md w-full p-8 rounded-xl shadow-lg text-center">
+              <div style="background-color: #10b981;" class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center">
+                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+              </div>
+              <h2 style="color: ${config.text_color}; font-family: ${config.font_family}, Arial, sans-serif; font-size: ${config.font_size * 1.5}px;" class="font-bold mb-2">Berhasil!</h2>
+              <p style="color: ${config.secondary_action_color}; font-family: ${config.font_family}, Arial, sans-serif; font-size: ${config.font_size}px;">${config.success_message}</p>
+            </div>
+          </div>
+        `;
+        return;
+      }
+      
+      app.innerHTML = `
+        <div class="min-h-full py-8 px-4 overflow-auto">
+          <div class="max-w-3xl mx-auto">
+            <div style="background-color: ${config.surface_color};" class="rounded-xl shadow-lg p-8">
+              <h1 style="color: ${config.text_color}; font-family: ${config.font_family}, Arial, sans-serif; font-size: ${config.font_size * 2}px;" class="font-bold mb-2 text-center">${config.form_title}</h1>
+              <p style="color: ${config.secondary_action_color}; font-family: ${config.font_family}, Arial, sans-serif; font-size: ${config.font_size}px;" class="mb-8 text-center">${config.form_subtitle}</p>
+              
+              <div style="background-color: #dbeafe; border-left: 4px solid ${config.primary_action_color};" class="p-4 rounded mb-6">
+                <p style="color: ${config.text_color}; font-family: ${config.font_family}, Arial, sans-serif; font-size: ${config.font_size * 0.9}px;">
+                  <strong>Nomor Kamar:</strong> Akan dibuat otomatis sebagai <strong>Kamar ${roomRegistrations.length + 1}</strong>
+                </p>
+              </div>
+
+              <form onsubmit="handleSubmit(event)">
+                <div style="border: 2px solid ${config.primary_action_color};" class="rounded-lg p-6 mb-6">
+                  <h3 style="color: ${config.text_color}; font-family: ${config.font_family}, Arial, sans-serif; font-size: ${config.font_size * 1.2}px;" class="font-bold mb-4">Ketua Kamar</h3>
+                  ${renderStudentField('Nama Ketua', 'leader', formData.leader, true)}
+                </div>
+
+                <div style="border: 1px solid #d1d5db;" class="rounded-lg p-6 mb-6">
+                  <h3 style="color: ${config.text_color}; font-family: ${config.font_family}, Arial, sans-serif; font-size: ${config.font_size * 1.2}px;" class="font-bold mb-4">Anggota Kamar</h3>
+                  ${renderStudentField('Anggota 1', 'member0', formData.members[0])}
+                  ${renderStudentField('Anggota 2', 'member1', formData.members[1])}
+                  ${renderStudentField('Anggota 3', 'member2', formData.members[2])}
+                </div>
+
+                <button type="submit"
+                        style="background-color: ${config.primary_action_color}; font-family: ${config.font_family}, Arial, sans-serif; font-size: ${config.font_size}px;"
+                        class="w-full text-white py-4 rounded-lg font-bold hover:opacity-90 transition-opacity flex items-center justify-center"
+                        ${isLoading ? 'disabled' : ''}>
+                  ${isLoading ? '<div class="loading-spinner mr-2"></div> Menyimpan ke Google Sheets...' : 'Simpan Data Kamar'}
+                </button>
+              </form>
+            </div>
+
+            ${roomRegistrations.length > 0 ? `
+              <div style="background-color: ${config.surface_color};" class="rounded-xl shadow-lg p-8 mt-8">
+                <h2 style="color: ${config.text_color}; font-family: ${config.font_family}, Arial, sans-serif; font-size: ${config.font_size * 1.5}px;" class="font-bold mb-6">Data Kamar yang Sudah Terdaftar</h2>
+                ${roomRegistrations.map(room => `
+                  <div style="border: 1px solid #e5e7eb;" class="rounded-lg p-4 mb-4">
+                    <h3 style="color: ${config.primary_action_color}; font-family: ${config.font_family}, Arial, sans-serif; font-size: ${config.font_size * 1.1}px;" class="font-bold mb-3">${room.kamar}</h3>
+                    <div class="mb-2">
+                      <span style="color: ${config.text_color}; font-family: ${config.font_family}, Arial, sans-serif; font-size: ${config.font_size * 0.9}px;" class="font-medium">Ketua:</span>
+                      <span style="color: ${config.secondary_action_color}; font-family: ${config.font_family}, Arial, sans-serif; font-size: ${config.font_size * 0.9}px;"> ${room.leader.name} (${room.leader.class}, Bus ${room.leader.bus})</span>
+                    </div>
+                    ${room.members.length > 0 ? `
+                      <div style="color: ${config.text_color}; font-family: ${config.font_family}, Arial, sans-serif; font-size: ${config.font_size * 0.9}px;" class="font-medium mb-1">Anggota:</div>
+                      ${room.members.map((member, idx) => `
+                        <div style="color: ${config.secondary_action_color}; font-family: ${config.font_family}, Arial, sans-serif; font-size: ${config.font_size * 0.9}px;" class="ml-4">• ${member.name} (${member.class}, Bus ${member.bus})</div>
+                      `).join('')}
+                    ` : ''}
+                  </div>
+                `).join('')}
+              </div>
+            ` : ''}
+          </div>
+        </div>
+      `;
+    }
+
+    async function onConfigChange(config) {
+      render();
+    }
+
+    async function init() {
+      await fetchStudentData();
+      
+      if (window.elementSdk) {
+        window.elementSdk.init({
+          defaultConfig,
+          onConfigChange,
+          mapToCapabilities: (config) => ({
+            recolorables: [
+              {
+                get: () => config.background_color || defaultConfig.background_color,
+                set: (value) => {
+                  config.background_color = value;
+                  window.elementSdk.setConfig({ background_color: value });
+                }
+              },
+              {
+                get: () => config.surface_color || defaultConfig.surface_color,
+                set: (value) => {
+                  config.surface_color = value;
+                  window.elementSdk.setConfig({ surface_color: value });
+                }
+              },
+              {
+                get: () => config.text_color || defaultConfig.text_color,
+                set: (value) => {
+                  config.text_color = value;
+                  window.elementSdk.setConfig({ text_color: value });
+                }
+              },
+              {
+                get: () => config.primary_action_color || defaultConfig.primary_action_color,
+                set: (value) => {
+                  config.primary_action_color = value;
+                  window.elementSdk.setConfig({ primary_action_color: value });
+                }
+              },
+              {
+                get: () => config.secondary_action_color || defaultConfig.secondary_action_color,
+                set: (value) => {
+                  config.secondary_action_color = value;
+                  window.elementSdk.setConfig({ secondary_action_color: value });
+                }
+              }
+            ],
+            borderables: [],
+            fontEditable: {
+              get: () => config.font_family || defaultConfig.font_family,
+              set: (value) => {
+                config.font_family = value;
+                window.elementSdk.setConfig({ font_family: value });
+              }
+            },
+            fontSizeable: {
+              get: () => config.font_size || defaultConfig.font_size,
+              set: (value) => {
+                config.font_size = value;
+                window.elementSdk.setConfig({ font_size: value });
+              }
+            }
+          }),
+          mapToEditPanelValues: (config) => new Map([
+            ["form_title", config.form_title || defaultConfig.form_title],
+            ["form_subtitle", config.form_subtitle || defaultConfig.form_subtitle],
+            ["success_message", config.success_message || defaultConfig.success_message]
+          ])
+        });
+      }
+      
+      render();
+    }
+
+    init();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9adf0a1eb0db9c86',t:'MTc2NTcyOTM0MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
