@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pengumuman TKA SKANSA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #e0e7ff; /* Lighter, more vibrant background */
+            background-image: linear-gradient(to bottom right, #e0e7ff, #c7d2fe); /* Subtle gradient */
+        }
+        .card {
+            background-color: #ffffff;
+            border-radius: 1.5rem; /* More rounded corners */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* Stronger shadow */
+            transition: transform 0.3s ease-in-out;
+        }
+        .card:hover {
+            transform: translateY(-5px); /* Slight lift on hover */
+        }
+        .btn-primary {
+            background-color: #6366f1; /* Indigo 500 */
+            border-radius: 0.75rem; /* Rounded corners for buttons */
+            transition: background-color 0.3s ease-in-out, transform 0.2s ease-in-out, box-shadow 0.3s ease-in-out;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .btn-primary:hover {
+            background-color: #4f46e5; /* Indigo 600 */
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px -2px rgba(0, 0, 0, 0.15), 0 3px 6px -1px rgba(0, 0, 0, 0.08);
+        }
+        .btn-secondary {
+            background-color: #6b7280; /* Gray 500 */
+            border-radius: 0.75rem;
+            transition: background-color 0.3s ease-in-out, transform 0.2s ease-in-out, box-shadow 0.3s ease-in-out;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .btn-secondary:hover {
+            background-color: #4b5563; /* Gray 700 */
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px -2px rgba(0, 0, 0, 0.15), 0 3px 6px -1px rgba(0, 0, 0, 0.08);
+        }
+        .btn-accent { /* New button style for AI feature */
+            background-color: #10b981; /* Emerald 500 */
+            border-radius: 0.75rem;
+            transition: background-color 0.3s ease-in-out, transform 0.2s ease-in-out, box-shadow 0.3s ease-in-out;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .btn-accent:hover {
+            background-color: #059669; /* Emerald 600 */
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px -2px rgba(0, 0, 0, 0.15), 0 3px 6px -1px rgba(0, 0, 0, 0.08);
+        }
+        input[type="text"] {
+            border-radius: 0.5rem; /* Slightly more rounded input */
+            transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        input[type="text"]:focus {
+            border-color: #6366f1; /* Indigo 500 on focus */
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3); /* Ring on focus */
+        }
+        .loading-spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3); /* Lighter border for spinner */
+            border-left-color: #ffffff; /* White spinner color */
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Styles for the hidden PDF template */
+        #pdfTemplate {
+            width: 148mm; /* A5 width */
+            height: 210mm; /* A5 height */
+            padding: 15mm; /* Adjusted padding for A5 */
+            box-sizing: border-box;
+            background-color: white;
+            color: black;
+            font-family: 'Inter', sans-serif;
+            font-size: 9pt; /* Adjusted base font size for A5 */
+            line-height: 1.2;
+            display: none; /* Hidden by default */
+            position: relative; /* Needed for absolute positioning of watermark */
+            overflow: hidden; /* Ensure content doesn't overflow */
+        }
+        #pdfTemplate .header-content {
+            text-align: center;
+            flex-grow: 1;
+            line-height: 1.1; /* Tighter line spacing for header text */
+        }
+        #pdfTemplate .header-line {
+            border-bottom: 2px solid black;
+            margin-top: 10px;
+            margin-bottom: 15px; /* Adjusted margin for A5 */
+        }
+        #pdfTemplate table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px; /* Adjusted margin for A5 */
+        }
+        #pdfTemplate table td {
+            padding: 3px 0; /* Adjusted padding for A5 */
+            vertical-align: top;
+        }
+        #pdfTemplate .text-center { text-align: center; }
+        #pdfTemplate .font-bold { font-weight: bold; }
+        /* Font sizes for header content to fit A5 */
+        #pdfTemplate .header-content p {
+            margin: 0; /* Remove default paragraph margins */
+            padding: 0;
+        }
+        #pdfTemplate .header-content p:nth-child(1) { font-size: 8pt; line-height: 1.0; } /* DINAS PENDIDIKAN */
+        #pdfTemplate .header-content p:nth-child(2) { font-size: 8pt; font-weight: bold; line-height: 1.0; } /* PEMERINTAH KABUPATEN */
+        #pdfTemplate .header-content p:nth-child(3) { font-size: 8pt; font-weight: bold; line-height: 1.0; } /* PURBALINGGA */
+        #pdfTemplate .header-content p:nth-child(4) { font-size: 12pt; font-weight: bold; margin-top: 3px; line-height: 1.0; } /* SMP NEGERI 1 */
+        #pdfTemplate .header-content p:nth-child(5) { font-size: 12pt; font-weight: bold; line-height: 1.0; } /* PURBALINGGA */
+        #pdfTemplate .header-content p:nth-child(6) { font-size: 6pt; margin-top: 3px; line-height: 1.0; } /* Jalan Kapten Piere Tendean */
+        #pdfTemplate .header-content p:nth-child(7) { font-size: 6pt; line-height: 1.0; } /* Telepon */
+        #pdfTemplate .header-content p:nth-child(8) { font-size: 6pt; line-height: 1.0; } /* Pos-El */
+
+        #pdfTemplate .logo {
+            width: 60px; /* Adjusted logo size for A5 */
+            height: auto;
+            margin-right: 10px;
+        }
+        #pdfTemplate .email-icon,
+        #pdfTemplate .website-icon {
+            vertical-align: middle;
+            width: 0.8em; /* Adjusted icon size for smaller font */
+            height: 0.8em;
+            margin-right: 0.1em;
+            fill: currentColor;
+        }
+        #pdfTemplate .signature-img {
+            width: 100px; /* Adjusted signature image width for A5 */
+            height: auto;
+            margin-bottom: -5px; /* Pull signature closer to text */
+            display: block;
+            margin-left: auto;
+            margin-right: 0;
+        }
+        /* Watermark style for html2pdf.js - REMOVED, now handled by jsPDF */
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <div class="card p-8 w-full max-w-md">
+         <div style="display: flex; justify-content: center; align-items: center; ">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/9/92/Logo_SMP_Negeri_1_Purbalingga.jpg" 
+               alt="Logo Sekolah" 
+               class="logo" 
+               style="max-width: 50px; max-height: 50px;">
+         </div>
+
+        <h2 class="text-xl font-bold text-center text-gray-800 mb-4">SISTEM INFORMASI NILAI</h2>
+        <h3 class="text-l font-bold text-center text-gray-800 mb-4">SMP NEGERI 1 PURBALINGGA</h3>
+
+        <div class="mb-6">
+            <label for="nisnInput" class="block text-gray-700 text-sm font-semibold mb-2">Masukkan NISN Anda:</label>
+            <input
+                type="text"
+                id="nisnInput"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm"
+                placeholder="Contoh: 1234567890"
+                aria-label="NISN Input"
+            >
+        </div>
+
+        <button
+            id="checkButton"
+            class="btn-primary w-full text-white font-bold py-3 px-4 flex items-center justify-center"
+        >
+            <span id="buttonText">Cek Hasil</span>
+            <div id="loadingSpinner" class="loading-spinner hidden ml-2"></div>
+        </button>
+
+        <div id="resultContainer" class="mt-8 p-6 bg-gray-50 rounded-xl border border-gray-200 shadow-md hidden">
+            <h2 class="text-xl font-bold text-gray-800 mb-4 text-center">NILAI TKA</h2>
+            <p class="text-gray-700 mb-2">
+                <span class="font-semibold">NISN:</span> <span id="displayNISN"></span>
+            </p>
+            <p class="text-gray-700 mb-2">
+                <span class="font-semibold">Nama:</span> <span id="displayName"></span>
+            </p>
+            <p class="text-gray-700 mb-2">
+                <span class="font-semibold">Pilihan Jurusan:</span> <span id="displayMajor"></span>
+            </p>
+            <p class="text-700 mb-2">
+                <span class="font-semibold">Asal Sekolah:</span> <span id="displaySchool"></span>
+            </p>
+            <p class="text-gray-700 mb-2">
+                <span class="font-semibold">Nilai TKA:</span> <span id="displayScore" class="font-extrabold text-indigo-700 text-lg"></span>
+            </p>
+            
+            <button
+                id="downloadPdfButton" class="btn-secondary w-full text-white font-bold py-3 px-4 mt-4 flex items-center justify-center"
+            >
+                <span id="downloadButtonText">Download PDF</span> <div id="downloadSpinner" class="loading-spinner hidden ml-2"></div>
+            </button>
+            <button
+                id="getSuggestionsButton"
+                class="btn-accent w-full text-white font-bold py-3 px-4 mt-6 flex items-center justify-center"
+            >
+                <span id="suggestionsButtonText">Dapatkan Saran & Tips Belajar ✨</span>
+                <div id="suggestionsSpinner" class="loading-spinner hidden ml-2"></div>
+            </button>
+
+            <div id="mobileFooterMessage" class="mt-6 p-4 bg-yellow-100 border border-yellow-400 text-yellow-700 rounded-lg text-center hidden">
+                
+                <p>Gunakan Komputer/Laptop jika ingin mendownload Hasil TKA atau bisa juga merubah tampilan browser Smartphone ke mode Desktop Site <a href="https://spmb.babelprov.go.id/" target="_blank" class="text-blue-700 underline">https://spmb.babelprov.go.id/</a></p>
+                
+            </div>
+        </div>
+
+        <div id="suggestionsContainer" class="mt-8 p-6 bg-blue-50 rounded-xl border border-blue-200 shadow-md hidden">
+            <h2 class="text-xl font-bold text-blue-800 mb-4">Saran & Tips Belajar:</h2>
+            <div id="aiSuggestions" class="text-gray-800 leading-relaxed">
+                </div>
+            <button
+                id="closeSuggestionsButton"
+                class="btn-secondary w-full text-white font-bold py-2 px-4 mt-6 rounded-md"
+            >
+                Tutup Saran
+            </button>
+        </div>
+
+        <div id="messageContainer" class="mt-8 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg shadow-sm hidden" role="alert">
+            <p id="messageText"></p>
+        </div>
+    </div>
+
+    <div id="pdfTemplate" class="hidden">
+        <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/a/a4/Seal_of_Purbalingga_Regency.svg" alt="Logo Pemkab" class="logo" style="max-width: 70px; max-height: 70px; transform: translateX(-10px);">
+            <div class="header-content"> 
+                <p style="font-size: 8pt; line-height: 1.0;">DINAS PENDIDIKAN</p>
+                <p style="font-size: 8pt; font-weight: bold; line-height: 1.0;">PEMERINTAH KABUPATEN PURBALINGGA</p>
+                <p style="font-size: 12pt; font-weight: bold; margin-top: 3px; line-height: 1.0;">SMP NEGERI 1 PURBALINGGA</p> 
+                <p style="font-size: 6pt; margin-top: 3px; line-height: 1.0;">Jalan kapten Piere Tendean No.8, Purbalingga</p>
+                <p style="font-size: 6pt; line-height: 1.0;">Telepon ((0281) 891089 | WA : 0858-6744-1162</p>
+                <p style="font-size: 6pt; line-height: 1.0;">Pos-El: admin@smpn1purbalingga.sch.id | Laman: www.smpn1purbalingga.sch.id</p>
+            </div>
+        </div>
+        <div class="header-line"></div>
+
+        <h3 style="font-size: 14pt; font-weight: bold; text-align: center; margin-bottom: 15px;">HASIL TES KEMAMPUAN AKADEMIK</h3>
+
+        <table>
+            <tr>
+                <td style="font-weight: bold; width: 35%;">NISN</td>
+                <td style="width: 5%;">:</td>
+                <td id="pdfNISN" style="width: 60%;"></td>
+            </tr>
+            <tr>
+                <td style="font-weight: bold;">Nama</td>
+                <td>:</td>
+                <td id="pdfNama"></td>
+            </tr>
+            <tr>
+                <td style="font-weight: bold;">Jurusan<br>yang dipilih</td> <td>:</td>
+                <td id="pdfJurusan"></td>
+            </tr>
+            <tr>
+                <td style="font-weight: bold;">Asal<br>Sekolah</td> <td>:</td>
+                <td id="pdfAsalSekolah"></td>
+            </tr>
+            <tr>
+                <td style="font-weight: bold;">Nilai TKA</td>
+                <td>:</td>
+                <td id="pdfNilaiTKA" class="font-bold"></td>
+            </tr>
+        </table>
+
+        <div style="margin-top: 40px; text-align: right;"> 
+            <p style="margin-bottom: 5px;">Sungailiat, <span id="pdfTanggal"></span></p>
+            <p style="margin-top: 0;">Kepala Sekolah,</p>
+            
+            <img src="https://ik.imagekit.io/p7yxabknj/ttdnina.png?updatedAt=1748923597536" alt="Tanda Tangan Kepala Sekolah" class="signature-img" style="width: 100px;">
+
+            <p style="font-weight: bold; margin-top: 5px;">Nina Erlina, M.Pd</p>
+            <p>NIP. 19760425 200012 2 002</p>
+        </div>
+    </div>
+
+    <script>
+        // Initialize jsPDF
+        const { jsPDF } = window.jspdf;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const nisnInput = document.getElementById('nisnInput');
+            const checkButton = document.getElementById('checkButton');
+            const buttonText = document.getElementById('buttonText');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const resultContainer = document.getElementById('resultContainer');
+            const messageContainer = document.getElementById('messageContainer');
+            const messageText = document.getElementById('messageText');
+            const downloadPdfButton = document.getElementById('downloadPdfButton'); 
+            const downloadButtonText = document.getElementById('downloadButtonText');
+            const downloadSpinner = document.getElementById('downloadSpinner');
+            const getSuggestionsButton = document.getElementById('getSuggestionsButton');
+            const suggestionsButtonText = document.getElementById('suggestionsButtonText');
+            const suggestionsSpinner = document.getElementById('suggestionsSpinner');
+            const suggestionsContainer = document.getElementById('suggestionsContainer'); 
+            const aiSuggestions = document.getElementById('aiSuggestions');
+            const closeSuggestionsButton = document.getElementById('closeSuggestionsButton');
+
+            // New element for mobile footer message
+            const mobileFooterMessage = document.getElementById('mobileFooterMessage');
+            const displayNISN = document.getElementById('displayNISN');
+            const displayName = document.getElementById('displayName');
+            const displayMajor = document.getElementById('displayMajor');
+            const displaySchool = document.getElementById('displaySchool');
+            const displayScore = document.getElementById('displayScore');
+            const pdfTemplate = document.getElementById('pdfTemplate');
+            const pdfNISN = document.getElementById('pdfNISN');
+            const pdfNama = document.getElementById('pdfNama');
+            const pdfJurusan = document.getElementById('pdfJurusan');
+            const pdfAsalSekolah = document.getElementById('pdfAsalSekolah');
+            const pdfNilaiTKA = document.getElementById('pdfNilaiTKA');
+            const pdfTanggal = document.getElementById('pdfTanggal');
+
+            const SPREADSHEET_ID = '1oxG-u2Bk_OIR396tkzEacON3YAHVhe2P4tD7d5BajfU';
+            const SHEET_GID = '0';
+            const GOOGLE_SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&gid=${SHEET_GID}`;
+
+            let studentData = [];
+
+            // Watermark image URL
+            const WATERMARK_URL = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTlCjARPqAJLSMU_3CbMT5xNBZ0IvUU6HOsGg&s';
+            let watermarkImgData = null;
+            let watermarkImg = null;
+
+            /**
+             * Function to detect if the user is on a mobile device.
+             * @returns {boolean} True if on mobile, false otherwise.
+             */
+            function isMobileDevice() {
+                const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+                // Basic check for common mobile OS and devices
+                return /android|iphone|ipad|ipod|blackberry|windows phone/i.test(userAgent) ||
+                       /Mobi|Tablet|Safari/i.test(userAgent) && !/Chrome/i.test(userAgent);
+            }
+
+
+            function showMessage(message, isError = true) {
+                messageText.textContent = message;
+                messageContainer.classList.remove('hidden');
+                if (isError) {
+                    messageContainer.classList.remove('bg-green-100', 'border-green-400', 'text-green-700');
+                    messageContainer.classList.add('bg-red-100', 'border-red-400', 'text-red-700');
+                } else {
+                    messageContainer.classList.remove('bg-red-100', 'border-red-400', 'text-green-700');
+                    messageContainer.classList.add('bg-green-100', 'border-green-400', 'text-green-700');
+                }
+                resultContainer.classList.add('hidden');
+                suggestionsContainer.classList.add('hidden');
+            }
+
+            function hideMessage() {
+                messageContainer.classList.add('hidden');
+                messageText.textContent = '';
+            }
+
+            function setLoadingState(isLoading) {
+                checkButton.disabled = isLoading;
+                if (isLoading) {
+                    buttonText.textContent = 'Memuat...';
+                    loadingSpinner.classList.remove('hidden');
+                } else {
+                    buttonText.textContent = 'Cek Hasil';
+                    loadingSpinner.classList.add('hidden');
+                }
+            }
+
+            function setDownloadLoadingState(isLoading) {
+                downloadPdfButton.disabled = isLoading; 
+                if (isLoading) {
+                    downloadSpinner.classList.remove('hidden');
+                } else {
+                    downloadSpinner.classList.add('hidden');
+                }
+            }
+
+            function setSuggestionsLoadingState(isLoading) {
+                getSuggestionsButton.disabled = isLoading;
+                if (isLoading) {
+                    suggestionsButtonText.textContent = 'Memuat Saran...';
+                    suggestionsSpinner.classList.remove('hidden');
+                } else {
+                    suggestionsButtonText.textContent = 'Dapatkan Saran & Tips Belajar ✨';
+                    suggestionsSpinner.classList.add('hidden');
+                }
+            }
+
+            async function fetchStudentData() {
+                setLoadingState(true);
+                hideMessage();
+                try {
+                    const response = await fetch(GOOGLE_SHEET_CSV_URL);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const csvText = await response.text();
+                    studentData = parseCSV(csvText);
+                    console.log('Data siswa berhasil dimuat:', studentData);
+                    showMessage('Data berhasil dimuat. Silakan masukkan NISN Anda.', false);
+                } catch (error) {
+                    console.error('Gagal memuat data siswa:', error);
+                    showMessage('Gagal memuat data siswa. Pastikan Google Sheet dapat diakses publik. ' + error.message);
+                } finally {
+                    setLoadingState(false);
+                }
+            }
+
+            function parseCSV(csv) {
+                const lines = csv.split('\n').filter(line => line.trim() !== '');
+                if (lines.length === 0) return [];
+
+                const headers = lines[0].split(',').map(header => {
+                    const cleanedHeader = header.trim().replace(/"/g, '');
+                    if (cleanedHeader.toLowerCase() === 'pilihan jurusan') return 'jurusan';
+                    if (cleanedHeader.toLowerCase() === 'nilai tka') return 'nilaitka';
+                    if (cleanedHeader.toLowerCase() === 'asal sekolah') return 'asalsekolah';
+                    return cleanedHeader.toLowerCase().replace(/\s/g, '');
+                });
+
+                const data = [];
+
+                for (let i = 1; i < lines.length; i++) {
+                    const values = lines[i].split(',').map(value => value.trim().replace(/"/g, ''));
+                    if (values.length === headers.length) {
+                        const row = {};
+                        headers.forEach((header, index) => {
+                            row[header] = values[index];
+                        });
+                        data.push(row);
+                    }
+                }
+                return data;
+            }
+
+            function findStudentByNISN(nisn) {
+                const searchNisn = String(nisn).trim();
+                return studentData.find(student => String(student.nisn).trim() === searchNisn);
+            }
+
+            checkButton.addEventListener('click', () => {
+                const nisn = nisnInput.value.trim();
+                hideMessage();
+                resultContainer.classList.add('hidden');
+                suggestionsContainer.classList.add('hidden');
+
+                if (!nisn) {
+                    showMessage('NISN tidak boleh kosong.');
+                    return;
+                }
+
+                if (studentData.length === 0) {
+                    showMessage('Data siswa belum dimuat atau kosong. Silakan coba lagi nanti.');
+                    return;
+                }
+
+                const student = findStudentByNISN(nisn);
+
+                if (student) {
+                    displayNISN.textContent = student.nisn;
+                    displayName.textContent = student.nama;
+                    displayMajor.textContent = student.jurusan || 'Tidak tersedia';
+                    displaySchool.textContent = student.asalsekolah;
+                    displayScore.textContent = student.nilaitka;
+                    resultContainer.classList.remove('hidden');
+                    
+                    // Show/hide mobile footer message based on device
+                    if (isMobileDevice()) {
+                        mobileFooterMessage.classList.remove('hidden');
+                    } else {
+                        mobileFooterMessage.classList.add('hidden');
+                    }
+
+                } else {
+                    showMessage(`NISN "${nisn}" tidak ditemukan dalam data.`);
+                }
+            });
+
+            /**
+             * Function to load watermark image and convert to base64.
+             */
+            async function loadWatermark() {
+                try {
+                    const imgResponse = await fetch(WATERMARK_URL);
+                    if (!imgResponse.ok) {
+                        throw new Error(`Failed to load watermark image: ${imgResponse.statusText}`);
+                    }
+                    const blob = await imgResponse.blob();
+                    watermarkImgData = await new Promise(resolve => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result);
+                        reader.readAsDataURL(blob);
+                    });
+
+                    watermarkImg = new Image();
+                    watermarkImg.src = watermarkImgData;
+                    await new Promise(resolve => watermarkImg.onload = resolve);
+                    console.log('Watermark image loaded successfully.');
+                } catch (imgError) {
+                    console.warn('Gagal memuat gambar watermark dari URL. PDF akan dibuat tanpa watermark.', imgError);
+                    watermarkImgData = null;
+                    watermarkImg = null;
+                }
+            }
+
+            /**
+             * Handles the click event for the "Download PDF" button.
+             */
+            downloadPdfButton.addEventListener('click', async () => { 
+                setDownloadLoadingState(true);
+                try {
+                    pdfNISN.textContent = displayNISN.textContent;
+                    pdfNama.textContent = displayName.textContent;
+                    pdfJurusan.textContent = displayMajor.textContent;
+                    pdfAsalSekolah.textContent = displaySchool.textContent;
+                    pdfNilaiTKA.textContent = displayScore.textContent;
+
+                    const today = new Date();
+                    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                    pdfTanggal.textContent = today.toLocaleDateString('id-ID', options);
+
+                    pdfTemplate.style.display = 'block';
+
+                    // Use a higher scale for better resolution on mobile, then compress JPG
+                    const canvas = await html2canvas(pdfTemplate, {
+                        scale: 2.0, // Ditingkatkan ke 7.0 untuk resolusi sangat tinggi
+                        useCORS: true, 
+                        logging: false 
+                    });
+
+                    pdfTemplate.style.display = 'none';
+
+                    // Convert to JPG data URL with good compression for passing to jsPDF
+                    const imgData = canvas.toDataURL('image/jpeg', 0.9); // Kualitas 0.9 untuk detail maksimal
+
+                    // Initialize jsPDF with A5 dimensions
+                    const pdf = new jsPDF('p', 'mm', [148, 210]); // A5 size: 148mm x 210mm
+
+                    const pdfWidth = pdf.internal.pageSize.getWidth();
+                    const pdfHeight = pdf.internal.pageSize.getHeight();
+
+                    // Calculate image dimensions to fit PDF while maintaining aspect ratio
+                    const imgProps = pdf.getImageProperties(imgData);
+                    const imgWidth = pdfWidth - 20; // PDF width minus margins (10mm left, 10mm right)
+                    const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
+
+                    let heightLeft = imgHeight;
+                    let position = 10; // Top margin
+
+                    // Watermark function
+                    const addWatermarkToPage = () => {
+                        if (watermarkImgData && watermarkImg) {
+                            pdf.setGState(new pdf.GState({ opacity: 0.1 }));
+                            const watermarkWidth = 80; // Adjusted watermark size for A5
+                            const watermarkHeight = watermarkImg.naturalHeight * watermarkWidth / watermarkImg.naturalWidth;
+                            const x = (pdfWidth - watermarkWidth) / 2;
+                            const y = (pdfHeight - watermarkHeight) / 2;
+                            pdf.addImage(watermarkImgData, 'PNG', x, y, watermarkWidth, watermarkHeight);
+                            pdf.setGState(new pdf.GState({ opacity: 1 }));
+                        }
+                    };
+
+                    // Add first page
+                    pdf.addImage(imgData, 'JPEG', 10, position, imgWidth, imgHeight, undefined, 'FAST_JPEG'); // Use JPEG compression
+                    addWatermarkToPage();
+
+                    
+
+                    heightLeft -= (pdfHeight - position);
+
+                    // Add subsequent pages if content is too long (though unlikely for A5 template)
+                    while (heightLeft > 0) {
+                        pdf.addPage();
+                        position = - (imgHeight - heightLeft + 10); // Adjust position for next page
+                        pdf.addImage(imgData, 'JPEG', 10, position, imgWidth, imgHeight, undefined, 'FAST_JPEG'); // Use JPEG compression
+                        addWatermarkToPage();
+                        heightLeft -= pdfHeight;
+                    }
+
+                    pdf.save(`Hasil_TKA_${displayNISN.textContent}.pdf`);
+
+                } catch (error) {
+                    console.error('Gagal membuat PDF:', error);
+                    showMessage('Gagal membuat PDF. ' + error.message);
+                } finally {
+                    setDownloadLoadingState(false);
+                }
+            });
+
+
+            getSuggestionsButton.addEventListener('click', async () => {
+                setSuggestionsLoadingState(true);
+                aiSuggestions.innerHTML = '';
+                suggestionsContainer.classList.remove('hidden');
+
+                const studentName = displayName.textContent;
+                const studentMajor = displayMajor.textContent;
+                const studentScore = displayScore.textContent;
+
+                const prompt = `Berikan informasi apa saja yang di pelajari (maksimal 3 paragraf, gunakan poin-poin jika perlu) untuk seorang siswa bernama ${studentName} yang telah memilih jurusan ${studentMajor} dan mendapatkan nilai ulangan ${studentScore}, . Fokus pada materi apa yang dipelajari pada jurusan di jenjang smp dan nilai, serta tips untuk meningkatkan kemampuan di bidang tersebut.`;
+
+                try {
+                    let chatHistory = [];
+                    chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                    const payload = { contents: chatHistory };
+                    const apiKey = "AIzaSyC8nDaXu7nz5sZNpuTzFj9eyaPNQgtH-pE"; 
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const result = await response.json();
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        const text = result.candidates[0].content.parts[0].text;
+                        aiSuggestions.innerHTML = formatTextForHtml(text);
+                    } else {
+                        aiSuggestions.textContent = 'Maaf, tidak dapat menghasilkan saran saat ini. Silakan coba lagi.';
+                        console.error('Unexpected Gemini API response structure:', result);
+                    }
+                } catch (error) {
+                    console.error('Error calling Gemini API:', error);
+                    aiSuggestions.textContent = 'Terjadi kesalahan saat menghubungi layanan AI. Silakan coba lagi nanti.';
+                } finally {
+                    setSuggestionsLoadingState(false);
+                }
+            });
+
+            function formatTextForHtml(text) {
+                return text.replace(/\n/g, '<br>');
+            }
+
+            closeSuggestionsButton.addEventListener('click', () => {
+                suggestionsContainer.classList.add('hidden');
+                aiSuggestions.innerHTML = '';
+            });
+
+            fetchStudentData();
+            loadWatermark(); // Load watermark image for PDF
+
+            // Hide PDF download button if on a mobile device
+            if (isMobileDevice()) {
+                downloadPdfButton.classList.add('hidden');
+                mobileFooterMessage.classList.remove('hidden'); // Show mobile footer message
+            } else {
+                mobileFooterMessage.classList.add('hidden'); // Hide mobile footer message on desktop
+            }
+        });
+    </script>
+</body>
+</html>

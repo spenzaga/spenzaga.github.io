@@ -87,11 +87,11 @@
   "questions": [
   { "question_id": "Q1",
     "question_type": "TF",
-    "question_text": "In 1492 Christopher Columbus landed on Bahama island of Guanahani, thinking that he had found Asia.",
     "image": "",
     "video": "",
     "audio": "https://basicenglishspeaking.com/wp-content/uploads/audio/QA/QA-01.mp3",
     "question_paragraph": "",
+    "question_text": "In 1492 Christopher Columbus landed on Bahama island of Guanahani, thinking that he had found Asia.",
     "answer_1": "*True",
     "answer_2": "False",
     "answer_3": "",
@@ -103,11 +103,11 @@
   {
     "question_id": "Q2",
     "question_type": "MC",
-    "question_text": "The Statue of Liberty, proud lady of welcome for millions of newly arrived Americans is a gift of (choose the name of the people)",
     "image": "https://raw.githubusercontent.com/didikkamseno/mypic/refs/heads/main/ab1.png",
     "video": "",
     "audio": "",
     "question_paragraph": "Ambil data dari firebase dengan halaman <b>login</b> hanya menggunakan 'nis' sesuai struktur data berikut. Ambil data dari firebase dengan halaman login hanya menggunakan 'nis' sesuai struktur data berikut",
+    "question_text": "The Statue of Liberty, proud lady of welcome for millions of newly arrived Americans is a gift of (choose the name of the people)",
     "answer_1": "*the French",
     "answer_2": "the Swedish",
     "answer_3": "the English",
@@ -119,13 +119,13 @@
   {
     "question_id": "Q3",
     "question_type": "MR",
-    "question_text": "Yellowstone, the oldest American national park, is located in three of the following states (tick the names of three states):",
     "image": "https://raw.githubusercontent.com/didikkamseno/mypic/refs/heads/main/ab1.png",
     "video": "",
     "audio": "",
     "question_paragraph": "",
+    "question_text": "Berikut ini yang termasuk nama-nama anak dari Didik Kamseno adalah ...",
     "answer_1": "Indiana",
-    "answer_2": "Idaho",
+    "answer_2": "*Idaho",
     "answer_3": "*Montana",
     "answer_4": "*Wyoming",
     "correct_feedback": "Well done!",
@@ -135,11 +135,11 @@
   {
     "question_id": "Q4",
     "question_type": "TI",
-    "question_text": "Margaret Mitchell wrote just one book - yet_________ remains a best-selling novel, still in print more than 60 years after its debut.",
     "image": "https://raw.githubusercontent.com/didikkamseno/mypic/refs/heads/main/ab1.png",
     "video": "",
     "audio": "",
     "question_paragraph": "",
+    "question_text": "Margaret Mitchell wrote just one book - yet_________ remains a best-selling novel, still in print more than 60 years after its debut.",
     "answer_1": "*Gone With the Wind",
     "answer_2": "*gone with the wind",
     "answer_3": "*Gone with the Wind",
@@ -151,15 +151,15 @@
   {
     "question_id": "Q5",
     "question_type": "MG",
-    "question_text": "Match the names of the states with their nicknames:",
     "image": "https://raw.githubusercontent.com/didikkamseno/mypic/refs/heads/main/ab1.png",
     "video": "",
     "audio": "",
     "question_paragraph": "",
-    "answer_1": "North Carolina|Tar Heel State",
-    "answer_2": "Texas|Lone Star State",
-    "answer_3": "Wyoming|Cowboy State",
-    "answer_4": "New York|Empire State",
+    "question_text": "Match the names of the states with their nicknames:",
+    "answer_1": "Didik|Kamseno",
+    "answer_2": "Amalianti|Amrulloh",
+    "answer_3": "Zain|Al Fatih",
+    "answer_4": "Tazakka|Assalami",
     "correct_feedback": "Well done!",
     "incorrect_feedback": "Sorry, the answer is incorrect...",
     "points": "10"
@@ -167,15 +167,15 @@
   {
     "question_id": "Q6",
     "question_type": "SEQ",
-    "question_text": "Put the names of the US presidents according to the times of their presidency from the earliest to the latest using drag and drop:",
     "image": "https://raw.githubusercontent.com/didikkamseno/mypic/refs/heads/main/ab1.png",
     "video": "",
     "audio": "",
     "question_paragraph": "",
-    "answer_1": "George Washington",
-    "answer_2": "Thomas Jefferson",
-    "answer_3": "Abraham Lincoln",
-    "answer_4": "Franklin D. Roosevelt",
+    "question_text": "Urutan nama dari anak",
+    "answer_1": "Zain",
+    "answer_2": "Zakka",
+    "answer_3": "Zayana",
+    "answer_4": "Zero",
     "correct_feedback": "Well done!",
     "incorrect_feedback": "Sorry, the answer is incorrect...",
     "points": "10"
@@ -183,11 +183,11 @@
   {
     "question_id": "Q7",
     "question_type": "NUMG",
-    "question_text": "This is the question",
     "image": "https://raw.githubusercontent.com/didikkamseno/mypic/refs/heads/main/ab1.png",
     "video": "",
     "audio": "",
     "question_paragraph": "",
+    "question_text": "Penjumlahan dari 5+5",
     "answer_1": "*10",
     "answer_2": "",
     "answer_3": "",
@@ -228,10 +228,10 @@
         {
           "question_id": "Q5",
           "response": [
-            "North Carolina|Tar Heel State",
-            "Texas|Lone Star State",
-            "Wyoming|Cowboy State",
-            "New York|Empire State"
+            "Didik|Kamseno",
+            "Amalianti|Amrulloh",
+            "Zain|Al Fatih",
+            "Tazakka|Assalami"
           ],
           "correct": true,
           "points_awarded": "10"
@@ -239,10 +239,10 @@
         {
           "question_id": "Q6",
           "response": [
-            "George Washington",
-            "Thomas Jefferson",
-            "Abraham Lincoln",
-            "Franklin D. Roosevelt"
+            "Zain",
+            "Zakka",
+            "Zayana",
+            "Zero"
           ],
           "correct": true,
           "points_awarded": "10"
@@ -258,7 +258,7 @@
       ],
       "total_score": "100",
       "duration": "00:32:10",
-      "status": "Lulus"
+      "status": "Memenuhi KKM"
     }
   ]
 }
