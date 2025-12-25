@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pengumuman TKA SKANSA</title>
+    <title>Pengumuman Nilai Ulangan Harian</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -183,7 +183,7 @@
         </button>
 
         <div id="resultContainer" class="mt-8 p-6 bg-gray-50 rounded-xl border border-gray-200 shadow-md hidden">
-            <h2 class="text-xl font-bold text-gray-800 mb-4 text-center">NILAI TKA</h2>
+            <h2 class="text-xl font-bold text-gray-800 mb-4 text-center">NILAI QUIZ</h2>
             <p class="text-gray-700 mb-2">
                 <span class="font-semibold">NISN:</span> <span id="displayNISN"></span>
             </p>
@@ -191,13 +191,13 @@
                 <span class="font-semibold">Nama:</span> <span id="displayName"></span>
             </p>
             <p class="text-gray-700 mb-2">
-                <span class="font-semibold">Pilihan Jurusan:</span> <span id="displayMajor"></span>
+                <span class="font-semibold">Mata Pelajaran:</span> <span id="displayMajor"></span>
             </p>
             <p class="text-700 mb-2">
                 <span class="font-semibold">Asal Sekolah:</span> <span id="displaySchool"></span>
             </p>
             <p class="text-gray-700 mb-2">
-                <span class="font-semibold">Nilai TKA:</span> <span id="displayScore" class="font-extrabold text-indigo-700 text-lg"></span>
+                <span class="font-semibold">Nilai Quiz:</span> <span id="displayScore" class="font-extrabold text-indigo-700 text-lg"></span>
             </p>
             
             <button
@@ -243,15 +243,15 @@
             <div class="header-content"> 
                 <p style="font-size: 8pt; line-height: 1.0;">DINAS PENDIDIKAN</p>
                 <p style="font-size: 8pt; font-weight: bold; line-height: 1.0;">PEMERINTAH KABUPATEN PURBALINGGA</p>
-                <p style="font-size: 12pt; font-weight: bold; margin-top: 3px; line-height: 1.0;">SMP NEGERI 1 PURBALINGGA</p> 
+                <p style="font-size: 12pt; font-weight: bold; margin-top: 3px; line-height: 1.0;">SMP NEGERI JAYA ABADI</p> 
                 <p style="font-size: 6pt; margin-top: 3px; line-height: 1.0;">Jalan kapten Piere Tendean No.8, Purbalingga</p>
-                <p style="font-size: 6pt; line-height: 1.0;">Telepon ((0281) 891089 | WA : 0858-6744-1162</p>
-                <p style="font-size: 6pt; line-height: 1.0;">Pos-El: admin@smpn1purbalingga.sch.id | Laman: www.smpn1purbalingga.sch.id</p>
+                <p style="font-size: 6pt; line-height: 1.0;">Telepon (0281) 123456789 | WA : -</p>
+                <p style="font-size: 6pt; line-height: 1.0;">Pos-El: admin@jayaabadi.sch.id | Laman: www.smpjayaabadi.sch.id</p>
             </div>
         </div>
         <div class="header-line"></div>
 
-        <h3 style="font-size: 14pt; font-weight: bold; text-align: center; margin-bottom: 15px;">HASIL TES KEMAMPUAN AKADEMIK</h3>
+        <h3 style="font-size: 14pt; font-weight: bold; text-align: center; margin-bottom: 15px;">HASIL ULANGAN HARIA</h3>
 
         <table>
             <tr>
@@ -265,28 +265,30 @@
                 <td id="pdfNama"></td>
             </tr>
             <tr>
-                <td style="font-weight: bold;">Jurusan<br>yang dipilih</td> <td>:</td>
-                <td id="pdfJurusan"></td>
+                <td style="font-weight: bold;">Mapel</td> 
+                <td>:</td>
+                <td id="pdfMapel"></td>
             </tr>
             <tr>
-                <td style="font-weight: bold;">Asal<br>Sekolah</td> <td>:</td>
+                <td style="font-weight: bold;">Kelas</td> 
+                <td>:</td>
                 <td id="pdfAsalSekolah"></td>
             </tr>
             <tr>
-                <td style="font-weight: bold;">Nilai TKA</td>
+                <td style="font-weight: bold;">Nilai Quiz</td>
                 <td>:</td>
-                <td id="pdfNilaiTKA" class="font-bold"></td>
+                <td id="pdfNilaiQuiz" class="font-bold"></td>
             </tr>
         </table>
 
         <div style="margin-top: 40px; text-align: right;"> 
-            <p style="margin-bottom: 5px;">Sungailiat, <span id="pdfTanggal"></span></p>
-            <p style="margin-top: 0;">Kepala Sekolah,</p>
+            <p style="margin-bottom: 5px;">Purbalingga <span id="pdfTanggal"></span></p>
+            <p style="margin-top: 0;">Guru Mata Pelajaran,</p>
             
-            <img src="https://ik.imagekit.io/p7yxabknj/ttdnina.png?updatedAt=1748923597536" alt="Tanda Tangan Kepala Sekolah" class="signature-img" style="width: 100px;">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/0/04/Tanda_tangan_bapak.png" alt="Tanda Tangan Guru Mapel" class="signature-img" style="width: 100px;">
 
-            <p style="font-weight: bold; margin-top: 5px;">Nina Erlina, M.Pd</p>
-            <p>NIP. 19760425 200012 2 002</p>
+            <p style="font-weight: bold; margin-top: 5px;">Bahagia S.Pd.</p>
+            <p>NIP. 112345678901234</p>
         </div>
     </div>
 
@@ -322,9 +324,9 @@
             const pdfTemplate = document.getElementById('pdfTemplate');
             const pdfNISN = document.getElementById('pdfNISN');
             const pdfNama = document.getElementById('pdfNama');
-            const pdfJurusan = document.getElementById('pdfJurusan');
+            const pdfMapel = document.getElementById('pdfMapel');
             const pdfAsalSekolah = document.getElementById('pdfAsalSekolah');
-            const pdfNilaiTKA = document.getElementById('pdfNilaiTKA');
+            const pdfNilaiQuiz = document.getElementById('pdfNilaiQuiz');
             const pdfTanggal = document.getElementById('pdfTanggal');
 
             const SPREADSHEET_ID = '1oxG-u2Bk_OIR396tkzEacON3YAHVhe2P4tD7d5BajfU';
@@ -334,7 +336,7 @@
             let studentData = [];
 
             // Watermark image URL
-            const WATERMARK_URL = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTlCjARPqAJLSMU_3CbMT5xNBZ0IvUU6HOsGg&s';
+            const WATERMARK_URL = 'https://upload.wikimedia.org/wikipedia/commons/9/92/Logo_SMP_Negeri_1_Purbalingga.jpg';
             let watermarkImgData = null;
             let watermarkImg = null;
 
@@ -426,8 +428,8 @@
 
                 const headers = lines[0].split(',').map(header => {
                     const cleanedHeader = header.trim().replace(/"/g, '');
-                    if (cleanedHeader.toLowerCase() === 'pilihan jurusan') return 'jurusan';
-                    if (cleanedHeader.toLowerCase() === 'nilai tka') return 'nilaitka';
+                    if (cleanedHeader.toLowerCase() === 'pilihan mapel') return 'mapel';
+                    if (cleanedHeader.toLowerCase() === 'nilai quiz') return 'nilai quiz';
                     if (cleanedHeader.toLowerCase() === 'asal sekolah') return 'asalsekolah';
                     return cleanedHeader.toLowerCase().replace(/\s/g, '');
                 });
@@ -473,9 +475,9 @@
                 if (student) {
                     displayNISN.textContent = student.nisn;
                     displayName.textContent = student.nama;
-                    displayMajor.textContent = student.jurusan || 'Tidak tersedia';
+                    displayMajor.textContent = student.mapel || 'Tidak tersedia';
                     displaySchool.textContent = student.asalsekolah;
-                    displayScore.textContent = student.nilaitka;
+                    displayScore.textContent = student.nilaiquiz;
                     resultContainer.classList.remove('hidden');
                     
                     // Show/hide mobile footer message based on device
@@ -525,9 +527,9 @@
                 try {
                     pdfNISN.textContent = displayNISN.textContent;
                     pdfNama.textContent = displayName.textContent;
-                    pdfJurusan.textContent = displayMajor.textContent;
+                    pdfMapel.textContent = displayMajor.textContent;
                     pdfAsalSekolah.textContent = displaySchool.textContent;
-                    pdfNilaiTKA.textContent = displayScore.textContent;
+                    pdfNilaiQuiz.textContent = displayScore.textContent;
 
                     const today = new Date();
                     const options = { year: 'numeric', month: 'long', day: 'numeric' };
@@ -569,7 +571,7 @@
                             const watermarkHeight = watermarkImg.naturalHeight * watermarkWidth / watermarkImg.naturalWidth;
                             const x = (pdfWidth - watermarkWidth) / 2;
                             const y = (pdfHeight - watermarkHeight) / 2;
-                            pdf.addImage(watermarkImgData, 'PNG', x, y, watermarkWidth, watermarkHeight);
+                            pdf.addImage(watermarkImgData, 'jpg', x, y, watermarkWidth, watermarkHeight);
                             pdf.setGState(new pdf.GState({ opacity: 1 }));
                         }
                     };
@@ -608,10 +610,10 @@
                 suggestionsContainer.classList.remove('hidden');
 
                 const studentName = displayName.textContent;
-                const studentMajor = displayMajor.textContent;
+                const studentMapel = displayMajor.textContent;
                 const studentScore = displayScore.textContent;
 
-                const prompt = `Berikan informasi apa saja yang di pelajari (maksimal 3 paragraf, gunakan poin-poin jika perlu) untuk seorang siswa bernama ${studentName} yang telah memilih jurusan ${studentMajor} dan mendapatkan nilai ulangan ${studentScore}, . Fokus pada materi apa yang dipelajari pada jurusan di jenjang smp dan nilai, serta tips untuk meningkatkan kemampuan di bidang tersebut.`;
+                const prompt = `Berikan informasi apa saja yang di pelajari (maksimal 3 paragraf, gunakan poin-poin jika perlu) untuk seorang siswa bernama ${studentName} yang telah memilih ulangan harian mata pelajaran dengan topik ${studentMapel} dan mendapatkan nilai ulangan ${studentScore}, . Fokus pada materi apa yang dipelajari pada ulangan mata pelajaran di jenjang smp dan nilai, serta tips untuk meningkatkan kemampuan di bidang tersebut.`;
 
                 try {
                     let chatHistory = [];
