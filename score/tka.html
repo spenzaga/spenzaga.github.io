@@ -197,7 +197,7 @@
                 <span class="font-semibold">Asal Sekolah:</span> <span id="displaySchool"></span>
             </p>
             <p class="text-gray-700 mb-2">
-                <span class="font-semibold">Nilai Quiz:</span> <span id="pdfNilaiQuiz" class="font-extrabold text-indigo-700 text-lg"></span>
+                <span class="font-semibold">Nilai Quiz:</span> <span id="displayScore" class="font-extrabold text-indigo-700 text-lg"></span>
             </p>
             
             <button
@@ -429,7 +429,7 @@
                 const headers = lines[0].split(',').map(header => {
                     const cleanedHeader = header.trim().replace(/"/g, '');
                     if (cleanedHeader.toLowerCase() === 'pilihan mapel') return 'mapel';
-                    if (cleanedHeader.toLowerCase() === 'nilai quiz') return 'nilai quiz';
+                    if (cleanedHeader.toLowerCase() === 'nilai quiz') return 'nilaiquiz';
                     if (cleanedHeader.toLowerCase() === 'asal sekolah') return 'asalsekolah';
                     return cleanedHeader.toLowerCase().replace(/\s/g, '');
                 });
