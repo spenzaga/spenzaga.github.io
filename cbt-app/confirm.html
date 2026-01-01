@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Konfirmasi Data - CBT SMP Negeri 1 Purbalingga</title>
+    <link rel="icon" href="https://www.smpn1purbalingga.sch.id/favicon.ico">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="confirm-container">
+        <h1>Konfirmasi Data Siswa</h1>
+        <div id="studentData">
+            <p><strong>Absen:</strong> <span id="absen"></span></p>
+            <p><strong>NIS:</strong> <span id="nis"></span></p>
+            <p><strong>Nama:</strong> <span id="name"></span></p>
+            <p><strong>Kelas:</strong> <span id="class"></span></p>
+        </div>
+        <div class="statement">
+            <p>Saya bersumpah bahwa saya akan mengerjakan ujian ini dengan jujur dan tidak melakukan kecurangan.</p>
+            <label>
+                <input type="checkbox" id="honestyCheck" required>
+                Saya setuju dengan pernyataan di atas.
+            </label>
+        </div>
+        <button id="startQuiz" disabled>Mulai Ujian</button>
+    </div>
+    <script type="module" src="script.js"></script>
+</body>
+</html>

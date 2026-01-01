@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hasil CBT - SMP Negeri 1 Purbalingga</title>
+    <link rel="icon" href="https://www.smpn1purbalingga.sch.id/favicon.ico">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+    <div class="results-container">
+        <h1>Hasil Ujian</h1>
+        <div id="studentData">
+            <p><strong>Absen:</strong> <span id="absen"></span></p>
+            <p><strong>NIS:</strong> <span id="nis"></span></p>
+            <p><strong>Nama:</strong> <span id="name"></span></p>
+            <p><strong>Kelas:</strong> <span id="class"></span></p>
+            <p><strong>Skor:</strong> <span id="score"></span></p>
+            <p><strong>Durasi:</strong> <span id="duration"></span></p>
+            <p><strong>Status:</strong> <span id="status"></span></p>
+        </div>
+        <button id="reviewBtn">Review Soal</button>
+        <div id="reviewContainer" style="display:none;">
+            <!-- Review soal akan dirender di sini -->
+        </div>
+    </div>
+    <script type="module" src="script.js"></script>
+</body>
+</html>

@@ -169,7 +169,7 @@
                 type="text"
                 id="nisnInput"
                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm"
-                placeholder="Contoh: 1234567890"
+                placeholder="1234567890"
                 aria-label="NISN Input"
             >
         </div>
@@ -243,7 +243,7 @@
             <div class="header-content"> 
                 <p style="font-size: 8pt; line-height: 1.0;">DINAS PENDIDIKAN</p>
                 <p style="font-size: 8pt; font-weight: bold; line-height: 1.0;">PEMERINTAH KABUPATEN PURBALINGGA</p>
-                <p style="font-size: 12pt; font-weight: bold; line-height: 1.0;">SMP NEGERI JAYA ABADI</p> 
+                <p style="font-size: 12pt; font-weight: bold; line-height: 1.0;">SMP NEGERI JAYA ABADI</p>
                 <p style="font-size: 6pt; line-height: 1.0;">Jalan kapten Piere Tendean No.8, Purbalingga</p>
                 <p style="font-size: 6pt; line-height: 1.0;">Telepon (0281) 123456789 | WA : -</p>
                 <p style="font-size: 6pt; line-height: 1.0;">Pos-El: admin@jayaabadi.sch.id | Laman: www.smpjayaabadi.sch.id</p>
@@ -577,9 +577,7 @@
 
                     // Add first page
                     pdf.addImage(imgData, 'JPEG', 10, position, imgWidth, imgHeight, undefined, 'FAST_JPEG'); // Use JPEG compression
-                    addWatermarkToPage();
-
-                    
+                    addWatermarkToPage();                   
 
                     heightLeft -= (pdfHeight - position);
 

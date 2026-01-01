@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CBT - SMP Negeri 1 Purbalingga</title>
+    <link rel="icon" href="https://www.smpn1purbalingga.sch.id/favicon.ico">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="quiz-container">
+        <div class="header">
+            <div class="timer" id="timer">00:00:00</div>
+            <div class="student-info">
+                <span id="studentName"></span> - <span id="studentClass"></span>
+            </div>
+        </div>
+        <div class="question" id="questionContainer">
+            <!-- Soal akan dirender di sini -->
+        </div>
+        <div class="navigation">
+            <button id="prevBtn">Sebelumnya</button>
+            <button id="nextBtn">Selanjutnya</button>
+            <button id="submitBtn" style="display:none;">Kirim Jawaban</button>
+        </div>
+    </div>
+    <div class="floating-nav" id="floatingNav">
+        <button id="toggleNav">Navigasi</button>
+        <div class="nav-grid" id="navGrid" style="display:none;">
+            <!-- Kotak navigasi akan dirender di sini -->
+        </div>
+    </div>
+    <script type="module" src="script.js"></script>
+</body>
+</html>

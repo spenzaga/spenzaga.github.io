@@ -91,7 +91,7 @@
     "video": "",
     "audio": "https://basicenglishspeaking.com/wp-content/uploads/audio/QA/QA-01.mp3",
     "question_paragraph": "",
-    "question_text": "In 1492 Christopher Columbus landed on Bahama island of Guanahani, thinking that he had found Asia.",
+    "question_text": "It is true that the Great Wall of China is visible from space.",
     "answer_1": "*True",
     "answer_2": "False",
     "answer_3": "",
@@ -106,8 +106,8 @@
     "image": "https://raw.githubusercontent.com/didikkamseno/mypic/refs/heads/main/ab1.png",
     "video": "",
     "audio": "",
-    "question_paragraph": "Ambil data dari firebase dengan halaman <b>login</b> hanya menggunakan 'nis' sesuai struktur data berikut. Ambil data dari firebase dengan halaman login hanya menggunakan 'nis' sesuai struktur data berikut",
-    "question_text": "The Statue of Liberty, proud lady of welcome for millions of newly arrived Americans is a gift of (choose the name of the people)",
+    "question_paragraph": "This is the example of the <b>paragraph</b> about the famous museum in the world. The Louvre Museum is located in Paris, France. It is the world's largest art museum and a historic monument. The museum is home to thousands of works of art, including the Mona Lisa and the Venus de Milo. The Louvre Museum attracts millions of visitors each year who come to admire its vast collection and rich history.",
+    "question_text": "Where is the Louvre Museum located?",
     "answer_1": "*the French",
     "answer_2": "the Swedish",
     "answer_3": "the English",
@@ -119,15 +119,15 @@
   {
     "question_id": "Q3",
     "question_type": "MR",
-    "image": "https://raw.githubusercontent.com/didikkamseno/mypic/refs/heads/main/ab1.png",
-    "video": "",
+    "image": "",
+    "video": "https://raw.githubusercontent.com/didikkamseno/mypic/refs/heads/main/video.mp4",
     "audio": "",
     "question_paragraph": "",
-    "question_text": "Berikut ini yang termasuk nama-nama anak dari Didik Kamseno adalah ...",
-    "answer_1": "Indiana",
-    "answer_2": "*Idaho",
-    "answer_3": "*Montana",
-    "answer_4": "*Wyoming",
+    "question_text": "Countries that are part of Southeast Asia include:",
+    "answer_1": "India",
+    "answer_2": "*Indonesia",
+    "answer_3": "*Filipina",
+    "answer_4": "*Malaysia",
     "correct_feedback": "Well done!",
     "incorrect_feedback": "Sorry, the answer is incorrect...",
     "points": "10"
@@ -139,11 +139,11 @@
     "video": "",
     "audio": "",
     "question_paragraph": "",
-    "question_text": "Margaret Mitchell wrote just one book - yet_________ remains a best-selling novel, still in print more than 60 years after its debut.",
-    "answer_1": "*Gone With the Wind",
-    "answer_2": "*gone with the wind",
-    "answer_3": "*Gone with the Wind",
-    "answer_4": "*Gone with the wind",
+    "question_text": "How to express love in English?",
+    "answer_1": "*I Love You",
+    "answer_2": "*i love you",
+    "answer_3": "*I LOVE YOU",
+    "answer_4": "*I Love you",
     "correct_feedback": "Well done!",
     "incorrect_feedback": "Sorry, the answer is incorrect...",
     "points": "10"
@@ -155,11 +155,11 @@
     "video": "",
     "audio": "",
     "question_paragraph": "",
-    "question_text": "Match the names of the states with their nicknames:",
-    "answer_1": "Didik|Kamseno",
-    "answer_2": "Amalianti|Amrulloh",
-    "answer_3": "Zain|Al Fatih",
-    "answer_4": "Tazakka|Assalami",
+    "question_text": "Match the names of province capitals in Indonesia:",
+    "answer_1": "Jawa Barat|Bandung",
+    "answer_2": "Jawa Tengah|Semarang",
+    "answer_3": "Jawa Timur|Surabaya",
+    "answer_4": "Kalimantan Barat|Pontianak",
     "correct_feedback": "Well done!",
     "incorrect_feedback": "Sorry, the answer is incorrect...",
     "points": "10"
@@ -171,11 +171,11 @@
     "video": "",
     "audio": "",
     "question_paragraph": "",
-    "question_text": "Urutan nama dari anak",
-    "answer_1": "Zain",
-    "answer_2": "Zakka",
-    "answer_3": "Zayana",
-    "answer_4": "Zero",
+    "question_text": "Order the islands of Indonesia from largest to smallest by area:",
+    "answer_1": "Papua",
+    "answer_2": "Kalimantan",
+    "answer_3": "Sumatera",
+    "answer_4": "Sulawesi",
     "correct_feedback": "Well done!",
     "incorrect_feedback": "Sorry, the answer is incorrect...",
     "points": "10"
@@ -187,7 +187,7 @@
     "video": "",
     "audio": "",
     "question_paragraph": "",
-    "question_text": "Penjumlahan dari 5+5",
+    "question_text": "The total of sum 4 + 6 is ....",
     "answer_1": "*10",
     "answer_2": "",
     "answer_3": "",
@@ -215,23 +215,23 @@
         },
         {
           "question_id": "Q3",
-          "response": ["Idaho", "Montana", "Wyoming"],
+          "response": ["Indonesia", "Malaysia", "Filipina"],
           "correct": true,
           "points": "10"
         },
         {
           "question_id": "Q4",
-          "response": "Gone With the Wind",
+          "response": "I Love You",
           "correct": true,
           "points": "10"
         },
         {
           "question_id": "Q5",
           "response": [
-            "Didik|Kamseno",
-            "Amalianti|Amrulloh",
-            "Zain|Al Fatih",
-            "Tazakka|Assalami"
+            "Jawa Barat|Bandung",
+            "Jawa Tengah|Semarang",
+            "Jawa Timur|Surabaya",
+            "Kalimantan Barat|Pontianak"
           ],
           "correct": true,
           "points_awarded": "10"
@@ -239,10 +239,10 @@
         {
           "question_id": "Q6",
           "response": [
-            "Zain",
-            "Zakka",
-            "Zayana",
-            "Zero"
+            "Papua",
+            "Kalimantan",
+            "Sumatera",
+            "Sulawesi"
           ],
           "correct": true,
           "points_awarded": "10"
@@ -256,9 +256,9 @@
           "points_awarded": "10"
         }
       ],
-      "total_score": "100",
+      "total_score": "70",
       "duration": "00:32:10",
-      "status": "Memenuhi KKM"
+      "status": "Memenuhi KKTP"
     }
   ]
 }
