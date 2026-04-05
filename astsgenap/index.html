@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="id" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cek Nilai Siswa</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Plus Jakarta Sans', sans-serif; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes pulse-ring { 0% { transform: scale(0.8); opacity: 1; } 100% { transform: scale(1.4); opacity: 0; } }
+    .fade-up { animation: fadeUp 0.5s ease forwards; }
+    .fade-up-d1 { animation: fadeUp 0.5s ease 0.1s forwards; opacity: 0; }
+    .fade-up-d2 { animation: fadeUp 0.5s ease 0.2s forwards; opacity: 0; }
+    .fade-up-d3 { animation: fadeUp 0.5s ease 0.3s forwards; opacity: 0; }
+    .fade-up-d4 { animation: fadeUp 0.5s ease 0.4s forwards; opacity: 0; }
+    .score-ring { position: relative; }
+    .score-ring::before { content: ''; position: absolute; inset: -6px; border-radius: 50%; border: 3px solid currentColor; opacity: 0.2; }
+  </style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full">
+  <div id="app" class="h-full w-full overflow-auto" style="background: #0f172a;"><!-- LOGIN -->
+   <div id="login-screen" class="h-full flex items-center justify-center p-4">
+    <div class="w-full max-w-sm">
+     <div class="text-center mb-8 fade-up">
+      <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4" style="background: #6366f1;"><i data-lucide="graduation-cap" style="width:32px;height:32px;color:#fff;"></i>
+      </div>
+      <h1 id="el-title" class="text-2xl font-800 text-white mb-1">Cek Nilai Siswa</h1>
+      <p id="el-subtitle" class="text-sm" style="color:#94a3b8;">Masukkan NIS untuk melihat nilai</p>
+     </div>
+     <form id="login-form" class="fade-up-d1">
+      <div class="rounded-2xl p-6" style="background:#1e293b; border:1px solid #334155;"><label for="nis-input" class="block text-xs font-600 mb-2" style="color:#94a3b8;">Nomor Induk Siswa (NIS)</label>
+       <div class="flex gap-2"><input id="nis-input" type="text" inputmode="numeric" placeholder="Ketik NIS kamu..." required class="flex-1 px-4 py-3 rounded-xl text-sm font-500 text-white outline-none placeholder:text-slate-500 transition-all focus:ring-2" style="background:#0f172a; border:1px solid #334155; --tw-ring-color:#6366f1;"> <button type="submit" id="login-btn" class="px-5 py-3 rounded-xl font-600 text-sm text-white transition-all hover:opacity-90 active:scale-95 flex items-center gap-2" style="background:#6366f1;"> <span id="btn-text">Cek</span> <span id="btn-spinner" class="hidden">
+          <svg class="animate-spin w-4 h-4" fill="none" viewbox="0 0 24 24">
+           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" /><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+          </svg></span> </button>
+       </div>
+       <p id="error-msg" class="hidden text-xs mt-3 font-500" style="color:#f87171;"></p>
+      </div>
+     </form>
+    </div>
+   </div><!-- RESULT -->
+   <div id="result-screen" class="hidden h-full p-4">
+    <div class="max-w-lg mx-auto py-8"><button id="back-btn" class="flex items-center gap-1 text-xs font-600 mb-6 transition hover:opacity-70 fade-up" style="color:#94a3b8;"> <i data-lucide="arrow-left" style="width:14px;height:14px;"></i> Kembali </button>
+     <div id="student-header" class="rounded-2xl p-5 mb-4 fade-up-d1" style="background:#1e293b;border:1px solid #334155;">
+      <p class="text-xs font-500 mb-1" style="color:#94a3b8;">Data Siswa</p>
+      <h2 id="r-nama" class="text-lg font-700 text-white"></h2>
+      <p id="r-nis" class="text-xs font-500" style="color:#6366f1;"></p>
+     </div>
+     <div class="grid grid-cols-2 gap-3 mb-4">
+      <div class="rounded-2xl p-5 text-center fade-up-d2" style="background:#1e293b;border:1px solid #334155;">
+       <p class="text-xs font-500 mb-2" style="color:#94a3b8;">Nilai Literasi</p>
+       <p id="r-literasi" class="text-3xl font-800" style="color:#34d399;"></p>
+      </div>
+      <div class="rounded-2xl p-5 text-center fade-up-d2" style="background:#1e293b;border:1px solid #334155;">
+       <p class="text-xs font-500 mb-2" style="color:#94a3b8;">Nilai Numerasi</p>
+       <p id="r-numerasi" class="text-3xl font-800" style="color:#60a5fa;"></p>
+      </div>
+     </div>
+     <div class="rounded-2xl p-6 text-center fade-up-d3" style="background: linear-gradient(135deg, #4f46e5, #7c3aed); border:1px solid #6366f1;">
+      <p class="text-xs font-600 mb-1" style="color:rgba(255,255,255,0.7);">Total Nilai</p>
+      <p id="r-total" class="text-5xl font-800 text-white my-2"></p>
+      <div class="inline-block rounded-full px-3 py-1 text-xs font-600 mt-1" style="background:rgba(255,255,255,0.15);color:rgba(255,255,255,0.9);">
+       (60% Literasi + 40% Numerasi)
+      </div>
+     </div>
+     <p class="text-center text-xs mt-4 fade-up-d4" style="color:#64748b;"><i data-lucide="info" style="width:12px;height:12px;display:inline;vertical-align:-2px;"></i> Total nilai diambil dari 60% nilai literasi dan 40% nilai numerasi</p>
+    </div>
+   </div>
+  </div>
+  <script>
+  const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQQ4-HxSnQVCEeMXJ7oG6ytW48xo1ZbswKvTnpnS09cy8JD-7qPkVvtmwDkbANNOw/pub?gid=505054386&single=true&output=csv';
+  let studentsData = [];
+
+  function parseCSV(text) {
+    const lines = text.trim().split('\n');
+    if (lines.length < 2) return [];
+    const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+    return lines.slice(1).map(line => {
+      const vals = [];
+      let current = '', inQuotes = false;
+      for (let i = 0; i < line.length; i++) {
+        if (line[i] === '"') { inQuotes = !inQuotes; }
+        else if (line[i] === ',' && !inQuotes) { vals.push(current.trim()); current = ''; }
+        else { current += line[i]; }
+      }
+      vals.push(current.trim());
+      const obj = {};
+      headers.forEach((h, i) => obj[h] = vals[i] || '');
+      return obj;
+    });
+  }
+
+  async function fetchData() {
+    try {
+      const res = await fetch(CSV_URL);
+      const text = await res.text();
+      studentsData = parseCSV(text);
+    } catch (e) {
+      console.error('Fetch error:', e);
+    }
+  }
+
+  fetchData();
+
+  const loginScreen = document.getElementById('login-screen');
+  const resultScreen = document.getElementById('result-screen');
+  const loginForm = document.getElementById('login-form');
+  const nisInput = document.getElementById('nis-input');
+  const errorMsg = document.getElementById('error-msg');
+  const btnText = document.getElementById('btn-text');
+  const btnSpinner = document.getElementById('btn-spinner');
+  const loginBtn = document.getElementById('login-btn');
+
+  function showError(msg) {
+    errorMsg.textContent = msg;
+    errorMsg.classList.remove('hidden');
+  }
+  function hideError() { errorMsg.classList.add('hidden'); }
+
+  function findStudent(nis) {
+    return studentsData.find(s => {
+      const keys = Object.keys(s);
+      return keys.some(k => k.toLowerCase().includes('nis') && s[k].toString().trim() === nis.trim());
+    });
+  }
+
+  function getField(obj, keyword) {
+    const key = Object.keys(obj).find(k => k.toLowerCase().includes(keyword.toLowerCase()));
+    return key ? obj[key] : '';
+  }
+
+  loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    hideError();
+    const nis = nisInput.value.trim();
+    if (!nis) { showError('Masukkan NIS terlebih dahulu'); return; }
+
+    btnText.textContent = 'Mencari...';
+    btnSpinner.classList.remove('hidden');
+    loginBtn.disabled = true;
+
+    if (studentsData.length === 0) await fetchData();
+
+    setTimeout(() => {
+      const student = findStudent(nis);
+      btnText.textContent = 'Cek';
+      btnSpinner.classList.add('hidden');
+      loginBtn.disabled = false;
+
+      if (!student) { showError('NIS tidak ditemukan. Pastikan NIS yang dimasukkan benar.'); return; }
+
+      const nama = getField(student, 'nama') || getField(student, 'name') || '-';
+      const nisVal = getField(student, 'nis') || nis;
+      const literasi = parseFloat(getField(student, 'literasi')) || 0;
+      const numerasi = parseFloat(getField(student, 'numerasi')) || 0;
+      const total = (literasi * 0.6) + (numerasi * 0.4);
+
+      document.getElementById('r-nama').textContent = nama;
+      document.getElementById('r-nis').textContent = 'NIS: ' + nisVal;
+      document.getElementById('r-literasi').textContent = literasi.toFixed(1);
+      document.getElementById('r-numerasi').textContent = numerasi.toFixed(1);
+      document.getElementById('r-total').textContent = total.toFixed(1);
+
+      loginScreen.classList.add('hidden');
+      resultScreen.classList.remove('hidden');
+      resultScreen.className = 'h-full p-4';
+      lucide.createIcons();
+    }, 500);
+  });
+
+  document.getElementById('back-btn').addEventListener('click', () => {
+    resultScreen.classList.add('hidden');
+    loginScreen.classList.remove('hidden');
+    nisInput.value = '';
+    hideError();
+  });
+
+  // Element SDK
+  const defaultConfig = {
+    app_title: 'Cek Nilai Siswa',
+    login_subtitle: 'Masukkan NIS untuk melihat nilai',
+    background_color: '#0f172a',
+    surface_color: '#1e293b',
+    text_color: '#ffffff',
+    primary_action: '#6366f1',
+    secondary_action: '#94a3b8',
+    font_family: 'Plus Jakarta Sans',
+    font_size: 16
+  };
+
+  window.elementSdk.init({
+    defaultConfig,
+    onConfigChange: async (config) => {
+      const bg = config.background_color || defaultConfig.background_color;
+      const surface = config.surface_color || defaultConfig.surface_color;
+      const text = config.text_color || defaultConfig.text_color;
+      const primary = config.primary_action || defaultConfig.primary_action;
+      const secondary = config.secondary_action || defaultConfig.secondary_action;
+      const font = config.font_family || defaultConfig.font_family;
+      const size = config.font_size || defaultConfig.font_size;
+
+      document.getElementById('app').style.background = bg;
+      document.getElementById('el-title').textContent = config.app_title || defaultConfig.app_title;
+      document.getElementById('el-subtitle').textContent = config.login_subtitle || defaultConfig.login_subtitle;
+
+      document.querySelectorAll('[style*="background:#1e293b"], [style*="background: #1e293b"]').forEach(el => {
+        // skip gradient
+      });
+
+      document.getElementById('el-title').style.color = text;
+      document.getElementById('el-title').style.fontFamily = `${font}, sans-serif`;
+      document.getElementById('el-title').style.fontSize = `${size * 1.5}px`;
+      document.getElementById('el-subtitle').style.color = secondary;
+
+      document.querySelectorAll('h1,h2,p,label,button,input').forEach(el => {
+        el.style.fontFamily = `${font}, sans-serif`;
+      });
+
+      loginBtn.style.background = primary;
+      nisInput.style.background = bg;
+    },
+    mapToCapabilities: (config) => ({
+      recolorables: [
+        { get: () => config.background_color || defaultConfig.background_color, set: v => { config.background_color = v; window.elementSdk.setConfig({ background_color: v }); } },
+        { get: () => config.surface_color || defaultConfig.surface_color, set: v => { config.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); } },
+        { get: () => config.text_color || defaultConfig.text_color, set: v => { config.text_color = v; window.elementSdk.setConfig({ text_color: v }); } },
+        { get: () => config.primary_action || defaultConfig.primary_action, set: v => { config.primary_action = v; window.elementSdk.setConfig({ primary_action: v }); } },
+        { get: () => config.secondary_action || defaultConfig.secondary_action, set: v => { config.secondary_action = v; window.elementSdk.setConfig({ secondary_action: v }); } }
+      ],
+      borderables: [],
+      fontEditable: { get: () => config.font_family || defaultConfig.font_family, set: v => { config.font_family = v; window.elementSdk.setConfig({ font_family: v }); } },
+      fontSizeable: { get: () => config.font_size || defaultConfig.font_size, set: v => { config.font_size = v; window.elementSdk.setConfig({ font_size: v }); } }
+    }),
+    mapToEditPanelValues: (config) => new Map([
+      ['app_title', config.app_title || defaultConfig.app_title],
+      ['login_subtitle', config.login_subtitle || defaultConfig.login_subtitle]
+    ])
+  });
+
+  lucide.createIcons();
+</script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9e79d55627b4f876',t:'MTc3NTQwNTUzNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
