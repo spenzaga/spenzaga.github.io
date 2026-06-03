@@ -1,0 +1,1105 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Containers &amp; Quantities</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&amp;family=Fredoka+One&amp;display=swap" rel="stylesheet">
+  <style>
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; overflow: hidden; }
+body { font-family: 'Nunito', sans-serif; }
+.page { display: none; height: 100%; overflow-y: auto; }
+.page.active { display: flex; flex-direction: column; }
+.fredoka { font-family: 'Fredoka One', cursive; }
+.btn-bounce:hover { transform: scale(1.05); }
+.btn-bounce { transition: transform 0.2s; }
+.fade-in { animation: fadeIn 0.5s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+.float-anim { animation: float 3s ease-in-out infinite; }
+.card-hover:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.15); }
+.card-hover { transition: all 0.3s; }
+.drag-item { cursor: grab; }
+.drag-item:active { cursor: grabbing; }
+.drop-zone { border: 2px dashed #94a3b8; min-height: 50px; transition: all 0.2s; }
+.drop-zone.over { border-color: #f59e0b; background: #fef3c7; }
+.quiz-opt { transition: all 0.2s; cursor: pointer; }
+.quiz-opt:hover { transform: scale(1.02); }
+.quiz-opt.correct { background: #d1fae5 !important; border-color: #10b981 !important; }
+.quiz-opt.wrong { background: #fee2e2 !important; border-color: #ef4444 !important; }
+.toast { position: fixed; top: 20px; right: 20px; z-index: 9999; padding: 12px 20px; border-radius: 8px; color: white; font-weight: 600; animation: fadeIn 0.3s; }
+.progress-bar { height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, #f59e0b, #ef4444); transition: width 0.5s; }
+</style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full bg-amber-50"><!-- TOAST -->
+  <div id="toast" class="toast hidden"></div><!-- PAGE: COVER -->
+  <div id="page-cover" class="page active">
+   <div class="flex-1 flex flex-col items-center justify-center p-6 text-center fade-in" style="background: linear-gradient(135deg, #fbbf24 0%, #f97316 50%, #ef4444 100%);">
+    <div class="float-anim mb-6">
+     <div class="text-7xl mb-2">
+      🍕🥤🧁
+     </div>
+    </div>
+    <h1 class="fredoka text-4xl md:text-6xl text-white drop-shadow-lg mb-4">Containers &amp; Quantities</h1>
+    <p class="text-xl md:text-2xl text-white/90 mb-2">Food &amp; Drink Edition</p>
+    <p class="text-white/70 mb-8">Interactive English Learning</p><button onclick="goTo('menu')" class="btn-bounce bg-white text-orange-600 font-bold px-8 py-4 rounded-full text-lg shadow-lg hover:shadow-xl"> Let's Start! <i data-lucide="arrow-right" class="inline w-5 h-5 ml-1"></i> </button>
+    <p class="text-white/60 text-sm mt-6">For Junior High School Students</p>
+   </div>
+  </div><!-- PAGE: MENU -->
+  <div id="page-menu" class="page">
+   <div class="flex-1 p-6 fade-in" style="background: linear-gradient(180deg, #fff7ed, #ffedd5);">
+    <div class="max-w-2xl mx-auto">
+     <h2 class="fredoka text-3xl text-orange-700 text-center mb-8">📚 Main Menu</h2>
+     <div class="grid grid-cols-2 md:grid-cols-3 gap-4"><button onclick="goTo('instructions')" class="card-hover bg-white rounded-xl p-5 text-center shadow-md">
+       <div class="text-3xl mb-2">
+        📋
+       </div>
+       <div class="font-bold text-gray-700 text-sm">
+        Instructions
+       </div></button> <button onclick="goTo('objectives')" class="card-hover bg-white rounded-xl p-5 text-center shadow-md">
+       <div class="text-3xl mb-2">
+        🎯
+       </div>
+       <div class="font-bold text-gray-700 text-sm">
+        Objectives
+       </div></button> <button onclick="goTo('warmup')" class="card-hover bg-white rounded-xl p-5 text-center shadow-md">
+       <div class="text-3xl mb-2">
+        🔥
+       </div>
+       <div class="font-bold text-gray-700 text-sm">
+        Warming Up
+       </div></button> <button onclick="goTo('welcome')" class="card-hover bg-white rounded-xl p-5 text-center shadow-md">
+       <div class="text-3xl mb-2">
+        👋
+       </div>
+       <div class="font-bold text-gray-700 text-sm">
+        Welcome
+       </div></button> <button onclick="goTo('material')" class="card-hover bg-white rounded-xl p-5 text-center shadow-md">
+       <div class="text-3xl mb-2">
+        📖
+       </div>
+       <div class="font-bold text-gray-700 text-sm">
+        Material
+       </div></button> <button onclick="goTo('qa')" class="card-hover bg-white rounded-xl p-5 text-center shadow-md">
+       <div class="text-3xl mb-2">
+        ❓
+       </div>
+       <div class="font-bold text-gray-700 text-sm">
+        Q&amp;A Material
+       </div></button> <button onclick="goTo('vocabulary')" class="card-hover bg-white rounded-xl p-5 text-center shadow-md">
+       <div class="text-3xl mb-2">
+        🔤
+       </div>
+       <div class="font-bold text-gray-700 text-sm">
+        Vocabulary
+       </div></button> <button onclick="goTo('matching')" class="card-hover bg-white rounded-xl p-5 text-center shadow-md">
+       <div class="text-3xl mb-2">
+        🧩
+       </div>
+       <div class="font-bold text-gray-700 text-sm">
+        Mini Practice
+       </div></button> <button onclick="goTo('text-example')" class="card-hover bg-white rounded-xl p-5 text-center shadow-md">
+       <div class="text-3xl mb-2">
+        📝
+       </div>
+       <div class="font-bold text-gray-700 text-sm">
+        Text Example
+       </div></button> <button onclick="goTo('dialog-quiz')" class="card-hover bg-white rounded-xl p-5 text-center shadow-md">
+       <div class="text-3xl mb-2">
+        💬
+       </div>
+       <div class="font-bold text-gray-700 text-sm">
+        Dialog Quiz
+       </div></button> <button onclick="goTo('dialog-scenarios')" class="card-hover bg-white rounded-xl p-5 text-center shadow-md">
+       <div class="text-3xl mb-2">
+        🎭
+       </div>
+       <div class="font-bold text-gray-700 text-sm">
+        Dialog Practice
+       </div></button> <button onclick="goTo('asking-giving')" class="card-hover bg-white rounded-xl p-5 text-center shadow-md">
+       <div class="text-3xl mb-2">
+        🗣️
+       </div>
+       <div class="font-bold text-gray-700 text-sm">
+        Asking &amp; Giving
+       </div></button> <button onclick="goTo('reading')" class="card-hover bg-white rounded-xl p-5 text-center shadow-md">
+       <div class="text-3xl mb-2">
+        📰
+       </div>
+       <div class="font-bold text-gray-700 text-sm">
+        Reading
+       </div></button> <button onclick="goTo('quiz1')" class="card-hover bg-white rounded-xl p-5 text-center shadow-md">
+       <div class="text-3xl mb-2">
+        ✅
+       </div>
+       <div class="font-bold text-gray-700 text-sm">
+        Quiz 1
+       </div></button> <button onclick="goTo('quiz2')" class="card-hover bg-white rounded-xl p-5 text-center shadow-md">
+       <div class="text-3xl mb-2">
+        ✅
+       </div>
+       <div class="font-bold text-gray-700 text-sm">
+        Quiz 2
+       </div></button> <button onclick="goTo('quiz3')" class="card-hover bg-white rounded-xl p-5 text-center shadow-md">
+       <div class="text-3xl mb-2">
+        ✅
+       </div>
+       <div class="font-bold text-gray-700 text-sm">
+        Quiz 3
+       </div></button> <button onclick="goTo('voice-quiz')" class="card-hover bg-white rounded-xl p-5 text-center shadow-md">
+       <div class="text-3xl mb-2">
+        🎤
+       </div>
+       <div class="font-bold text-gray-700 text-sm">
+        Voice Quiz
+       </div></button> <button onclick="goTo('conclusion')" class="card-hover bg-white rounded-xl p-5 text-center shadow-md">
+       <div class="text-3xl mb-2">
+        📌
+       </div>
+       <div class="font-bold text-gray-700 text-sm">
+        Conclusion
+       </div></button> <button onclick="goTo('reflection')" class="card-hover bg-white rounded-xl p-5 text-center shadow-md">
+       <div class="text-3xl mb-2">
+        🪞
+       </div>
+       <div class="font-bold text-gray-700 text-sm">
+        Reflection
+       </div></button> <button onclick="goTo('developer')" class="card-hover bg-white rounded-xl p-5 text-center shadow-md">
+       <div class="text-3xl mb-2">
+        👨‍💻
+       </div>
+       <div class="font-bold text-gray-700 text-sm">
+        Developer
+       </div></button>
+     </div>
+    </div>
+   </div>
+  </div><!-- PAGE: INSTRUCTIONS -->
+  <div id="page-instructions" class="page">
+   <div class="flex-1 p-6 fade-in bg-gradient-to-b from-blue-50 to-white">
+    <div class="max-w-2xl mx-auto"><button onclick="goTo('menu')" class="text-blue-600 font-bold mb-4 flex items-center gap-1"><i data-lucide="arrow-left" class="w-4 h-4"></i> Menu</button>
+     <h2 class="fredoka text-3xl text-blue-700 mb-6">📋 Instructions</h2>
+     <div class="bg-white rounded-xl p-6 shadow-md space-y-3">
+      <div class="flex gap-3 items-start">
+       <span class="bg-blue-100 text-blue-700 rounded-full w-7 h-7 flex items-center justify-center font-bold text-sm shrink-0">1</span>
+       <p>Navigate through the menu to access each section of the learning material.</p>
+      </div>
+      <div class="flex gap-3 items-start">
+       <span class="bg-blue-100 text-blue-700 rounded-full w-7 h-7 flex items-center justify-center font-bold text-sm shrink-0">2</span>
+       <p>Read the material carefully before attempting the quizzes and practices.</p>
+      </div>
+      <div class="flex gap-3 items-start">
+       <span class="bg-blue-100 text-blue-700 rounded-full w-7 h-7 flex items-center justify-center font-bold text-sm shrink-0">3</span>
+       <p>Click the 🔊 speaker icons to listen to pronunciation of vocabulary words.</p>
+      </div>
+      <div class="flex gap-3 items-start">
+       <span class="bg-blue-100 text-blue-700 rounded-full w-7 h-7 flex items-center justify-center font-bold text-sm shrink-0">4</span>
+       <p>Complete the matching exercises by dragging items to the correct answers.</p>
+      </div>
+      <div class="flex gap-3 items-start">
+       <span class="bg-blue-100 text-blue-700 rounded-full w-7 h-7 flex items-center justify-center font-bold text-sm shrink-0">5</span>
+       <p>Answer all quiz questions. You will receive instant feedback on your answers.</p>
+      </div>
+      <div class="flex gap-3 items-start">
+       <span class="bg-blue-100 text-blue-700 rounded-full w-7 h-7 flex items-center justify-center font-bold text-sm shrink-0">6</span>
+       <p>Use the Voice Recognition quiz to practice speaking English aloud.</p>
+      </div>
+      <div class="flex gap-3 items-start">
+       <span class="bg-blue-100 text-blue-700 rounded-full w-7 h-7 flex items-center justify-center font-bold text-sm shrink-0">7</span>
+       <p>You may repeat any section as many times as you like to improve your score.</p>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div><!-- PAGE: OBJECTIVES -->
+  <div id="page-objectives" class="page">
+   <div class="flex-1 p-6 fade-in bg-gradient-to-b from-green-50 to-white">
+    <div class="max-w-2xl mx-auto"><button onclick="goTo('menu')" class="text-green-600 font-bold mb-4 flex items-center gap-1"><i data-lucide="arrow-left" class="w-4 h-4"></i> Menu</button>
+     <h2 class="fredoka text-3xl text-green-700 mb-6">🎯 Learning Objectives</h2>
+     <div class="bg-white rounded-xl p-6 shadow-md space-y-4">
+      <p class="text-gray-600 mb-4">By the end of this lesson, students will be able to:</p>
+      <div class="space-y-3">
+       <div class="flex gap-3 items-start">
+        <span class="text-green-500 text-xl">✓</span>
+        <p>Identify and use common containers for food and drink (a bottle of, a cup of, a glass of, a bowl of, etc.)</p>
+       </div>
+       <div class="flex gap-3 items-start">
+        <span class="text-green-500 text-xl">✓</span>
+        <p>Use quantity expressions correctly (some, any, a lot of, a little, a few)</p>
+       </div>
+       <div class="flex gap-3 items-start">
+        <span class="text-green-500 text-xl">✓</span>
+        <p>Ask and give information about containers and quantities of food and drink</p>
+       </div>
+       <div class="flex gap-3 items-start">
+        <span class="text-green-500 text-xl">✓</span>
+        <p>Read and understand short texts about food containers and quantities</p>
+       </div>
+       <div class="flex gap-3 items-start">
+        <span class="text-green-500 text-xl">✓</span>
+        <p>Pronounce vocabulary related to containers and quantities correctly</p>
+       </div>
+       <div class="flex gap-3 items-start">
+        <span class="text-green-500 text-xl">✓</span>
+        <p>Create simple dialogues using containers and quantities in context</p>
+       </div>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div><!-- PAGE: WARMING UP -->
+  <div id="page-warmup" class="page">
+   <div class="flex-1 p-6 fade-in bg-gradient-to-b from-red-50 to-white">
+    <div class="max-w-2xl mx-auto"><button onclick="goTo('menu')" class="text-red-600 font-bold mb-4 flex items-center gap-1"><i data-lucide="arrow-left" class="w-4 h-4"></i> Menu</button>
+     <h2 class="fredoka text-3xl text-red-600 mb-6">🔥 Warming Up</h2>
+     <div class="bg-white rounded-xl p-6 shadow-md mb-4">
+      <h3 class="font-bold text-lg text-gray-800 mb-3">Think About Your Breakfast Today! 🍳</h3>
+      <p class="text-gray-600 mb-4">Before we start, let's think about containers we use every day:</p>
+      <div class="bg-amber-50 rounded-lg p-4 mb-4">
+       <p class="font-semibold text-amber-800 mb-2">🤔 Questions to think about:</p>
+       <ul class="space-y-2 text-gray-700">
+        <li>• What did you drink this morning? Was it in a <b>cup</b>, a <b>glass</b>, or a <b>bottle</b>?</li>
+        <li>• What did you eat for breakfast? Was it in a <b>bowl</b>, on a <b>plate</b>, or in a <b>bag</b>?</li>
+        <li>• When you go to the store, how is the food packaged?</li>
+       </ul>
+      </div>
+      <div class="bg-blue-50 rounded-lg p-4">
+       <p class="font-semibold text-blue-800 mb-2">🌍 Real Life Connection:</p>
+       <p class="text-gray-700">Every time you eat or drink, you use containers! When you buy a <b>bottle of water</b>, a <b>bag of chips</b>, or a <b>carton of milk</b> — you are already using the English we will learn today!</p>
+      </div>
+     </div><button onclick="goTo('welcome')" class="btn-bounce bg-red-500 text-white font-bold px-6 py-3 rounded-full shadow-md">Next: Welcome →</button>
+    </div>
+   </div>
+  </div><!-- PAGE: WELCOME -->
+  <div id="page-welcome" class="page">
+   <div class="flex-1 p-6 fade-in bg-gradient-to-b from-purple-50 to-white">
+    <div class="max-w-2xl mx-auto"><button onclick="goTo('menu')" class="text-purple-600 font-bold mb-4 flex items-center gap-1"><i data-lucide="arrow-left" class="w-4 h-4"></i> Menu</button>
+     <h2 class="fredoka text-3xl text-purple-700 mb-6">👋 Welcome!</h2>
+     <div class="bg-white rounded-xl p-6 shadow-md">
+      <div class="text-center text-5xl mb-4">
+       🛒🥛🍞🧃
+      </div>
+      <h3 class="font-bold text-xl text-center text-gray-800 mb-4">Welcome to "Containers &amp; Quantities"!</h3>
+      <p class="text-gray-600 mb-4">In this lesson, you will learn how to talk about <b>food and drinks</b> using the right <b>containers</b> and <b>quantity words</b>.</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+       <div class="bg-orange-50 rounded-lg p-4">
+        <p class="font-bold text-orange-700 mb-2">📦 Containers:</p>
+        <p class="text-sm text-gray-600">a bottle, a glass, a cup, a bowl, a bag, a box, a can, a carton, a jar, a packet</p>
+       </div>
+       <div class="bg-green-50 rounded-lg p-4">
+        <p class="font-bold text-green-700 mb-2">🔢 Quantities:</p>
+        <p class="text-sm text-gray-600">some, any, a lot of, a little, a few, a piece of, a slice of, a loaf of</p>
+       </div>
+      </div>
+      <p class="text-gray-600 text-sm italic">These words help us describe exactly how much food or drink we want!</p>
+     </div><button onclick="goTo('material')" class="btn-bounce bg-purple-500 text-white font-bold px-6 py-3 rounded-full shadow-md mt-4">Start Learning →</button>
+    </div>
+   </div>
+  </div><!-- PAGE: MATERIAL -->
+  <div id="page-material" class="page">
+   <div class="flex-1 p-6 fade-in bg-gradient-to-b from-amber-50 to-white">
+    <div class="max-w-2xl mx-auto"><button onclick="goTo('menu')" class="text-amber-600 font-bold mb-4 flex items-center gap-1"><i data-lucide="arrow-left" class="w-4 h-4"></i> Menu</button>
+     <h2 class="fredoka text-3xl text-amber-700 mb-6">📖 Containers &amp; Quantities</h2>
+     <div class="space-y-4">
+      <div class="bg-white rounded-xl p-5 shadow-md">
+       <h3 class="font-bold text-lg text-orange-700 mb-3">🥛 Containers for Drinks</h3>
+       <div class="grid grid-cols-2 gap-3">
+        <div class="bg-orange-50 rounded-lg p-3 text-center">
+         <div class="text-2xl">
+          🍶
+         </div>
+         <p class="font-semibold text-sm">a bottle of water</p>
+        </div>
+        <div class="bg-orange-50 rounded-lg p-3 text-center">
+         <div class="text-2xl">
+          ☕
+         </div>
+         <p class="font-semibold text-sm">a cup of tea</p>
+        </div>
+        <div class="bg-orange-50 rounded-lg p-3 text-center">
+         <div class="text-2xl">
+          🥛
+         </div>
+         <p class="font-semibold text-sm">a glass of milk</p>
+        </div>
+        <div class="bg-orange-50 rounded-lg p-3 text-center">
+         <div class="text-2xl">
+          🥫
+         </div>
+         <p class="font-semibold text-sm">a can of soda</p>
+        </div>
+        <div class="bg-orange-50 rounded-lg p-3 text-center">
+         <div class="text-2xl">
+          🧃
+         </div>
+         <p class="font-semibold text-sm">a carton of juice</p>
+        </div>
+        <div class="bg-orange-50 rounded-lg p-3 text-center">
+         <div class="text-2xl">
+          🫖
+         </div>
+         <p class="font-semibold text-sm">a pot of coffee</p>
+        </div>
+       </div>
+      </div>
+      <div class="bg-white rounded-xl p-5 shadow-md">
+       <h3 class="font-bold text-lg text-green-700 mb-3">🍞 Containers for Food</h3>
+       <div class="grid grid-cols-2 gap-3">
+        <div class="bg-green-50 rounded-lg p-3 text-center">
+         <div class="text-2xl">
+          🥣
+         </div>
+         <p class="font-semibold text-sm">a bowl of rice</p>
+        </div>
+        <div class="bg-green-50 rounded-lg p-3 text-center">
+         <div class="text-2xl">
+          👜
+         </div>
+         <p class="font-semibold text-sm">a bag of chips</p>
+        </div>
+        <div class="bg-green-50 rounded-lg p-3 text-center">
+         <div class="text-2xl">
+          📦
+         </div>
+         <p class="font-semibold text-sm">a box of cereal</p>
+        </div>
+        <div class="bg-green-50 rounded-lg p-3 text-center">
+         <div class="text-2xl">
+          🏺
+         </div>
+         <p class="font-semibold text-sm">a jar of jam</p>
+        </div>
+        <div class="bg-green-50 rounded-lg p-3 text-center">
+         <div class="text-2xl">
+          🍞
+         </div>
+         <p class="font-semibold text-sm">a loaf of bread</p>
+        </div>
+        <div class="bg-green-50 rounded-lg p-3 text-center">
+         <div class="text-2xl">
+          🍕
+         </div>
+         <p class="font-semibold text-sm">a slice of pizza</p>
+        </div>
+        <div class="bg-green-50 rounded-lg p-3 text-center">
+         <div class="text-2xl">
+          🍰
+         </div>
+         <p class="font-semibold text-sm">a piece of cake</p>
+        </div>
+       </div>
+      </div>
+      <div class="bg-white rounded-xl p-5 shadow-md">
+       <h3 class="font-bold text-lg text-blue-700 mb-3">🔢 Quantity Words</h3>
+       <table class="w-full text-sm">
+        <tbody>
+         <tr class="border-b">
+          <td class="py-2 font-bold text-blue-600">some</td>
+          <td>I have <b>some</b> water. (positive sentences)</td>
+         </tr>
+         <tr class="border-b">
+          <td class="py-2 font-bold text-blue-600">any</td>
+          <td>Do you have <b>any</b> milk? (questions/negatives)</td>
+         </tr>
+         <tr class="border-b">
+          <td class="py-2 font-bold text-blue-600">a lot of</td>
+          <td>There are <b>a lot of</b> apples.</td>
+         </tr>
+         <tr class="border-b">
+          <td class="py-2 font-bold text-blue-600">a little</td>
+          <td>I need <b>a little</b> sugar. (uncountable)</td>
+         </tr>
+         <tr class="border-b">
+          <td class="py-2 font-bold text-blue-600">a few</td>
+          <td>There are <b>a few</b> eggs. (countable)</td>
+         </tr>
+        </tbody>
+       </table>
+      </div>
+     </div><button onclick="goTo('qa')" class="btn-bounce bg-amber-500 text-white font-bold px-6 py-3 rounded-full shadow-md mt-4">Next: Q&amp;A →</button>
+    </div>
+   </div>
+  </div><!-- PAGE: Q&A -->
+  <div id="page-qa" class="page">
+   <div class="flex-1 p-6 fade-in bg-gradient-to-b from-teal-50 to-white">
+    <div class="max-w-2xl mx-auto"><button onclick="goTo('menu')" class="text-teal-600 font-bold mb-4 flex items-center gap-1"><i data-lucide="arrow-left" class="w-4 h-4"></i> Menu</button>
+     <h2 class="fredoka text-3xl text-teal-700 mb-6">❓ Questions &amp; Answers</h2>
+     <div class="space-y-4">
+      <div class="bg-white rounded-xl p-5 shadow-md">
+       <h3 class="font-bold text-teal-700 mb-3">How to Ask About Containers &amp; Quantities:</h3>
+       <div class="space-y-3">
+        <div class="bg-teal-50 rounded-lg p-3">
+         <p class="font-semibold">Q: How much water do you need?</p>
+         <p class="text-gray-600">A: I need <b>a bottle of</b> water.</p>
+        </div>
+        <div class="bg-teal-50 rounded-lg p-3">
+         <p class="font-semibold">Q: How many eggs are there?</p>
+         <p class="text-gray-600">A: There are <b>a few</b> eggs in the box.</p>
+        </div>
+        <div class="bg-teal-50 rounded-lg p-3">
+         <p class="font-semibold">Q: Is there any milk in the fridge?</p>
+         <p class="text-gray-600">A: Yes, there is <b>a carton of</b> milk.</p>
+        </div>
+        <div class="bg-teal-50 rounded-lg p-3">
+         <p class="font-semibold">Q: What would you like to drink?</p>
+         <p class="text-gray-600">A: I'd like <b>a cup of</b> tea, please.</p>
+        </div>
+        <div class="bg-teal-50 rounded-lg p-3">
+         <p class="font-semibold">Q: Do you have any sugar?</p>
+         <p class="text-gray-600">A: Yes, I have <b>a little</b> sugar.</p>
+        </div>
+       </div>
+      </div>
+      <div class="bg-yellow-50 rounded-xl p-5 shadow-md border-l-4 border-yellow-400">
+       <p class="font-bold text-yellow-800 mb-2">💡 Remember!</p>
+       <p class="text-gray-700"><b>How much</b> → for uncountable nouns (water, sugar, rice)</p>
+       <p class="text-gray-700"><b>How many</b> → for countable nouns (eggs, apples, bottles)</p>
+      </div>
+     </div><button onclick="goTo('vocabulary')" class="btn-bounce bg-teal-500 text-white font-bold px-6 py-3 rounded-full shadow-md mt-4">Next: Vocabulary →</button>
+    </div>
+   </div>
+  </div><!-- PAGE: VOCABULARY -->
+  <div id="page-vocabulary" class="page">
+   <div class="flex-1 p-6 fade-in bg-gradient-to-b from-indigo-50 to-white">
+    <div class="max-w-2xl mx-auto"><button onclick="goTo('menu')" class="text-indigo-600 font-bold mb-4 flex items-center gap-1"><i data-lucide="arrow-left" class="w-4 h-4"></i> Menu</button>
+     <h2 class="fredoka text-3xl text-indigo-700 mb-4">🔤 Vocabulary &amp; Listening</h2>
+     <p class="text-gray-600 mb-4">Click 🔊 to hear the pronunciation!</p>
+     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="vocab-list">
+     </div>
+    </div>
+   </div>
+  </div><!-- PAGE: MATCHING -->
+  <div id="page-matching" class="page">
+   <div class="flex-1 p-6 fade-in bg-gradient-to-b from-pink-50 to-white">
+    <div class="max-w-2xl mx-auto"><button onclick="goTo('menu')" class="text-pink-600 font-bold mb-4 flex items-center gap-1"><i data-lucide="arrow-left" class="w-4 h-4"></i> Menu</button>
+     <h2 class="fredoka text-3xl text-pink-700 mb-4">🧩 Mini Practice: Match!</h2>
+     <p class="text-gray-600 mb-4">Click a container, then click the correct food/drink to match.</p>
+     <div id="matching-game" class="space-y-4"></div>
+     <div id="matching-result" class="mt-4 text-center font-bold text-lg hidden"></div><button onclick="initMatching()" class="btn-bounce bg-pink-500 text-white font-bold px-6 py-3 rounded-full shadow-md mt-4">Reset Game</button>
+    </div>
+   </div>
+  </div><!-- PAGE: TEXT EXAMPLE -->
+  <div id="page-text-example" class="page">
+   <div class="flex-1 p-6 fade-in bg-gradient-to-b from-cyan-50 to-white">
+    <div class="max-w-2xl mx-auto"><button onclick="goTo('menu')" class="text-cyan-600 font-bold mb-4 flex items-center gap-1"><i data-lucide="arrow-left" class="w-4 h-4"></i> Menu</button>
+     <h2 class="fredoka text-3xl text-cyan-700 mb-6">📝 Text Example</h2>
+     <div class="bg-white rounded-xl p-6 shadow-md">
+      <h3 class="font-bold text-lg text-gray-800 mb-2">🛒 My Shopping List</h3>
+      <div class="bg-gray-50 rounded-lg p-4 text-gray-700 leading-relaxed">
+       <p>Today is Saturday. My mother and I go to the supermarket. We need to buy some things for the week.</p>
+       <p class="mt-2">Here is our shopping list:</p>
+       <ul class="list-disc ml-5 mt-2 space-y-1">
+        <li>Two <b>bottles of</b> water</li>
+        <li>A <b>carton of</b> milk</li>
+        <li>A <b>loaf of</b> bread</li>
+        <li>A <b>bag of</b> rice (5 kg)</li>
+        <li>A <b>jar of</b> strawberry jam</li>
+        <li>A <b>box of</b> cereal</li>
+        <li>A <b>dozen</b> eggs</li>
+        <li>A <b>few</b> bananas</li>
+        <li>A <b>can of</b> tuna</li>
+        <li><b>Some</b> vegetables</li>
+       </ul>
+       <p class="mt-3">We don't need <b>any</b> sugar because we still have <b>a lot of</b> sugar at home. We also have <b>a little</b> butter left in the fridge.</p>
+       <p class="mt-2">At the store, I ask my mother: "Do we need <b>any</b> juice?" She says: "Yes, please get <b>a carton of</b> orange juice."</p>
+      </div>
+     </div><button onclick="goTo('dialog-quiz')" class="btn-bounce bg-cyan-500 text-white font-bold px-6 py-3 rounded-full shadow-md mt-4">Next: Dialog Quiz →</button>
+    </div>
+   </div>
+  </div><!-- PAGE: DIALOG QUIZ (True/False) -->
+  <div id="page-dialog-quiz" class="page">
+   <div class="flex-1 p-6 fade-in bg-gradient-to-b from-rose-50 to-white">
+    <div class="max-w-2xl mx-auto"><button onclick="goTo('menu')" class="text-rose-600 font-bold mb-4 flex items-center gap-1"><i data-lucide="arrow-left" class="w-4 h-4"></i> Menu</button>
+     <h2 class="fredoka text-3xl text-rose-700 mb-4">💬 Dialog: True or False?</h2>
+     <div class="bg-white rounded-xl p-5 shadow-md mb-4">
+      <h3 class="font-bold text-gray-800 mb-2">How to Make a Cup of Tea ☕</h3>
+      <div class="bg-gray-50 rounded-lg p-4 text-sm text-gray-700 space-y-2">
+       <p><b>Anna:</b> Hey Ben, would you like a cup of tea?</p>
+       <p><b>Ben:</b> Yes, please! How do you make it?</p>
+       <p><b>Anna:</b> First, boil a kettle of water.</p>
+       <p><b>Ben:</b> Okay, then what?</p>
+       <p><b>Anna:</b> Put a tea bag in a cup. Pour the hot water into the cup.</p>
+       <p><b>Ben:</b> Do I add sugar?</p>
+       <p><b>Anna:</b> Add a spoonful of sugar if you like. Then add a little milk.</p>
+       <p><b>Ben:</b> That sounds easy! Thanks, Anna!</p>
+      </div>
+     </div>
+     <div id="tf-quiz" class="space-y-3"></div>
+     <div id="tf-result" class="mt-4 text-center font-bold hidden"></div>
+    </div>
+   </div>
+  </div><!-- PAGE: DIALOG SCENARIOS -->
+  <div id="page-dialog-scenarios" class="page">
+   <div class="flex-1 p-6 fade-in bg-gradient-to-b from-violet-50 to-white">
+    <div class="max-w-2xl mx-auto"><button onclick="goTo('menu')" class="text-violet-600 font-bold mb-4 flex items-center gap-1"><i data-lucide="arrow-left" class="w-4 h-4"></i> Menu</button>
+     <h2 class="fredoka text-3xl text-violet-700 mb-4">🎭 Dialog Scenarios</h2>
+     <div class="flex gap-2 mb-4 flex-wrap"><button onclick="showScenario(0)" class="bg-violet-100 text-violet-700 font-bold px-4 py-2 rounded-full text-sm scenario-tab active-tab" data-idx="0">At a Café</button> <button onclick="showScenario(1)" class="bg-violet-100 text-violet-700 font-bold px-4 py-2 rounded-full text-sm scenario-tab" data-idx="1">At a Store</button> <button onclick="showScenario(2)" class="bg-violet-100 text-violet-700 font-bold px-4 py-2 rounded-full text-sm scenario-tab" data-idx="2">At Home</button> <button onclick="showScenario(3)" class="bg-violet-100 text-violet-700 font-bold px-4 py-2 rounded-full text-sm scenario-tab" data-idx="3">At School</button>
+     </div>
+     <div id="scenario-content" class="bg-white rounded-xl p-5 shadow-md"></div>
+     <div id="scenario-practice" class="mt-4"></div>
+    </div>
+   </div>
+  </div><!-- PAGE: ASKING & GIVING -->
+  <div id="page-asking-giving" class="page">
+   <div class="flex-1 p-6 fade-in bg-gradient-to-b from-lime-50 to-white">
+    <div class="max-w-2xl mx-auto"><button onclick="goTo('menu')" class="text-lime-600 font-bold mb-4 flex items-center gap-1"><i data-lucide="arrow-left" class="w-4 h-4"></i> Menu</button>
+     <h2 class="fredoka text-3xl text-lime-700 mb-6">🗣️ Asking &amp; Giving Information</h2>
+     <div class="space-y-4">
+      <div class="bg-white rounded-xl p-5 shadow-md">
+       <h3 class="font-bold text-lime-700 mb-3">Useful Expressions:</h3>
+       <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div class="bg-lime-50 rounded-lg p-3">
+         <p class="font-bold text-sm text-lime-800">Asking:</p>
+         <p class="text-sm">"Can I have a bottle of water, please?"</p>
+        </div>
+        <div class="bg-lime-50 rounded-lg p-3">
+         <p class="font-bold text-sm text-lime-800">Giving:</p>
+         <p class="text-sm">"Here you are. One bottle of water."</p>
+        </div>
+        <div class="bg-lime-50 rounded-lg p-3">
+         <p class="font-bold text-sm text-lime-800">Asking:</p>
+         <p class="text-sm">"How much sugar do you need?"</p>
+        </div>
+        <div class="bg-lime-50 rounded-lg p-3">
+         <p class="font-bold text-sm text-lime-800">Giving:</p>
+         <p class="text-sm">"Just a little, please."</p>
+        </div>
+        <div class="bg-lime-50 rounded-lg p-3">
+         <p class="font-bold text-sm text-lime-800">Asking:</p>
+         <p class="text-sm">"Is there any juice left?"</p>
+        </div>
+        <div class="bg-lime-50 rounded-lg p-3">
+         <p class="font-bold text-sm text-lime-800">Giving:</p>
+         <p class="text-sm">"Yes, there's a carton of juice in the fridge."</p>
+        </div>
+        <div class="bg-lime-50 rounded-lg p-3">
+         <p class="font-bold text-sm text-lime-800">Asking:</p>
+         <p class="text-sm">"Would you like some cake?"</p>
+        </div>
+        <div class="bg-lime-50 rounded-lg p-3">
+         <p class="font-bold text-sm text-lime-800">Giving:</p>
+         <p class="text-sm">"Yes, please. Just a slice."</p>
+        </div>
+       </div>
+      </div>
+      <div class="bg-yellow-50 rounded-xl p-4 border-l-4 border-yellow-400">
+       <p class="font-bold text-yellow-800">💡 Tip: Be polite!</p>
+       <p class="text-sm text-gray-700">Always use "please" and "thank you" when asking for food and drink.</p>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div><!-- PAGE: READING -->
+  <div id="page-reading" class="page">
+   <div class="flex-1 p-6 fade-in bg-gradient-to-b from-sky-50 to-white">
+    <div class="max-w-2xl mx-auto"><button onclick="goTo('menu')" class="text-sky-600 font-bold mb-4 flex items-center gap-1"><i data-lucide="arrow-left" class="w-4 h-4"></i> Menu</button>
+     <h2 class="fredoka text-3xl text-sky-700 mb-4">📰 Reading Comprehension</h2>
+     <div class="bg-white rounded-xl p-5 shadow-md mb-4">
+      <h3 class="font-bold text-gray-800 mb-2">🎉 Sarah's Birthday Party</h3>
+      <div class="bg-gray-50 rounded-lg p-4 text-sm text-gray-700 leading-relaxed">
+       <p>Sarah is having a birthday party tomorrow. She makes a list of things she needs. She needs three bottles of lemonade, two cartons of orange juice, and <b>a lot of</b> snacks. She buys five <b>bags of</b> chips, two <b>boxes of</b> cookies, and a big <b>bowl of</b> fruit salad. For the cake, she needs <b>a packet of</b> flour, <b>some</b> eggs, and <b>a little</b> vanilla. Her friend Tom brings <b>a few</b> cans of soda. They don't have <b>any</b> paper cups, so they also buy <b>a pack of</b> cups from the store.</p>
+      </div>
+     </div>
+     <div id="reading-quiz" class="space-y-4"></div>
+     <div id="reading-result" class="mt-4 text-center font-bold hidden"></div>
+    </div>
+   </div>
+  </div><!-- PAGE: QUIZ 1 -->
+  <div id="page-quiz1" class="page">
+   <div class="flex-1 p-6 fade-in bg-gradient-to-b from-emerald-50 to-white">
+    <div class="max-w-2xl mx-auto"><button onclick="goTo('menu')" class="text-emerald-600 font-bold mb-4 flex items-center gap-1"><i data-lucide="arrow-left" class="w-4 h-4"></i> Menu</button>
+     <h2 class="fredoka text-3xl text-emerald-700 mb-4">✅ Quiz 1: Choose the Right Container</h2>
+     <div id="quiz1-content" class="space-y-4"></div>
+     <div id="quiz1-result" class="mt-4 text-center font-bold hidden"></div><button onclick="checkQuiz('quiz1')" class="btn-bounce bg-emerald-500 text-white font-bold px-6 py-3 rounded-full shadow-md mt-4">Check Answers</button>
+    </div>
+   </div>
+  </div><!-- PAGE: QUIZ 2 -->
+  <div id="page-quiz2" class="page">
+   <div class="flex-1 p-6 fade-in bg-gradient-to-b from-orange-50 to-white">
+    <div class="max-w-2xl mx-auto"><button onclick="goTo('menu')" class="text-orange-600 font-bold mb-4 flex items-center gap-1"><i data-lucide="arrow-left" class="w-4 h-4"></i> Menu</button>
+     <h2 class="fredoka text-3xl text-orange-700 mb-4">✅ Quiz 2: Fill in the Blanks</h2>
+     <div id="quiz2-content" class="space-y-4"></div>
+     <div id="quiz2-result" class="mt-4 text-center font-bold hidden"></div><button onclick="checkQuiz('quiz2')" class="btn-bounce bg-orange-500 text-white font-bold px-6 py-3 rounded-full shadow-md mt-4">Check Answers</button>
+    </div>
+   </div>
+  </div><!-- PAGE: QUIZ 3 -->
+  <div id="page-quiz3" class="page">
+   <div class="flex-1 p-6 fade-in bg-gradient-to-b from-fuchsia-50 to-white">
+    <div class="max-w-2xl mx-auto"><button onclick="goTo('menu')" class="text-fuchsia-600 font-bold mb-4 flex items-center gap-1"><i data-lucide="arrow-left" class="w-4 h-4"></i> Menu</button>
+     <h2 class="fredoka text-3xl text-fuchsia-700 mb-4">✅ Quiz 3: Multiple Choice</h2>
+     <div id="quiz3-content" class="space-y-4"></div>
+     <div id="quiz3-result" class="mt-4 text-center font-bold hidden"></div><button onclick="checkQuiz('quiz3')" class="btn-bounce bg-fuchsia-500 text-white font-bold px-6 py-3 rounded-full shadow-md mt-4">Check Answers</button>
+    </div>
+   </div>
+  </div><!-- PAGE: VOICE QUIZ -->
+  <div id="page-voice-quiz" class="page">
+   <div class="flex-1 p-6 fade-in bg-gradient-to-b from-red-50 to-white">
+    <div class="max-w-2xl mx-auto"><button onclick="goTo('menu')" class="text-red-600 font-bold mb-4 flex items-center gap-1"><i data-lucide="arrow-left" class="w-4 h-4"></i> Menu</button>
+     <h2 class="fredoka text-3xl text-red-700 mb-4">🎤 Voice Recognition Quiz</h2>
+     <p class="text-gray-600 mb-4">Say the phrase shown below. Click the microphone button and speak clearly!</p>
+     <div id="voice-quiz-content" class="text-center">
+      <div class="bg-white rounded-xl p-8 shadow-md mb-4">
+       <p class="text-gray-500 text-sm mb-2">Say this phrase:</p>
+       <p id="voice-target" class="text-2xl font-bold text-gray-800 mb-4"></p><button id="voice-btn" onclick="startVoiceRecognition()" class="bg-red-500 text-white w-16 h-16 rounded-full shadow-lg text-3xl btn-bounce">🎤</button>
+       <p id="voice-status" class="text-sm text-gray-500 mt-3">Click the microphone to start</p>
+       <p id="voice-result-text" class="text-lg font-bold mt-3 hidden"></p>
+      </div>
+      <div class="flex justify-between items-center"><span id="voice-progress" class="text-sm text-gray-500">Question 1/5</span> <button onclick="nextVoiceQuestion()" class="bg-red-100 text-red-700 font-bold px-4 py-2 rounded-full text-sm">Skip →</button>
+      </div>
+      <div id="voice-score" class="mt-4 text-center font-bold hidden"></div>
+     </div>
+    </div>
+   </div>
+  </div><!-- PAGE: CONCLUSION -->
+  <div id="page-conclusion" class="page">
+   <div class="flex-1 p-6 fade-in bg-gradient-to-b from-amber-50 to-white">
+    <div class="max-w-2xl mx-auto"><button onclick="goTo('menu')" class="text-amber-600 font-bold mb-4 flex items-center gap-1"><i data-lucide="arrow-left" class="w-4 h-4"></i> Menu</button>
+     <h2 class="fredoka text-3xl text-amber-700 mb-6">📌 Conclusion</h2>
+     <div class="bg-white rounded-xl p-6 shadow-md">
+      <h3 class="font-bold text-lg text-gray-800 mb-4">What We Learned Today:</h3>
+      <div class="space-y-3">
+       <div class="flex gap-2">
+        <span>📦</span>
+        <p><b>Containers:</b> bottle, cup, glass, bowl, bag, box, can, carton, jar, packet, loaf, slice, piece</p>
+       </div>
+       <div class="flex gap-2">
+        <span>🔢</span>
+        <p><b>Quantity words:</b> some, any, a lot of, a little, a few</p>
+       </div>
+       <div class="flex gap-2">
+        <span>❓</span>
+        <p><b>Questions:</b> How much...? How many...? Is there any...? Do you have...?</p>
+       </div>
+       <div class="flex gap-2">
+        <span>🗣️</span>
+        <p><b>Polite requests:</b> Can I have...? Would you like...? I'd like..., please.</p>
+       </div>
+      </div>
+      <div class="bg-amber-50 rounded-lg p-4 mt-4">
+       <p class="font-bold text-amber-800">🌟 Great job completing this lesson!</p>
+       <p class="text-sm text-gray-600 mt-1">Keep practicing these expressions in your daily life!</p>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div><!-- PAGE: REFLECTION -->
+  <div id="page-reflection" class="page">
+   <div class="flex-1 p-6 fade-in bg-gradient-to-b from-sky-50 to-white">
+    <div class="max-w-2xl mx-auto"><button onclick="goTo('menu')" class="text-sky-600 font-bold mb-4 flex items-center gap-1"><i data-lucide="arrow-left" class="w-4 h-4"></i> Menu</button>
+     <h2 class="fredoka text-3xl text-sky-700 mb-6">🪞 Reflection</h2>
+     <div class="bg-white rounded-xl p-6 shadow-md">
+      <p class="text-gray-600 mb-4">Think about what you learned and rate yourself:</p>
+      <div class="space-y-4" id="reflection-items">
+       <div class="border rounded-lg p-4">
+        <p class="font-semibold text-sm mb-2">I can name containers for food and drink.</p>
+        <div class="flex gap-2">
+         <button onclick="rateReflection(this)" class="text-2xl hover:scale-125 transition-transform">😊</button><button onclick="rateReflection(this)" class="text-2xl hover:scale-125 transition-transform">😐</button><button onclick="rateReflection(this)" class="text-2xl hover:scale-125 transition-transform">😟</button>
+        </div>
+       </div>
+       <div class="border rounded-lg p-4">
+        <p class="font-semibold text-sm mb-2">I can use quantity words (some, any, a lot of, a little, a few).</p>
+        <div class="flex gap-2">
+         <button onclick="rateReflection(this)" class="text-2xl hover:scale-125 transition-transform">😊</button><button onclick="rateReflection(this)" class="text-2xl hover:scale-125 transition-transform">😐</button><button onclick="rateReflection(this)" class="text-2xl hover:scale-125 transition-transform">😟</button>
+        </div>
+       </div>
+       <div class="border rounded-lg p-4">
+        <p class="font-semibold text-sm mb-2">I can ask and answer questions about food quantities.</p>
+        <div class="flex gap-2">
+         <button onclick="rateReflection(this)" class="text-2xl hover:scale-125 transition-transform">😊</button><button onclick="rateReflection(this)" class="text-2xl hover:scale-125 transition-transform">😐</button><button onclick="rateReflection(this)" class="text-2xl hover:scale-125 transition-transform">😟</button>
+        </div>
+       </div>
+       <div class="border rounded-lg p-4">
+        <p class="font-semibold text-sm mb-2">I can read and understand texts about containers and quantities.</p>
+        <div class="flex gap-2">
+         <button onclick="rateReflection(this)" class="text-2xl hover:scale-125 transition-transform">😊</button><button onclick="rateReflection(this)" class="text-2xl hover:scale-125 transition-transform">😐</button><button onclick="rateReflection(this)" class="text-2xl hover:scale-125 transition-transform">😟</button>
+        </div>
+       </div>
+      </div>
+      <div id="reflection-msg" class="mt-4 text-center font-bold hidden"></div>
+     </div>
+    </div>
+   </div>
+  </div><!-- PAGE: DEVELOPER -->
+  <div id="page-developer" class="page">
+   <div class="flex-1 p-6 fade-in bg-gradient-to-b from-gray-100 to-white">
+    <div class="max-w-2xl mx-auto text-center"><button onclick="goTo('menu')" class="text-gray-600 font-bold mb-4 flex items-center gap-1"><i data-lucide="arrow-left" class="w-4 h-4"></i> Menu</button>
+     <h2 class="fredoka text-3xl text-gray-700 mb-6">👨‍💻 Developer</h2>
+     <div class="bg-white rounded-xl p-8 shadow-md">
+      <div class="text-6xl mb-4">
+       👨‍🏫
+      </div>
+      <h3 class="font-bold text-xl text-gray-800 mb-2">Interactive Learning Media</h3>
+      <p class="text-gray-600 mb-1"><b>Subject:</b> English</p>
+      <p class="text-gray-600 mb-1"><b>Topic:</b> Containers &amp; Quantities (Food &amp; Drink)</p>
+      <p class="text-gray-600 mb-1"><b>Level:</b> Junior High School Grade 7</p>
+      <p class="text-gray-600 mb-4"><b>Created by:</b> Didik Kamseno</p>
+      <div class="bg-gray-50 rounded-lg p-4 text-sm text-gray-500">
+       <p>This interactive learning media is designed to help students learn English vocabulary and expressions related to containers and quantities in the context of food and drink.</p>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div>
+  <script>
+// Navigation
+function goTo(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const target = document.getElementById('page-' + page);
+  if (target) { target.classList.add('active'); target.scrollTop = 0; }
+  if (page === 'vocabulary') initVocab();
+  if (page === 'matching') initMatching();
+  if (page === 'dialog-quiz') initTFQuiz();
+  if (page === 'dialog-scenarios') showScenario(0);
+  if (page === 'reading') initReading();
+  if (page === 'quiz1') initQuiz1();
+  if (page === 'quiz2') initQuiz2();
+  if (page === 'quiz3') initQuiz3();
+  if (page === 'voice-quiz') initVoiceQuiz();
+  lucide.createIcons();
+}
+
+// Toast
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + (type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500');
+  setTimeout(() => t.className = 'toast hidden', 2500);
+}
+
+// TTS
+function speak(text) {
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'en-US'; u.rate = 0.85;
+  speechSynthesis.speak(u);
+}
+
+// VOCABULARY
+const vocabData = [
+  { word: 'a bottle of water', emoji: '🍶' },
+  { word: 'a cup of tea', emoji: '☕' },
+  { word: 'a glass of milk', emoji: '🥛' },
+  { word: 'a can of soda', emoji: '🥫' },
+  { word: 'a carton of juice', emoji: '🧃' },
+  { word: 'a bowl of rice', emoji: '🥣' },
+  { word: 'a bag of chips', emoji: '👜' },
+  { word: 'a box of cereal', emoji: '📦' },
+  { word: 'a jar of jam', emoji: '🏺' },
+  { word: 'a loaf of bread', emoji: '🍞' },
+  { word: 'a slice of pizza', emoji: '🍕' },
+  { word: 'a piece of cake', emoji: '🍰' },
+];
+function initVocab() {
+  const c = document.getElementById('vocab-list');
+  c.innerHTML = vocabData.map(v => `<div class="bg-white rounded-lg p-3 shadow-sm flex items-center gap-3"><span class="text-2xl">${v.emoji}</span><span class="font-semibold text-sm flex-1">${v.word}</span><button onclick="speak('${v.word}')" class="bg-indigo-100 text-indigo-700 w-8 h-8 rounded-full flex items-center justify-center text-lg hover:bg-indigo-200">🔊</button></div>`).join('');
+}
+
+// MATCHING GAME
+const matchPairs = [
+  { container: 'a bottle of', item: 'water 💧', emoji: '🍶' },
+  { container: 'a cup of', item: 'coffee ☕', emoji: '☕' },
+  { container: 'a bag of', item: 'chips 🥔', emoji: '👜' },
+  { container: 'a bowl of', item: 'soup 🍲', emoji: '🥣' },
+  { container: 'a jar of', item: 'honey 🍯', emoji: '🏺' },
+];
+let matchSelected = null, matchScore = 0;
+function initMatching() {
+  matchSelected = null; matchScore = 0;
+  const containers = [...matchPairs].sort(() => Math.random() - 0.5);
+  const items = [...matchPairs].sort(() => Math.random() - 0.5);
+  const g = document.getElementById('matching-game');
+  g.innerHTML = `<div class="grid grid-cols-2 gap-4"><div class="space-y-2">${containers.map((p,i) => `<button class="match-container w-full bg-pink-100 rounded-lg p-3 font-semibold text-sm text-left hover:bg-pink-200 transition" data-pair="${p.container}" onclick="selectContainer(this)">${p.emoji} ${p.container}...</button>`).join('')}</div><div class="space-y-2">${items.map((p,i) => `<button class="match-item w-full bg-amber-100 rounded-lg p-3 font-semibold text-sm text-left hover:bg-amber-200 transition" data-pair="${p.container}" onclick="selectItem(this)">${p.item}</button>`).join('')}</div></div>`;
+  document.getElementById('matching-result').classList.add('hidden');
+}
+function selectContainer(el) {
+  document.querySelectorAll('.match-container').forEach(e => e.classList.remove('ring-2','ring-pink-500'));
+  el.classList.add('ring-2','ring-pink-500');
+  matchSelected = el.dataset.pair;
+}
+function selectItem(el) {
+  if (!matchSelected) { showToast('Select a container first!','error'); return; }
+  if (el.dataset.pair === matchSelected) {
+    el.classList.add('bg-green-200'); el.disabled = true;
+    const cont = document.querySelector(`.match-container[data-pair="${matchSelected}"]`);
+    cont.classList.add('bg-green-200'); cont.disabled = true;
+    cont.classList.remove('ring-2','ring-pink-500');
+    matchScore++;
+    if (matchScore === matchPairs.length) {
+      document.getElementById('matching-result').textContent = '🎉 Perfect! All matched correctly!';
+      document.getElementById('matching-result').classList.remove('hidden');
+      document.getElementById('matching-result').className = 'mt-4 text-center font-bold text-lg text-green-600';
+    }
+  } else {
+    showToast('Try again!','error');
+  }
+  matchSelected = null;
+  document.querySelectorAll('.match-container').forEach(e => e.classList.remove('ring-2','ring-pink-500'));
+}
+
+// TRUE/FALSE QUIZ
+const tfQuestions = [
+  { q: 'Anna uses a kettle to boil water.', a: true },
+  { q: 'Ben puts the tea bag in a glass.', a: false },
+  { q: 'Anna adds a spoonful of sugar.', a: true },
+  { q: 'They don\'t use any milk.', a: false },
+  { q: 'Ben thinks making tea is easy.', a: true },
+];
+function initTFQuiz() {
+  const c = document.getElementById('tf-quiz');
+  c.innerHTML = tfQuestions.map((q,i) => `<div class="bg-white rounded-lg p-4 shadow-sm"><p class="font-semibold text-sm mb-2">${i+1}. ${q.q}</p><div class="flex gap-3"><button class="tf-btn px-4 py-2 rounded-full text-sm font-bold bg-green-100 text-green-700 hover:bg-green-200" onclick="answerTF(${i},true,this)">✓ True</button><button class="tf-btn px-4 py-2 rounded-full text-sm font-bold bg-red-100 text-red-700 hover:bg-red-200" onclick="answerTF(${i},false,this)">✗ False</button></div><p class="tf-feedback text-sm mt-2 hidden" id="tf-fb-${i}"></p></div>`).join('');
+  document.getElementById('tf-result').classList.add('hidden');
+}
+function answerTF(idx, answer, btn) {
+  const fb = document.getElementById('tf-fb-'+idx);
+  const correct = tfQuestions[idx].a === answer;
+  fb.textContent = correct ? '✓ Correct!' : '✗ Incorrect. The answer is ' + (tfQuestions[idx].a ? 'True' : 'False');
+  fb.className = 'tf-feedback text-sm mt-2 font-bold ' + (correct ? 'text-green-600' : 'text-red-600');
+}
+
+// DIALOG SCENARIOS
+const scenarios = [
+  { title: '☕ At a Café', dialog: [
+    { speaker: 'Waiter', text: 'Good morning! What would you like?' },
+    { speaker: 'You', text: 'I\'d like a cup of coffee, please.' },
+    { speaker: 'Waiter', text: 'Would you like some sugar?' },
+    { speaker: 'You', text: 'Yes, just a little, please.' },
+    { speaker: 'Waiter', text: 'And anything to eat?' },
+    { speaker: 'You', text: 'A slice of chocolate cake, please.' },
+  ], practice: { q: 'What container do you use for coffee?', options: ['a cup of','a bottle of','a bag of'], answer: 0 }},
+  { title: '🛒 At a Store', dialog: [
+    { speaker: 'Customer', text: 'Excuse me, do you have any orange juice?' },
+    { speaker: 'Shopkeeper', text: 'Yes! We have cartons and bottles. Which one would you like?' },
+    { speaker: 'Customer', text: 'A carton of orange juice, please. And a loaf of bread.' },
+    { speaker: 'Shopkeeper', text: 'Here you are. Anything else?' },
+    { speaker: 'Customer', text: 'Do you have any jam?' },
+    { speaker: 'Shopkeeper', text: 'Yes, we have jars of strawberry and grape jam.' },
+  ], practice: { q: 'How is the bread measured?', options: ['a slice of','a loaf of','a bag of'], answer: 1 }},
+  { title: '🏠 At Home', dialog: [
+    { speaker: 'Mom', text: 'Can you check the fridge? Is there any milk?' },
+    { speaker: 'You', text: 'There\'s only a little milk left.' },
+    { speaker: 'Mom', text: 'How many eggs do we have?' },
+    { speaker: 'You', text: 'We have a few eggs. Maybe three.' },
+    { speaker: 'Mom', text: 'Okay, please add a carton of milk and a dozen eggs to the shopping list.' },
+  ], practice: { q: 'Which word is for uncountable nouns?', options: ['a few','a little','many'], answer: 1 }},
+  { title: '🏫 At School', dialog: [
+    { speaker: 'Teacher', text: 'For our cooking class, each group needs some ingredients.' },
+    { speaker: 'Student', text: 'What do we need, Miss?' },
+    { speaker: 'Teacher', text: 'You need a bag of flour, a few eggs, and a bottle of oil.' },
+    { speaker: 'Student', text: 'Do we need any sugar?' },
+    { speaker: 'Teacher', text: 'Yes, you need a little sugar and a packet of butter.' },
+  ], practice: { q: 'What container is used for flour?', options: ['a jar of','a box of','a bag of'], answer: 2 }},
+];
+function showScenario(idx) {
+  document.querySelectorAll('.scenario-tab').forEach(t => t.classList.remove('bg-violet-600','text-white'));
+  document.querySelectorAll('.scenario-tab')[idx].classList.add('bg-violet-600','text-white');
+  const s = scenarios[idx];
+  document.getElementById('scenario-content').innerHTML = `<h3 class="font-bold text-lg mb-3">${s.title}</h3><div class="space-y-2">${s.dialog.map(d => `<div class="flex gap-2"><span class="font-bold text-sm text-violet-700 w-20 shrink-0">${d.speaker}:</span><span class="text-sm text-gray-700">${d.text}</span></div>`).join('')}</div>`;
+  document.getElementById('scenario-practice').innerHTML = `<div class="bg-violet-50 rounded-xl p-4"><p class="font-bold text-sm mb-2">Mini Practice: ${s.practice.q}</p><div class="flex gap-2 flex-wrap">${s.practice.options.map((o,i) => `<button class="quiz-opt bg-white border-2 border-violet-200 rounded-lg px-4 py-2 text-sm font-semibold" onclick="checkScenarioPractice(${idx},${i},this)">${o}</button>`).join('')}</div></div>`;
+}
+function checkScenarioPractice(sIdx, oIdx, btn) {
+  const correct = scenarios[sIdx].practice.answer === oIdx;
+  btn.classList.add(correct ? 'correct' : 'wrong');
+  if (!correct) setTimeout(() => btn.classList.remove('wrong'), 1000);
+}
+
+// READING QUIZ
+const readingQs = [
+  { q: 'How many bottles of lemonade does Sarah need?', opts: ['Two','Three','Five'], a: 1 },
+  { q: 'What does Tom bring?', opts: ['Bags of chips','Cans of soda','Boxes of cookies'], a: 1 },
+  { q: 'What do they need for the cake?', opts: ['A packet of flour, some eggs, a little vanilla','A bag of sugar and some milk','A box of cereal'], a: 0 },
+  { q: 'Do they have paper cups?', opts: ['Yes, a lot','No, they don\'t have any','Yes, a few'], a: 1 },
+];
+function initReading() {
+  document.getElementById('reading-quiz').innerHTML = readingQs.map((q,i) => `<div class="bg-white rounded-lg p-4 shadow-sm"><p class="font-semibold text-sm mb-2">${i+1}. ${q.q}</p><div class="space-y-2">${q.opts.map((o,j) => `<button class="quiz-opt w-full text-left bg-sky-50 border-2 border-sky-200 rounded-lg px-4 py-2 text-sm" onclick="checkReadingQ(${i},${j},this)">${o}</button>`).join('')}</div></div>`).join('');
+}
+function checkReadingQ(qi, oi, btn) {
+  const correct = readingQs[qi].a === oi;
+  btn.classList.add(correct ? 'correct' : 'wrong');
+  if (correct) btn.parentElement.querySelectorAll('button').forEach(b => b.disabled = true);
+  else setTimeout(() => btn.classList.remove('wrong'), 800);
+}
+
+// QUIZ 1
+const quiz1Data = [
+  { q: '___ of milk', opts: ['a bottle','a slice','a loaf'], a: 0 },
+  { q: '___ of bread', opts: ['a can','a loaf','a jar'], a: 1 },
+  { q: '___ of chips', opts: ['a cup','a carton','a bag'], a: 2 },
+  { q: '___ of tea', opts: ['a cup','a bottle','a box'], a: 0 },
+  { q: '___ of jam', opts: ['a bag','a packet','a jar'], a: 2 },
+];
+function initQuiz1() { renderQuiz('quiz1', quiz1Data); }
+
+// QUIZ 2
+const quiz2Data = [
+  { q: 'I need ___ sugar for my coffee. (a small amount)', opts: ['a few','a little','many'], a: 1 },
+  { q: 'Are there ___ eggs in the fridge?', opts: ['some','any','a little'], a: 1 },
+  { q: 'We have ___ apples. About ten!', opts: ['a little','any','a lot of'], a: 2 },
+  { q: 'There are ___ bananas left. Only two.', opts: ['a few','a little','a lot of'], a: 0 },
+  { q: 'I have ___ water. Would you like some?', opts: ['any','a few','some'], a: 2 },
+];
+function initQuiz2() { renderQuiz('quiz2', quiz2Data); }
+
+// QUIZ 3
+const quiz3Data = [
+  { q: 'Which is correct?', opts: ['a glass of rice','a glass of juice','a glass of bread'], a: 1 },
+  { q: '"How much" is used for...', opts: ['countable nouns','uncountable nouns','both'], a: 1 },
+  { q: 'Complete: "Can I have ___ water?"', opts: ['a few','any','some'], a: 2 },
+  { q: 'Which container is for cereal?', opts: ['a can','a box','a jar'], a: 1 },
+  { q: '"There isn\'t ___ milk left."', opts: ['some','any','a few'], a: 1 },
+];
+function initQuiz3() { renderQuiz('quiz3', quiz3Data); }
+
+function renderQuiz(id, data) {
+  const c = document.getElementById(id + '-content');
+  c.innerHTML = data.map((q,i) => `<div class="bg-white rounded-lg p-4 shadow-sm"><p class="font-semibold text-sm mb-2">${i+1}. ${q.q}</p><div class="space-y-2">${q.opts.map((o,j) => `<button class="quiz-opt w-full text-left bg-gray-50 border-2 border-gray-200 rounded-lg px-4 py-2 text-sm" data-qi="${i}" data-oi="${j}" onclick="selectQuizOpt('${id}',${i},${j},this)">${o}</button>`).join('')}</div></div>`).join('');
+  document.getElementById(id + '-result').classList.add('hidden');
+}
+let quizAnswers = {};
+function selectQuizOpt(id, qi, oi, btn) {
+  if (!quizAnswers[id]) quizAnswers[id] = {};
+  quizAnswers[id][qi] = oi;
+  btn.parentElement.querySelectorAll('button').forEach(b => { b.classList.remove('ring-2','ring-blue-500'); });
+  btn.classList.add('ring-2','ring-blue-500');
+}
+function checkQuiz(id) {
+  const data = id === 'quiz1' ? quiz1Data : id === 'quiz2' ? quiz2Data : quiz3Data;
+  if (!quizAnswers[id]) { showToast('Please answer all questions!','error'); return; }
+  let score = 0;
+  data.forEach((q,i) => {
+    const btns = document.querySelectorAll(`#${id}-content [data-qi="${i}"]`);
+    btns.forEach(b => {
+      const oi = parseInt(b.dataset.oi);
+      if (oi === q.a) b.classList.add('correct');
+      else if (quizAnswers[id][i] === oi) b.classList.add('wrong');
+      b.disabled = true;
+    });
+    if (quizAnswers[id][i] === q.a) score++;
+  });
+  const r = document.getElementById(id + '-result');
+  r.textContent = `Score: ${score}/${data.length} ${score === data.length ? '🎉 Perfect!' : score >= 3 ? '👍 Good job!' : '📚 Keep practicing!'}`;
+  r.className = 'mt-4 text-center font-bold text-lg ' + (score === data.length ? 'text-green-600' : score >= 3 ? 'text-blue-600' : 'text-orange-600');
+}
+
+// VOICE RECOGNITION
+const voicePhrases = [
+  'a bottle of water',
+  'a cup of tea',
+  'a loaf of bread',
+  'a glass of milk',
+  'a bag of chips',
+];
+let voiceIdx = 0, voiceScore2 = 0;
+function initVoiceQuiz() {
+  voiceIdx = 0; voiceScore2 = 0;
+  showVoiceQuestion();
+  document.getElementById('voice-score').classList.add('hidden');
+}
+function showVoiceQuestion() {
+  document.getElementById('voice-target').textContent = voicePhrases[voiceIdx];
+  document.getElementById('voice-progress').textContent = `Question ${voiceIdx+1}/${voicePhrases.length}`;
+  document.getElementById('voice-result-text').classList.add('hidden');
+  document.getElementById('voice-status').textContent = 'Click the microphone to start';
+}
+function startVoiceRecognition() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { showToast('Voice recognition not supported in this browser.','error'); return; }
+  const recognition = new SR();
+  recognition.lang = 'en-US'; recognition.continuous = false; recognition.interimResults = false;
+  document.getElementById('voice-status').textContent = '🔴 Listening...';
+  document.getElementById('voice-btn').classList.add('animate-pulse');
+  recognition.start();
+  recognition.onresult = function(e) {
+    const transcript = e.results[0][0].transcript.toLowerCase().trim();
+    const target = voicePhrases[voiceIdx].toLowerCase();
+    const rt = document.getElementById('voice-result-text');
+    rt.classList.remove('hidden');
+    // Simple similarity check
+    const similarity = transcript.includes(target) || target.includes(transcript) || levenshteinSimilarity(transcript, target) > 0.6;
+    if (similarity) {
+      rt.textContent = '✓ Great! You said: "' + transcript + '"';
+      rt.className = 'text-lg font-bold mt-3 text-green-600';
+      voiceScore2++;
+    } else {
+      rt.textContent = '✗ You said: "' + transcript + '" — Try again!';
+      rt.className = 'text-lg font-bold mt-3 text-red-600';
+    }
+    document.getElementById('voice-status').textContent = 'Done!';
+    document.getElementById('voice-btn').classList.remove('animate-pulse');
+  };
+  recognition.onerror = function() {
+    document.getElementById('voice-status').textContent = 'Error. Try again.';
+    document.getElementById('voice-btn').classList.remove('animate-pulse');
+  };
+}
+function nextVoiceQuestion() {
+  voiceIdx++;
+  if (voiceIdx >= voicePhrases.length) {
+    const s = document.getElementById('voice-score');
+    s.textContent = `🎤 Voice Quiz Complete! Score: ${voiceScore2}/${voicePhrases.length}`;
+    s.classList.remove('hidden');
+    s.className = 'mt-4 text-center font-bold text-lg text-green-600';
+    return;
+  }
+  showVoiceQuestion();
+}
+function levenshteinSimilarity(a, b) {
+  const m = a.length, n = b.length;
+  const dp = Array.from({length: m+1}, () => Array(n+1).fill(0));
+  for (let i = 0; i <= m; i++) dp[i][0] = i;
+  for (let j = 0; j <= n; j++) dp[0][j] = j;
+  for (let i = 1; i <= m; i++) for (let j = 1; j <= n; j++)
+    dp[i][j] = a[i-1] === b[j-1] ? dp[i-1][j-1] : 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
+  return 1 - dp[m][n] / Math.max(m, n);
+}
+
+// REFLECTION
+function rateReflection(btn) {
+  const parent = btn.parentElement;
+  parent.querySelectorAll('button').forEach(b => b.classList.remove('ring-2','ring-blue-400','scale-125'));
+  btn.classList.add('ring-2','ring-blue-400','scale-125');
+}
+
+// ELEMENT SDK
+const defaultConfig = {
+  app_title: 'Containers & Quantities',
+  background_color: '#fffbeb',
+  surface_color: '#ffffff',
+  text_color: '#1f2937',
+  primary_action_color: '#f97316',
+  secondary_action_color: '#0ea5e9',
+  font_family: 'Nunito',
+  font_size: 16
+};
+
+window.elementSdk.init({
+  defaultConfig,
+  onConfigChange: async (config) => {
+    document.body.style.fontFamily = `${config.font_family || defaultConfig.font_family}, sans-serif`;
+  },
+  mapToCapabilities: (config) => ({
+    recolorables: [
+      { get: () => config.background_color || defaultConfig.background_color, set: (v) => { config.background_color = v; window.elementSdk.setConfig({ background_color: v }); }},
+      { get: () => config.surface_color || defaultConfig.surface_color, set: (v) => { config.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); }},
+      { get: () => config.text_color || defaultConfig.text_color, set: (v) => { config.text_color = v; window.elementSdk.setConfig({ text_color: v }); }},
+      { get: () => config.primary_action_color || defaultConfig.primary_action_color, set: (v) => { config.primary_action_color = v; window.elementSdk.setConfig({ primary_action_color: v }); }},
+      { get: () => config.secondary_action_color || defaultConfig.secondary_action_color, set: (v) => { config.secondary_action_color = v; window.elementSdk.setConfig({ secondary_action_color: v }); }},
+    ],
+    borderables: [],
+    fontEditable: { get: () => config.font_family || defaultConfig.font_family, set: (v) => { config.font_family = v; window.elementSdk.setConfig({ font_family: v }); }},
+    fontSizeable: { get: () => config.font_size || defaultConfig.font_size, set: (v) => { config.font_size = v; window.elementSdk.setConfig({ font_size: v }); }},
+  }),
+  mapToEditPanelValues: (config) => new Map([
+    ['app_title', config.app_title || defaultConfig.app_title]
+  ])
+});
+
+lucide.createIcons();
+</script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9f621747b351f838',t:'MTc3Nzg0MDkzMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

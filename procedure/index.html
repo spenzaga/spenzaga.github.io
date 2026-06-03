@@ -1,0 +1,1569 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Procedure Text: Recipe</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&amp;family=Chewy&amp;display=swap" rel="stylesheet">
+  <style>
+html,body{margin:0;padding:0;height:100%;font-family:'Nunito',sans-serif}
+*{box-sizing:border-box}
+.page{display:none;width:100%;min-height:100%;flex-direction:column}
+.page.active{display:flex}
+.btn-primary{background:#ff6b35;color:#fff;padding:12px 24px;border-radius:14px;font-weight:700;border:none;cursor:pointer;font-size:1rem;transition:all .2s;font-family:'Nunito',sans-serif;display:inline-flex;align-items:center;gap:8px}
+.btn-primary:hover{background:#e55a2b;transform:translateY(-2px);box-shadow:0 4px 15px rgba(255,107,53,.4)}
+.btn-secondary{background:#2ec4b6;color:#fff;padding:10px 20px;border-radius:12px;font-weight:700;border:none;cursor:pointer;font-size:.95rem;transition:all .2s;font-family:'Nunito',sans-serif}
+.btn-secondary:hover{background:#25a99d;transform:translateY(-1px)}
+.btn-outline{background:transparent;border:2px solid #ff6b35;color:#ff6b35;padding:10px 20px;border-radius:12px;font-weight:700;cursor:pointer;font-size:.95rem;transition:all .2s;font-family:'Nunito',sans-serif}
+.btn-outline:hover{background:#ff6b35;color:#fff}
+.card{background:#fff;border-radius:16px;padding:20px;box-shadow:0 4px 20px rgba(0,0,0,.08);margin-bottom:16px}
+.menu-btn{background:#fff;border:none;border-radius:16px;padding:18px 20px;display:flex;align-items:center;gap:14px;width:100%;cursor:pointer;font-family:'Nunito',sans-serif;font-size:1.05rem;font-weight:700;color:#333;box-shadow:0 3px 15px rgba(0,0,0,.08);transition:all .25s}
+.menu-btn:hover{transform:translateX(6px);box-shadow:0 5px 25px rgba(0,0,0,.12)}
+.menu-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0}
+.top-bar{background:rgba(255,255,255,.95);backdrop-filter:blur(10px);padding:12px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(0,0,0,.06);position:sticky;top:0;z-index:50}
+.top-bar button{background:none;border:none;cursor:pointer;padding:6px;border-radius:8px;display:flex;align-items:center}
+.top-bar button:hover{background:rgba(0,0,0,.05)}
+.quiz-option{background:#fff;border:2px solid #e0e0e0;border-radius:12px;padding:14px 18px;cursor:pointer;transition:all .2s;font-family:'Nunito',sans-serif;font-size:.95rem;width:100%;text-align:left;display:block;font-weight:600}
+.quiz-option:hover{border-color:#ff6b35;background:#fff5f0}
+.quiz-option.correct{border-color:#2ec4b6;background:#e6faf8;color:#1a8a7e}
+.quiz-option.wrong{border-color:#e74c3c;background:#fde8e8;color:#c0392b}
+.quiz-option.selected{border-color:#ff6b35;background:#fff5f0}
+.vocab-card{background:#fff;border-radius:14px;padding:16px;box-shadow:0 2px 12px rgba(0,0,0,.07);text-align:center;cursor:pointer;transition:all .2s}
+.vocab-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(0,0,0,.12)}
+.match-item{background:#fff;border:2px solid #e0e0e0;border-radius:12px;padding:12px;text-align:center;cursor:pointer;transition:all .2s;font-weight:600;font-size:.9rem}
+.match-item.selected{border-color:#ff6b35;background:#fff5f0}
+.match-item.matched{border-color:#2ec4b6;background:#e6faf8;pointer-events:none}
+.structure-goal{background:#ff6b3520;border-left:4px solid #ff6b35;padding:12px 16px;border-radius:0 12px 12px 0;margin-bottom:8px}
+.structure-materials{background:#2ec4b620;border-left:4px solid #2ec4b6;padding:12px 16px;border-radius:0 12px 12px 0;margin-bottom:8px}
+.structure-steps{background:#6c5ce720;border-left:4px solid #6c5ce7;padding:12px 16px;border-radius:0 12px 12px 0;margin-bottom:8px}
+.drag-item{background:#fff;border:2px solid #ddd;border-radius:10px;padding:12px 16px;margin:6px 0;cursor:grab;font-weight:600;transition:all .15s;user-select:none}
+.drag-item:active{cursor:grabbing;transform:scale(1.03);box-shadow:0 4px 15px rgba(0,0,0,.15)}
+.drag-item.correct-pos{border-color:#2ec4b6;background:#e6faf8}
+.drag-item.wrong-pos{border-color:#e74c3c;background:#fde8e8}
+.tf-btn{padding:12px 28px;border-radius:12px;font-weight:800;font-size:1rem;border:2px solid;cursor:pointer;transition:all .2s;font-family:'Nunito',sans-serif;min-width:100px}
+.tf-true{border-color:#2ec4b6;color:#2ec4b6;background:#fff}
+.tf-true:hover,.tf-true.active{background:#2ec4b6;color:#fff}
+.tf-false{border-color:#e74c3c;color:#e74c3c;background:#fff}
+.tf-false:hover,.tf-false.active{background:#e74c3c;color:#fff}
+.dialog-bubble{border-radius:16px;padding:14px 18px;max-width:85%;font-size:.95rem;line-height:1.5;position:relative;animation:fadeUp .3s ease}
+.dialog-left{background:#f0f0f0;color:#333;border-bottom-left-radius:4px;align-self:flex-start}
+.dialog-right{background:#ff6b35;color:#fff;border-bottom-right-radius:4px;align-self:flex-end}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+.float-anim{animation:float 3s ease-in-out infinite}
+.pulse-anim{animation:pulse 2s ease-in-out infinite}
+.progress-bar{height:6px;background:#e0e0e0;border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,#ff6b35,#ff9a6c);border-radius:3px;transition:width .5s ease}
+.score-circle{width:120px;height:120px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:900;font-size:2rem;margin:0 auto}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);padding:12px 24px;border-radius:12px;font-weight:700;z-index:999;animation:fadeUp .3s ease;font-family:'Nunito',sans-serif}
+.toast-success{background:#2ec4b6;color:#fff}
+.toast-error{background:#e74c3c;color:#fff}
+.chewy{font-family:'Chewy',cursive}
+.recording{animation:pulse 1s infinite}
+</style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full bg-gray-50">
+  <div id="app" class="h-full overflow-auto w-full" style="max-width:100%"><!-- PAGE: COVER -->
+   <div id="page-cover" class="page active" style="background:linear-gradient(135deg,#ff6b35 0%,#ff9a6c 50%,#ffd166 100%);min-height:100%;justify-content:center;align-items:center;text-align:center;padding:32px 20px">
+    <div class="float-anim" style="font-size:5rem;margin-bottom:16px">
+     🍳
+    </div>
+    <h1 class="chewy text-white" style="font-size:2.5rem;line-height:1.1;margin:0 0 8px" id="cover-title">Procedure Text</h1>
+    <p class="text-white" style="font-size:1.2rem;font-weight:700;opacity:.9;margin:0 0 6px">Recipe Theme</p>
+    <p class="text-white" style="font-size:.95rem;opacity:.8;margin:0 0 32px">English Learning for Junior High School<br>
+      CEFR Level A1–A2</p><button class="btn-primary" onclick="goTo('page-menu')" style="background:#fff;color:#ff6b35;font-size:1.1rem;padding:14px 36px"> Let's Start! <i data-lucide="arrow-right" style="width:20px;height:20px"></i> </button>
+    <div style="margin-top:40px;opacity:.7">
+     <p class="text-white" style="font-size:.8rem;margin:0" id="cover-dev">Developed for English Class</p>
+    </div>
+   </div><!-- PAGE: MENU -->
+   <div id="page-menu" class="page" style="background:linear-gradient(180deg,#fff5f0 0%,#fff 100%)">
+    <div style="padding:24px 20px 12px;text-align:center">
+     <div style="font-size:2.5rem;margin-bottom:8px">
+      📚
+     </div>
+     <h2 class="chewy" style="color:#ff6b35;font-size:1.6rem;margin:0 0 4px" id="menu-title">Main Menu</h2>
+     <p style="color:#888;font-size:.85rem;margin:0 0 20px">Choose a section to explore</p>
+    </div>
+    <div style="padding:0 20px 32px;display:flex;flex-direction:column;gap:12px"><button class="menu-btn" onclick="goTo('page-instructions')">
+      <div class="menu-icon" style="background:#ff6b3520;color:#ff6b35">
+       📋
+      </div>
+      <div style="text-align:left">
+       <div>
+        Instructions
+       </div>
+       <div style="font-size:.75rem;color:#999;font-weight:400">
+        How to use this app
+       </div>
+      </div><i data-lucide="chevron-right" style="margin-left:auto;color:#ccc;width:20px"></i></button> <button class="menu-btn" onclick="goTo('page-objectives')">
+      <div class="menu-icon" style="background:#2ec4b620;color:#2ec4b6">
+       🎯
+      </div>
+      <div style="text-align:left">
+       <div>
+        Learning Objectives
+       </div>
+       <div style="font-size:.75rem;color:#999;font-weight:400">
+        What you will learn
+       </div>
+      </div><i data-lucide="chevron-right" style="margin-left:auto;color:#ccc;width:20px"></i></button> <button class="menu-btn" onclick="goTo('page-warmup')">
+      <div class="menu-icon" style="background:#ffd16620;color:#e6a817">
+       ☀️
+      </div>
+      <div style="text-align:left">
+       <div>
+        Warming Up
+       </div>
+       <div style="font-size:.75rem;color:#999;font-weight:400">
+        Get ready to learn
+       </div>
+      </div><i data-lucide="chevron-right" style="margin-left:auto;color:#ccc;width:20px"></i></button> <button class="menu-btn" onclick="goTo('page-welcome')">
+      <div class="menu-icon" style="background:#6c5ce720;color:#6c5ce7">
+       👋
+      </div>
+      <div style="text-align:left">
+       <div>
+        Welcome &amp; Overview
+       </div>
+       <div style="font-size:.75rem;color:#999;font-weight:400">
+        Introduction to the topic
+       </div>
+      </div><i data-lucide="chevron-right" style="margin-left:auto;color:#ccc;width:20px"></i></button> <button class="menu-btn" onclick="goTo('page-material1')">
+      <div class="menu-icon" style="background:#ff6b3520;color:#ff6b35">
+       📖
+      </div>
+      <div style="text-align:left">
+       <div>
+        Materials
+       </div>
+       <div style="font-size:.75rem;color:#999;font-weight:400">
+        Procedure text &amp; recipes
+       </div>
+      </div><i data-lucide="chevron-right" style="margin-left:auto;color:#ccc;width:20px"></i></button> <button class="menu-btn" onclick="goTo('page-exercise-ordering')">
+      <div class="menu-icon" style="background:#2ec4b620;color:#2ec4b6">
+       ✏️
+      </div>
+      <div style="text-align:left">
+       <div>
+        Exercises
+       </div>
+       <div style="font-size:.75rem;color:#999;font-weight:400">
+        Practice activities
+       </div>
+      </div><i data-lucide="chevron-right" style="margin-left:auto;color:#ccc;width:20px"></i></button> <button class="menu-btn" onclick="goTo('page-quiz1')">
+      <div class="menu-icon" style="background:#e74c3c20;color:#e74c3c">
+       🏆
+      </div>
+      <div style="text-align:left">
+       <div>
+        Quizzes
+       </div>
+       <div style="font-size:.75rem;color:#999;font-weight:400">
+        Test your knowledge
+       </div>
+      </div><i data-lucide="chevron-right" style="margin-left:auto;color:#ccc;width:20px"></i></button> <button class="menu-btn" onclick="goTo('page-voice')">
+      <div class="menu-icon" style="background:#9b59b620;color:#9b59b6">
+       🎤
+      </div>
+      <div style="text-align:left">
+       <div>
+        Voice Quiz
+       </div>
+       <div style="font-size:.75rem;color:#999;font-weight:400">
+        Practice speaking
+       </div>
+      </div><i data-lucide="chevron-right" style="margin-left:auto;color:#ccc;width:20px"></i></button> <button class="menu-btn" onclick="goTo('page-conclusion')">
+      <div class="menu-icon" style="background:#1abc9c20;color:#1abc9c">
+       📝
+      </div>
+      <div style="text-align:left">
+       <div>
+        Conclusion &amp; Reflection
+       </div>
+       <div style="font-size:.75rem;color:#999;font-weight:400">
+        Wrap up
+       </div>
+      </div><i data-lucide="chevron-right" style="margin-left:auto;color:#ccc;width:20px"></i></button> <button class="menu-btn" onclick="goTo('page-developer')">
+      <div class="menu-icon" style="background:#34495e20;color:#34495e">
+       👨‍💻
+      </div>
+      <div style="text-align:left">
+       <div>
+        Developer
+       </div>
+       <div style="font-size:.75rem;color:#999;font-weight:400">
+        About this app
+       </div>
+      </div><i data-lucide="chevron-right" style="margin-left:auto;color:#ccc;width:20px"></i></button>
+    </div>
+   </div><!-- PAGE: INSTRUCTIONS -->
+   <div id="page-instructions" class="page" style="background:#fff">
+    <div class="top-bar">
+     <button onclick="goTo('page-menu')"><i data-lucide="arrow-left" style="width:22px;height:22px;color:#333"></i></button><strong style="font-size:1.05rem">Instructions</strong>
+    </div>
+    <div style="padding:20px">
+     <div class="card">
+      <h3 style="color:#ff6b35;margin:0 0 14px;font-size:1.1rem">📋 How to Use This App</h3>
+      <div style="display:flex;flex-direction:column;gap:12px">
+       <div style="display:flex;gap:12px;align-items:flex-start">
+        <div style="background:#ff6b35;color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;flex-shrink:0">
+         1
+        </div>
+        <div>
+         <strong>Navigate easily</strong> — Use the Main Menu to jump to any section. Tap the back arrow to return.
+        </div>
+       </div>
+       <div style="display:flex;gap:12px;align-items:flex-start">
+        <div style="background:#ff6b35;color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;flex-shrink:0">
+         2
+        </div>
+        <div>
+         <strong>Read all materials carefully</strong> — Study the procedure texts, vocabulary, and grammar sections before doing exercises.
+        </div>
+       </div>
+       <div style="display:flex;gap:12px;align-items:flex-start">
+        <div style="background:#ff6b35;color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;flex-shrink:0">
+         3
+        </div>
+        <div>
+         <strong>Listen and repeat</strong> — Tap the 🔊 speaker icon to hear the pronunciation. Practice saying the words aloud.
+        </div>
+       </div>
+       <div style="display:flex;gap:12px;align-items:flex-start">
+        <div style="background:#ff6b35;color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;flex-shrink:0">
+         4
+        </div>
+        <div>
+         <strong>Do the practice activities</strong> — Complete matching, ordering, and dialogue exercises to check your understanding.
+        </div>
+       </div>
+       <div style="display:flex;gap:12px;align-items:flex-start">
+        <div style="background:#ff6b35;color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;flex-shrink:0">
+         5
+        </div>
+        <div>
+         <strong>Take the quizzes</strong> — Test your knowledge with multiple-choice questions and voice recognition activities.
+        </div>
+       </div>
+       <div style="display:flex;gap:12px;align-items:flex-start">
+        <div style="background:#ff6b35;color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;flex-shrink:0">
+         6
+        </div>
+        <div>
+         <strong>Review and reflect</strong> — Check the conclusion and reflection pages to see what you have learned.
+        </div>
+       </div>
+      </div>
+     </div>
+     <div class="card" style="background:#fff5f0;border:1px solid #ffe0cc">
+      <p style="margin:0;font-size:.9rem"><strong>💡 Tip:</strong> You can revisit any section as many times as you like. There is no time limit!</p>
+     </div>
+    </div>
+   </div><!-- PAGE: OBJECTIVES -->
+   <div id="page-objectives" class="page" style="background:#fff">
+    <div class="top-bar">
+     <button onclick="goTo('page-menu')"><i data-lucide="arrow-left" style="width:22px;height:22px;color:#333"></i></button><strong>Learning Objectives</strong>
+    </div>
+    <div style="padding:20px">
+     <div class="card">
+      <h3 style="color:#2ec4b6;margin:0 0 14px">🎯 After studying this material, you will be able to:</h3>
+      <div style="display:flex;flex-direction:column;gap:10px">
+       <div style="display:flex;gap:10px">
+        <span style="font-size:1.2rem">✅</span><span>Identify the <strong>social function</strong> of procedure texts (recipes).</span>
+       </div>
+       <div style="display:flex;gap:10px">
+        <span style="font-size:1.2rem">✅</span><span>Recognize the <strong>generic structure</strong>: Goal, Materials, and Steps.</span>
+       </div>
+       <div style="display:flex;gap:10px">
+        <span style="font-size:1.2rem">✅</span><span>Use <strong>action verbs</strong> related to cooking (cut, boil, fry, stir, etc.).</span>
+       </div>
+       <div style="display:flex;gap:10px">
+        <span style="font-size:1.2rem">✅</span><span>Use <strong>imperative sentences</strong> to give instructions.</span>
+       </div>
+       <div style="display:flex;gap:10px">
+        <span style="font-size:1.2rem">✅</span><span>Use <strong>sequence connectives</strong> (first, then, next, after that, finally).</span>
+       </div>
+       <div style="display:flex;gap:10px">
+        <span style="font-size:1.2rem">✅</span><span><strong>Ask and give information</strong> about how to make food.</span>
+       </div>
+       <div style="display:flex;gap:10px">
+        <span style="font-size:1.2rem">✅</span><span>Read and write <strong>simple procedure texts</strong> about recipes.</span>
+       </div>
+      </div>
+     </div>
+    </div>
+   </div><!-- PAGE: WARMING UP -->
+   <div id="page-warmup" class="page" style="background:#fff">
+    <div class="top-bar">
+     <button onclick="goTo('page-menu')"><i data-lucide="arrow-left" style="width:22px;height:22px;color:#333"></i></button><strong>Warming Up</strong>
+    </div>
+    <div style="padding:20px">
+     <div class="card" style="background:linear-gradient(135deg,#fff5f0,#fff);border:1px solid #ffe0cc">
+      <h3 style="color:#ff6b35;margin:0 0 12px">☀️ Let's Think!</h3>
+      <p style="margin:0 0 12px;line-height:1.6">Have you ever helped your mother or father cook in the kitchen? What did you cook? 🤔</p>
+      <p style="margin:0 0 16px;line-height:1.6">When we cook, we follow <strong>steps</strong>. For example, to make a cup of tea, we need to boil water, put a tea bag in a cup, pour hot water, and add sugar. These steps are called a <strong>procedure</strong>!</p>
+     </div>
+     <div class="card">
+      <h3 style="color:#2ec4b6;margin:0 0 12px">🍽️ Discussion Questions</h3>
+      <div style="display:flex;flex-direction:column;gap:10px;font-size:.95rem">
+       <div style="background:#f7f7f7;padding:12px 16px;border-radius:10px">
+        1. What is your <strong>favourite food</strong>? Can you name the ingredients?
+       </div>
+       <div style="background:#f7f7f7;padding:12px 16px;border-radius:10px">
+        2. Do you know <strong>how to make fried rice</strong>? What do you need?
+       </div>
+       <div style="background:#f7f7f7;padding:12px 16px;border-radius:10px">
+        3. Have you ever <strong>read a recipe</strong> in English before?
+       </div>
+       <div style="background:#f7f7f7;padding:12px 16px;border-radius:10px">
+        4. Why is it important to <strong>follow the steps in order</strong>?
+       </div>
+      </div>
+     </div>
+     <div class="card" style="background:#e6faf8;border:1px solid #b2ece5">
+      <p style="margin:0;font-size:.9rem">💡 <strong>Real-life connection:</strong> Recipes are procedure texts you use every day! When you search "how to make instant noodles" on YouTube, that is a procedure text in video form.</p>
+     </div>
+     <div style="text-align:center;margin-top:12px">
+      <button class="btn-primary" onclick="goTo('page-welcome')">Continue <i data-lucide="arrow-right" style="width:18px;height:18px"></i></button>
+     </div>
+    </div>
+   </div><!-- PAGE: WELCOME -->
+   <div id="page-welcome" class="page" style="background:#fff">
+    <div class="top-bar">
+     <button onclick="goTo('page-menu')"><i data-lucide="arrow-left" style="width:22px;height:22px;color:#333"></i></button><strong>Welcome</strong>
+    </div>
+    <div style="padding:20px">
+     <div style="text-align:center;margin-bottom:20px">
+      <div style="font-size:4rem;margin-bottom:8px">
+       👋
+      </div>
+      <h2 class="chewy" style="color:#ff6b35;margin:0 0 8px;font-size:1.5rem">Welcome, Young Chefs!</h2>
+     </div>
+     <div class="card">
+      <p style="line-height:1.7;margin:0 0 14px">In this module, you will learn about <strong>Procedure Text</strong> — a type of text that tells you <em>how to do</em> or <em>how to make</em> something step by step.</p>
+      <p style="line-height:1.7;margin:0 0 14px">We will focus on <strong>recipes</strong> — specifically <strong>how to make fried rice</strong> 🍚 and <strong>how to make instant noodles</strong> 🍜.</p>
+      <p style="line-height:1.7;margin:0">You will learn new vocabulary, grammar, reading, and even practice speaking! Let's become English chefs! 👨‍🍳</p>
+     </div>
+     <div class="card" style="background:#6c5ce710;border:1px solid #6c5ce730">
+      <h4 style="color:#6c5ce7;margin:0 0 10px">📌 What's Inside:</h4>
+      <div style="display:flex;flex-wrap:wrap;gap:8px"><span style="background:#6c5ce720;color:#6c5ce7;padding:6px 12px;border-radius:20px;font-size:.8rem;font-weight:700">Vocabulary</span> <span style="background:#ff6b3520;color:#ff6b35;padding:6px 12px;border-radius:20px;font-size:.8rem;font-weight:700">Recipes</span> <span style="background:#2ec4b620;color:#2ec4b6;padding:6px 12px;border-radius:20px;font-size:.8rem;font-weight:700">Grammar</span> <span style="background:#e74c3c20;color:#e74c3c;padding:6px 12px;border-radius:20px;font-size:.8rem;font-weight:700">Dialogues</span> <span style="background:#f39c1220;color:#f39c12;padding:6px 12px;border-radius:20px;font-size:.8rem;font-weight:700">Quizzes</span> <span style="background:#9b59b620;color:#9b59b6;padding:6px 12px;border-radius:20px;font-size:.8rem;font-weight:700">Speaking</span>
+      </div>
+     </div>
+     <div style="text-align:center;margin-top:12px">
+      <button class="btn-primary" onclick="goTo('page-material1')">Start Learning <i data-lucide="arrow-right" style="width:18px;height:18px"></i></button>
+     </div>
+    </div>
+   </div><!-- PAGE: MATERIAL 1 - Procedure Texts -->
+   <div id="page-material1" class="page" style="background:#fff">
+    <div class="top-bar">
+     <button onclick="goTo('page-menu')"><i data-lucide="arrow-left" style="width:22px;height:22px;color:#333"></i></button><strong>Procedure Text: Recipes</strong>
+    </div>
+    <div style="padding:20px">
+     <div class="card" style="border:2px solid #ff6b3530">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+       <span style="font-size:1.8rem">🍚</span>
+       <h3 style="margin:0;color:#ff6b35">How to Make Fried Rice</h3>
+      </div>
+      <div class="structure-goal">
+       <strong style="color:#ff6b35">Goal:</strong> How to make delicious fried rice
+      </div>
+      <div class="structure-materials"><strong style="color:#2ec4b6">Materials:</strong>
+       <ul style="margin:8px 0 0;padding-left:20px;line-height:1.8">
+        <li>A plate of cooked rice</li>
+        <li>2 eggs</li>
+        <li>3 cloves of garlic (chopped)</li>
+        <li>2 tablespoons of cooking oil</li>
+        <li>1 tablespoon of soy sauce</li>
+        <li>A pinch of salt and pepper</li>
+        <li>Spring onions (sliced)</li>
+       </ul>
+      </div>
+      <div class="structure-steps"><strong style="color:#6c5ce7">Steps:</strong>
+       <ol style="margin:8px 0 0;padding-left:20px;line-height:1.9">
+        <li><strong>First,</strong> heat the cooking oil in a frying pan.</li>
+        <li><strong>Then,</strong> crack the eggs and scramble them in the pan.</li>
+        <li><strong>Next,</strong> add the chopped garlic and stir until fragrant.</li>
+        <li><strong>After that,</strong> add the cooked rice and mix it well.</li>
+        <li><strong>Then,</strong> pour the soy sauce, salt, and pepper. Stir evenly.</li>
+        <li><strong>Finally,</strong> add the spring onions and serve on a plate.</li>
+       </ol>
+      </div>
+     </div>
+     <div class="card" style="border:2px solid #2ec4b630">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+       <span style="font-size:1.8rem">🍜</span>
+       <h3 style="margin:0;color:#2ec4b6">How to Make Instant Noodles</h3>
+      </div>
+      <div class="structure-goal">
+       <strong style="color:#ff6b35">Goal:</strong> How to make instant noodles
+      </div>
+      <div class="structure-materials"><strong style="color:#2ec4b6">Materials:</strong>
+       <ul style="margin:8px 0 0;padding-left:20px;line-height:1.8">
+        <li>A packet of instant noodles</li>
+        <li>400 ml of water</li>
+        <li>1 egg (optional)</li>
+        <li>Vegetables: cabbage, carrot (sliced)</li>
+       </ul>
+      </div>
+      <div class="structure-steps"><strong style="color:#6c5ce7">Steps:</strong>
+       <ol style="margin:8px 0 0;padding-left:20px;line-height:1.9">
+        <li><strong>First,</strong> boil 400 ml of water in a pot.</li>
+        <li><strong>Then,</strong> put the noodles into the boiling water.</li>
+        <li><strong>Next,</strong> cook for about 3 minutes and stir occasionally.</li>
+        <li><strong>After that,</strong> add the seasoning and mix well.</li>
+        <li><strong>Then,</strong> add the egg and vegetables if you like.</li>
+        <li><strong>Finally,</strong> pour the noodles into a bowl and serve.</li>
+       </ol>
+      </div>
+     </div>
+     <div style="text-align:center;margin-top:8px">
+      <button class="btn-primary" onclick="goTo('page-material-qa')">Continue: Q&amp;A <i data-lucide="arrow-right" style="width:18px;height:18px"></i></button>
+     </div>
+    </div>
+   </div><!-- PAGE: MATERIAL Q&A -->
+   <div id="page-material-qa" class="page" style="background:#fff">
+    <div class="top-bar">
+     <button onclick="goTo('page-material1')"><i data-lucide="arrow-left" style="width:22px;height:22px;color:#333"></i></button><strong>Q&amp;A About Recipes</strong>
+    </div>
+    <div style="padding:20px">
+     <div class="card">
+      <h3 style="color:#ff6b35;margin:0 0 14px">❓ Comprehension Questions — Fried Rice</h3>
+      <div id="qa-fried" style="display:flex;flex-direction:column;gap:12px"></div>
+     </div>
+     <div class="card">
+      <h3 style="color:#2ec4b6;margin:0 0 14px">❓ Comprehension Questions — Instant Noodles</h3>
+      <div id="qa-noodle" style="display:flex;flex-direction:column;gap:12px"></div>
+     </div>
+     <div style="text-align:center;margin-top:8px">
+      <button class="btn-primary" onclick="goTo('page-vocabulary')">Continue: Vocabulary <i data-lucide="arrow-right" style="width:18px;height:18px"></i></button>
+     </div>
+    </div>
+   </div><!-- PAGE: VOCABULARY -->
+   <div id="page-vocabulary" class="page" style="background:#fff">
+    <div class="top-bar">
+     <button onclick="goTo('page-menu')"><i data-lucide="arrow-left" style="width:22px;height:22px;color:#333"></i></button><strong>Vocabulary</strong>
+    </div>
+    <div style="padding:20px">
+     <div class="card">
+      <h3 style="color:#ff6b35;margin:0 0 4px">🔤 Action Verbs for Cooking</h3>
+      <p style="color:#888;font-size:.85rem;margin:0 0 12px">Tap a word to hear pronunciation 🔊</p>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px" id="vocab-verbs"></div>
+     </div>
+     <div class="card">
+      <h3 style="color:#2ec4b6;margin:0 0 4px">🥕 Ingredients</h3>
+      <p style="color:#888;font-size:.85rem;margin:0 0 12px">Tap to hear 🔊</p>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px" id="vocab-ingredients"></div>
+     </div>
+     <div class="card">
+      <h3 style="color:#6c5ce7;margin:0 0 4px">🍳 Cooking Utensils</h3>
+      <p style="color:#888;font-size:.85rem;margin:0 0 12px">Tap to hear 🔊</p>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px" id="vocab-utensils"></div>
+     </div>
+     <div style="text-align:center;margin-top:8px">
+      <button class="btn-primary" onclick="goTo('page-matching')">Mini Practice: Matching <i data-lucide="arrow-right" style="width:18px;height:18px"></i></button>
+     </div>
+    </div>
+   </div><!-- PAGE: MATCHING -->
+   <div id="page-matching" class="page" style="background:#fff">
+    <div class="top-bar">
+     <button onclick="goTo('page-vocabulary')"><i data-lucide="arrow-left" style="width:22px;height:22px;color:#333"></i></button><strong>Mini Practice: Matching</strong>
+    </div>
+    <div style="padding:20px">
+     <div class="card">
+      <h3 style="color:#ff6b35;margin:0 0 4px">🎮 Match the Picture with the Word</h3>
+      <p style="color:#888;font-size:.85rem;margin:0 0 16px">Tap a picture, then tap the matching word</p>
+      <div id="match-game"></div>
+      <div id="match-result" style="text-align:center;margin-top:12px"></div>
+     </div>
+     <div style="text-align:center;margin-top:8px">
+      <button class="btn-primary" onclick="goTo('page-structure')">Continue: Text Structure <i data-lucide="arrow-right" style="width:18px;height:18px"></i></button>
+     </div>
+    </div>
+   </div><!-- PAGE: TEXT STRUCTURE -->
+   <div id="page-structure" class="page" style="background:#fff">
+    <div class="top-bar">
+     <button onclick="goTo('page-menu')"><i data-lucide="arrow-left" style="width:22px;height:22px;color:#333"></i></button><strong>Text Structure</strong>
+    </div>
+    <div style="padding:20px">
+     <div class="card">
+      <h3 style="color:#6c5ce7;margin:0 0 14px">📐 Generic Structure of Procedure Text</h3>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px">
+       <div style="background:#ff6b3515;border-radius:12px;padding:14px">
+        <strong style="color:#ff6b35">1. Goal / Title</strong><br><span style="font-size:.9rem;color:#666">Tells the reader what they will make or do.</span>
+       </div>
+       <div style="background:#2ec4b615;border-radius:12px;padding:14px">
+        <strong style="color:#2ec4b6">2. Materials / Ingredients</strong><br><span style="font-size:.9rem;color:#666">Lists the things you need.</span>
+       </div>
+       <div style="background:#6c5ce715;border-radius:12px;padding:14px">
+        <strong style="color:#6c5ce7">3. Steps / Methods</strong><br><span style="font-size:.9rem;color:#666">Explains the steps in order.</span>
+       </div>
+      </div>
+     </div>
+     <div class="card">
+      <h3 style="color:#ff6b35;margin:0 0 12px">🔍 Identify the Structure</h3>
+      <p style="font-size:.9rem;color:#666;margin:0 0 12px">Read the text below. The structure is highlighted:</p>
+      <div class="structure-goal">
+       <strong>🏷️ Goal:</strong> How to Make a Cup of Tea
+      </div>
+      <div class="structure-materials">
+       <strong>📦 Materials:</strong> A tea bag, hot water, sugar, a cup, a spoon
+      </div>
+      <div class="structure-steps">
+       <strong>📝 Steps:</strong><br>
+        1. First, boil the water.<br>
+        2. Then, put the tea bag in a cup.<br>
+        3. Next, pour the hot water into the cup.<br>
+        4. After that, add sugar and stir.<br>
+        5. Finally, remove the tea bag and enjoy!
+      </div>
+     </div>
+     <div style="text-align:center;margin-top:8px">
+      <button class="btn-primary" onclick="goTo('page-grammar')">Continue: Grammar <i data-lucide="arrow-right" style="width:18px;height:18px"></i></button>
+     </div>
+    </div>
+   </div><!-- PAGE: GRAMMAR -->
+   <div id="page-grammar" class="page" style="background:#fff">
+    <div class="top-bar">
+     <button onclick="goTo('page-menu')"><i data-lucide="arrow-left" style="width:22px;height:22px;color:#333"></i></button><strong>Grammar Focus</strong>
+    </div>
+    <div style="padding:20px">
+     <div class="card">
+      <h3 style="color:#ff6b35;margin:0 0 12px">📖 Imperative Sentences</h3>
+      <p style="font-size:.9rem;line-height:1.6;margin:0 0 12px">Imperative sentences give <strong>commands or instructions</strong>. They start with a <strong>verb</strong> (action word). We use them a lot in recipes!</p>
+      <div style="display:flex;flex-direction:column;gap:8px">
+       <div style="background:#f7f7f7;padding:10px 14px;border-radius:10px;font-size:.95rem">
+        ✅ <strong>Cut</strong> the onion into small pieces.
+       </div>
+       <div style="background:#f7f7f7;padding:10px 14px;border-radius:10px;font-size:.95rem">
+        ✅ <strong>Boil</strong> the water for 5 minutes.
+       </div>
+       <div style="background:#f7f7f7;padding:10px 14px;border-radius:10px;font-size:.95rem">
+        ✅ <strong>Add</strong> two tablespoons of sugar.
+       </div>
+       <div style="background:#f7f7f7;padding:10px 14px;border-radius:10px;font-size:.95rem">
+        ✅ <strong>Stir</strong> the mixture well.
+       </div>
+       <div style="background:#f7f7f7;padding:10px 14px;border-radius:10px;font-size:.95rem">
+        ✅ <strong>Don't</strong> forget to wash your hands!
+       </div>
+      </div>
+     </div>
+     <div class="card">
+      <h3 style="color:#2ec4b6;margin:0 0 12px">🔗 Sequence Connectives</h3>
+      <p style="font-size:.9rem;line-height:1.6;margin:0 0 12px">We use these words to show the <strong>order</strong> of steps:</p>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px"><span style="background:#2ec4b620;color:#1a8a7e;padding:8px 16px;border-radius:20px;font-weight:700">First</span> <span style="background:#2ec4b620;color:#1a8a7e;padding:8px 16px;border-radius:20px;font-weight:700">Second</span> <span style="background:#2ec4b620;color:#1a8a7e;padding:8px 16px;border-radius:20px;font-weight:700">Then</span> <span style="background:#2ec4b620;color:#1a8a7e;padding:8px 16px;border-radius:20px;font-weight:700">Next</span> <span style="background:#2ec4b620;color:#1a8a7e;padding:8px 16px;border-radius:20px;font-weight:700">After that</span> <span style="background:#2ec4b620;color:#1a8a7e;padding:8px 16px;border-radius:20px;font-weight:700">Finally</span>
+      </div>
+      <div style="background:#f7f7f7;padding:14px;border-radius:12px;font-size:.9rem;line-height:1.7"><strong>Example:</strong><br><strong>First,</strong> wash the vegetables.<br><strong>Then,</strong> cut them into small pieces.<br><strong>Next,</strong> heat the oil in a pan.<br><strong>After that,</strong> fry the vegetables for 5 minutes.<br><strong>Finally,</strong> serve on a plate.
+      </div>
+     </div>
+     <div style="text-align:center;margin-top:8px">
+      <button class="btn-primary" onclick="goTo('page-dialog-tf')">Continue: Dialogues <i data-lucide="arrow-right" style="width:18px;height:18px"></i></button>
+     </div>
+    </div>
+   </div><!-- PAGE: DIALOG TRUE/FALSE -->
+   <div id="page-dialog-tf" class="page" style="background:#fff">
+    <div class="top-bar">
+     <button onclick="goTo('page-menu')"><i data-lucide="arrow-left" style="width:22px;height:22px;color:#333"></i></button><strong>Dialogue: True or False</strong>
+    </div>
+    <div style="padding:20px">
+     <div class="card">
+      <h3 style="color:#ff6b35;margin:0 0 12px">🗣️ Read the Dialogue</h3>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px">
+       <div class="dialog-bubble dialog-left">
+        <strong>Rina:</strong> Hi Budi! Do you know how to make fried rice?
+       </div>
+       <div class="dialog-bubble dialog-right">
+        <strong>Budi:</strong> Yes! First, heat the oil. Then, scramble the eggs.
+       </div>
+       <div class="dialog-bubble dialog-left">
+        <strong>Rina:</strong> What do you do next?
+       </div>
+       <div class="dialog-bubble dialog-right">
+        <strong>Budi:</strong> Next, add garlic and rice. After that, pour soy sauce.
+       </div>
+       <div class="dialog-bubble dialog-left">
+        <strong>Rina:</strong> That sounds easy! What's the last step?
+       </div>
+       <div class="dialog-bubble dialog-right">
+        <strong>Budi:</strong> Finally, add spring onions and serve it!
+       </div>
+      </div>
+     </div>
+     <div class="card">
+      <h3 style="color:#2ec4b6;margin:0 0 12px">✅ True or False?</h3>
+      <div id="tf-quiz" style="display:flex;flex-direction:column;gap:14px"></div>
+      <div id="tf-result" style="text-align:center;margin-top:14px"></div>
+     </div>
+     <div style="text-align:center;margin-top:8px">
+      <button class="btn-primary" onclick="goTo('page-dialog-scenarios')">Continue: More Dialogues <i data-lucide="arrow-right" style="width:18px;height:18px"></i></button>
+     </div>
+    </div>
+   </div><!-- PAGE: DIALOG SCENARIOS -->
+   <div id="page-dialog-scenarios" class="page" style="background:#fff">
+    <div class="top-bar">
+     <button onclick="goTo('page-menu')"><i data-lucide="arrow-left" style="width:22px;height:22px;color:#333"></i></button><strong>Dialogue Scenarios</strong>
+    </div>
+    <div style="padding:20px">
+     <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap"><button class="btn-secondary dialog-tab active-tab" onclick="showDialogScenario(0)" id="dt0" style="font-size:.85rem;padding:8px 14px">Scenario 1</button> <button class="btn-outline dialog-tab" onclick="showDialogScenario(1)" id="dt1" style="font-size:.85rem;padding:8px 14px">Scenario 2</button> <button class="btn-outline dialog-tab" onclick="showDialogScenario(2)" id="dt2" style="font-size:.85rem;padding:8px 14px">Scenario 3</button> <button class="btn-outline dialog-tab" onclick="showDialogScenario(3)" id="dt3" style="font-size:.85rem;padding:8px 14px">Scenario 4</button>
+     </div>
+     <div id="dialog-scenario-content"></div>
+     <div style="text-align:center;margin-top:12px">
+      <button class="btn-primary" onclick="goTo('page-asking-giving')">Continue: Asking &amp; Giving Info <i data-lucide="arrow-right" style="width:18px;height:18px"></i></button>
+     </div>
+    </div>
+   </div><!-- PAGE: ASKING AND GIVING INFO -->
+   <div id="page-asking-giving" class="page" style="background:#fff">
+    <div class="top-bar">
+     <button onclick="goTo('page-menu')"><i data-lucide="arrow-left" style="width:22px;height:22px;color:#333"></i></button><strong>Asking &amp; Giving Information</strong>
+    </div>
+    <div style="padding:20px">
+     <div class="card">
+      <h3 style="color:#ff6b35;margin:0 0 12px">🗣️ Useful Expressions</h3>
+      <div style="margin-bottom:14px">
+       <h4 style="color:#2ec4b6;margin:0 0 8px">Asking:</h4>
+       <div style="display:flex;flex-direction:column;gap:6px;font-size:.9rem">
+        <div style="background:#f7f7f7;padding:10px 14px;border-radius:10px">
+         "How do you make ___?"
+        </div>
+        <div style="background:#f7f7f7;padding:10px 14px;border-radius:10px">
+         "Can you tell me how to make ___?"
+        </div>
+        <div style="background:#f7f7f7;padding:10px 14px;border-radius:10px">
+         "What do I need to make ___?"
+        </div>
+        <div style="background:#f7f7f7;padding:10px 14px;border-radius:10px">
+         "What is the first/next step?"
+        </div>
+       </div>
+      </div>
+      <div>
+       <h4 style="color:#6c5ce7;margin:0 0 8px">Giving Information:</h4>
+       <div style="display:flex;flex-direction:column;gap:6px;font-size:.9rem">
+        <div style="background:#f7f7f7;padding:10px 14px;border-radius:10px">
+         "You need ___ and ___."
+        </div>
+        <div style="background:#f7f7f7;padding:10px 14px;border-radius:10px">
+         "First, you have to ___."
+        </div>
+        <div style="background:#f7f7f7;padding:10px 14px;border-radius:10px">
+         "Then, ___ and after that ___."
+        </div>
+        <div style="background:#f7f7f7;padding:10px 14px;border-radius:10px">
+         "Finally, ___."
+        </div>
+       </div>
+      </div>
+     </div>
+     <div class="card" style="border:2px solid #6c5ce730">
+      <h3 style="color:#6c5ce7;margin:0 0 12px">🥞 Example: How to Make a Pancake</h3>
+      <div style="display:flex;flex-direction:column;gap:10px">
+       <div class="dialog-bubble dialog-left">
+        <strong>Sari:</strong> Can you tell me how to make a pancake?
+       </div>
+       <div class="dialog-bubble dialog-right">
+        <strong>Doni:</strong> Sure! You need flour, eggs, milk, sugar, and butter.
+       </div>
+       <div class="dialog-bubble dialog-left">
+        <strong>Sari:</strong> What is the first step?
+       </div>
+       <div class="dialog-bubble dialog-right">
+        <strong>Doni:</strong> First, mix the flour, sugar, and eggs in a bowl. Then, add milk and stir well.
+       </div>
+       <div class="dialog-bubble dialog-left">
+        <strong>Sari:</strong> What do I do next?
+       </div>
+       <div class="dialog-bubble dialog-right">
+        <strong>Doni:</strong> Next, heat butter in a pan. After that, pour the batter and cook each side for 2 minutes. Finally, serve with honey!
+       </div>
+      </div>
+     </div>
+     <div style="text-align:center;margin-top:8px">
+      <button class="btn-primary" onclick="goTo('page-reading')">Continue: Reading Practice <i data-lucide="arrow-right" style="width:18px;height:18px"></i></button>
+     </div>
+    </div>
+   </div><!-- PAGE: READING -->
+   <div id="page-reading" class="page" style="background:#fff">
+    <div class="top-bar">
+     <button onclick="goTo('page-menu')"><i data-lucide="arrow-left" style="width:22px;height:22px;color:#333"></i></button><strong>Reading Practice</strong>
+    </div>
+    <div style="padding:20px">
+     <div class="card" style="background:#fffde6;border:1px solid #f5e6a3">
+      <h3 style="margin:0 0 12px;color:#b8860b">📖 Read the Text Carefully</h3>
+      <h4 style="margin:0 0 10px;text-align:center">How to Make a Banana Smoothie</h4>
+      <p style="font-size:.9rem;line-height:1.6;margin:0 0 8px"><strong>Ingredients:</strong> 2 ripe bananas, 200 ml of milk, 2 tablespoons of honey, 5 ice cubes, a blender.</p>
+      <p style="font-size:.9rem;line-height:1.7;margin:0"><strong>Steps:</strong><br>
+        First, peel the bananas and cut them into pieces. Then, put the bananas, milk, and honey into the blender. Next, add the ice cubes. After that, blend everything until smooth. Finally, pour the smoothie into a glass and enjoy!</p>
+     </div>
+     <div class="card">
+      <h3 style="color:#ff6b35;margin:0 0 14px">📝 Multiple Choice Questions</h3>
+      <div id="reading-quiz" style="display:flex;flex-direction:column;gap:16px"></div>
+      <div id="reading-result" style="text-align:center;margin-top:14px"></div>
+     </div>
+     <div style="text-align:center;margin-top:8px">
+      <button class="btn-primary" onclick="goTo('page-exercise-ordering')">Continue: Ordering Exercise <i data-lucide="arrow-right" style="width:18px;height:18px"></i></button>
+     </div>
+    </div>
+   </div><!-- PAGE: EXERCISE ORDERING -->
+   <div id="page-exercise-ordering" class="page" style="background:#fff">
+    <div class="top-bar">
+     <button onclick="goTo('page-menu')"><i data-lucide="arrow-left" style="width:22px;height:22px;color:#333"></i></button><strong>Exercise: Ordering Steps</strong>
+    </div>
+    <div style="padding:20px">
+     <div class="card">
+      <h3 style="color:#ff6b35;margin:0 0 4px">🧃 How to Make Orange Juice</h3>
+      <p style="color:#888;font-size:.85rem;margin:0 0 14px">Drag and drop the steps into the correct order!</p>
+      <div id="ordering-container"></div>
+      <div style="margin-top:14px;text-align:center"><button class="btn-primary" onclick="checkOrdering()">Check My Answer</button>
+      </div>
+      <div id="ordering-result" style="text-align:center;margin-top:12px"></div>
+     </div>
+     <div style="text-align:center;margin-top:8px">
+      <button class="btn-primary" onclick="goTo('page-quiz1')">Continue: Quiz 1 <i data-lucide="arrow-right" style="width:18px;height:18px"></i></button>
+     </div>
+    </div>
+   </div><!-- PAGE: QUIZ 1 -->
+   <div id="page-quiz1" class="page" style="background:#fff">
+    <div class="top-bar">
+     <button onclick="goTo('page-menu')"><i data-lucide="arrow-left" style="width:22px;height:22px;color:#333"></i></button><strong>Quiz 1: Vocabulary</strong>
+    </div>
+    <div style="padding:20px">
+     <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+       <h3 style="color:#ff6b35;margin:0">🏆 Quiz 1</h3><span id="q1-progress" style="font-size:.85rem;color:#888">Question 1/5</span>
+      </div>
+      <div class="progress-bar" style="margin-bottom:16px">
+       <div class="progress-fill" id="q1-bar" style="width:20%"></div>
+      </div>
+      <div id="quiz1-content"></div>
+      <div id="quiz1-result" style="text-align:center;margin-top:14px"></div>
+     </div>
+    </div>
+   </div><!-- PAGE: QUIZ 2 -->
+   <div id="page-quiz2" class="page" style="background:#fff">
+    <div class="top-bar">
+     <button onclick="goTo('page-menu')"><i data-lucide="arrow-left" style="width:22px;height:22px;color:#333"></i></button><strong>Quiz 2: Grammar</strong>
+    </div>
+    <div style="padding:20px">
+     <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+       <h3 style="color:#2ec4b6;margin:0">🏆 Quiz 2</h3><span id="q2-progress" style="font-size:.85rem;color:#888">Question 1/5</span>
+      </div>
+      <div class="progress-bar" style="margin-bottom:16px">
+       <div class="progress-fill" id="q2-bar" style="width:20%"></div>
+      </div>
+      <div id="quiz2-content"></div>
+      <div id="quiz2-result" style="text-align:center;margin-top:14px"></div>
+     </div>
+    </div>
+   </div><!-- PAGE: QUIZ 3 -->
+   <div id="page-quiz3" class="page" style="background:#fff">
+    <div class="top-bar">
+     <button onclick="goTo('page-menu')"><i data-lucide="arrow-left" style="width:22px;height:22px;color:#333"></i></button><strong>Quiz 3: Reading</strong>
+    </div>
+    <div style="padding:20px">
+     <div class="card" style="background:#fffde6;border:1px solid #f5e6a3;margin-bottom:16px">
+      <h4 style="margin:0 0 8px">📖 How to Make Lemon Tea</h4>
+      <p style="font-size:.88rem;line-height:1.6;margin:0"><strong>Ingredients:</strong> A tea bag, hot water, lemon, honey, a cup.<br><strong>Steps:</strong> First, boil the water. Then, put the tea bag in a cup and pour hot water. Next, wait for 3 minutes. After that, squeeze the lemon into the tea. Finally, add honey and stir well.</p>
+     </div>
+     <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+       <h3 style="color:#6c5ce7;margin:0">🏆 Quiz 3</h3><span id="q3-progress" style="font-size:.85rem;color:#888">Question 1/5</span>
+      </div>
+      <div class="progress-bar" style="margin-bottom:16px">
+       <div class="progress-fill" id="q3-bar" style="width:20%"></div>
+      </div>
+      <div id="quiz3-content"></div>
+      <div id="quiz3-result" style="text-align:center;margin-top:14px"></div>
+     </div>
+    </div>
+   </div><!-- PAGE: VOICE QUIZ -->
+   <div id="page-voice" class="page" style="background:#fff">
+    <div class="top-bar">
+     <button onclick="goTo('page-menu')"><i data-lucide="arrow-left" style="width:22px;height:22px;color:#333"></i></button><strong>Voice Recognition Quiz</strong>
+    </div>
+    <div style="padding:20px">
+     <div class="card" style="text-align:center">
+      <h3 style="color:#9b59b6;margin:0 0 6px">🎤 Speak the Sentence</h3>
+      <p style="color:#888;font-size:.85rem;margin:0 0 16px">Tap the microphone and read the sentence aloud</p>
+      <div id="voice-prompt" style="font-size:1.2rem;font-weight:800;color:#333;margin-bottom:20px;padding:16px;background:#f7f7f7;border-radius:12px"></div><button id="voice-btn" onclick="startVoice()" style="width:80px;height:80px;border-radius:50%;border:none;background:linear-gradient(135deg,#9b59b6,#8e44ad);color:#fff;cursor:pointer;font-size:2rem;box-shadow:0 4px 20px rgba(155,89,182,.3);transition:all .2s">🎤</button>
+      <p id="voice-status" style="color:#888;font-size:.85rem;margin:12px 0 0">Tap to start speaking</p>
+      <div id="voice-result" style="margin-top:16px"></div>
+      <div style="margin-top:16px;display:flex;gap:10px;justify-content:center"><span id="voice-score" style="font-size:.9rem;font-weight:700;color:#888"></span>
+      </div>
+      <div style="margin-top:14px">
+       <button class="btn-secondary" onclick="nextVoicePrompt()">Next Sentence</button>
+      </div>
+     </div>
+     <div class="card" style="background:#9b59b610;border:1px solid #9b59b630">
+      <p style="margin:0;font-size:.85rem">💡 <strong>Tip:</strong> Speak clearly and at a normal pace. Your browser needs microphone permission for this feature.</p>
+     </div>
+    </div>
+   </div><!-- PAGE: CONCLUSION -->
+   <div id="page-conclusion" class="page" style="background:#fff">
+    <div class="top-bar">
+     <button onclick="goTo('page-menu')"><i data-lucide="arrow-left" style="width:22px;height:22px;color:#333"></i></button><strong>Conclusion</strong>
+    </div>
+    <div style="padding:20px">
+     <div class="card" style="background:linear-gradient(135deg,#ff6b3510,#2ec4b610)">
+      <h3 style="color:#ff6b35;margin:0 0 14px">📝 What We Have Learned</h3>
+      <div style="display:flex;flex-direction:column;gap:10px;font-size:.95rem">
+       <div style="display:flex;gap:10px">
+        <span>📌</span><span>A <strong>procedure text</strong> tells how to make or do something step by step.</span>
+       </div>
+       <div style="display:flex;gap:10px">
+        <span>📌</span><span>The structure includes <strong>Goal</strong>, <strong>Materials</strong>, and <strong>Steps</strong>.</span>
+       </div>
+       <div style="display:flex;gap:10px">
+        <span>📌</span><span>We use <strong>imperative sentences</strong> (verb + object) to give instructions.</span>
+       </div>
+       <div style="display:flex;gap:10px">
+        <span>📌</span><span>We use <strong>sequence connectives</strong>: first, then, next, after that, finally.</span>
+       </div>
+       <div style="display:flex;gap:10px">
+        <span>📌</span><span>We learned <strong>cooking vocabulary</strong>: action verbs, ingredients, and utensils.</span>
+       </div>
+       <div style="display:flex;gap:10px">
+        <span>📌</span><span>We practiced <strong>asking and giving information</strong> about recipes.</span>
+       </div>
+      </div>
+     </div>
+     <div style="text-align:center;margin-top:8px">
+      <button class="btn-primary" onclick="goTo('page-reflection')">Continue: Reflection <i data-lucide="arrow-right" style="width:18px;height:18px"></i></button>
+     </div>
+    </div>
+   </div><!-- PAGE: REFLECTION -->
+   <div id="page-reflection" class="page" style="background:#fff">
+    <div class="top-bar">
+     <button onclick="goTo('page-menu')"><i data-lucide="arrow-left" style="width:22px;height:22px;color:#333"></i></button><strong>Reflection</strong>
+    </div>
+    <div style="padding:20px">
+     <div class="card">
+      <h3 style="color:#2ec4b6;margin:0 0 14px">🪞 Reflect on Your Learning</h3>
+      <p style="font-size:.9rem;color:#666;margin:0 0 16px">Think about these questions and rate yourself:</p>
+      <div id="reflection-items" style="display:flex;flex-direction:column;gap:14px"></div>
+     </div>
+     <div id="reflection-msg" style="text-align:center;margin-top:8px"></div>
+     <div style="text-align:center;margin-top:12px">
+      <button class="btn-primary" onclick="goTo('page-menu')">Back to Menu <i data-lucide="arrow-left" style="width:18px;height:18px"></i></button>
+     </div>
+    </div>
+   </div><!-- PAGE: DEVELOPER -->
+   <div id="page-developer" class="page" style="background:#fff">
+    <div class="top-bar">
+     <button onclick="goTo('page-menu')"><i data-lucide="arrow-left" style="width:22px;height:22px;color:#333"></i></button><strong>Developer</strong>
+    </div>
+    <div style="padding:20px;text-align:center">
+     <div style="font-size:4rem;margin-bottom:12px">
+      👨‍💻
+     </div>
+     <h2 class="chewy" style="color:#ff6b35;margin:0 0 6px" id="dev-name">English Learning App</h2>
+     <p style="color:#888;margin:0 0 20px;font-size:.9rem">Procedure Text: Recipe Theme</p>
+     <div class="card" style="text-align:left">
+      <h4 style="margin:0 0 10px;color:#333">About This App</h4>
+      <p style="font-size:.9rem;line-height:1.6;margin:0 0 12px">This interactive English learning application was designed for Junior High School students at CEFR level A1–A2. It covers <strong>Procedure Text</strong> with a focus on recipes.</p>
+      <div style="font-size:.85rem;color:#888;display:flex;flex-direction:column;gap:6px">
+       <div>
+        📚 <strong>Subject:</strong> English
+       </div>
+       <div>
+        🎓 <strong>Level:</strong> Junior High School (SMP/MTs)
+       </div>
+       <div>
+        📊 <strong>CEFR:</strong> A1–A2
+       </div>
+       <div>
+        📖 <strong>Topic:</strong> Procedure Text — Recipe
+       </div>
+       <div>
+        💻 <strong>Built with:</strong> HTML, CSS, JavaScript
+       </div>
+      </div>
+     </div>
+     <div style="margin-top:20px">
+      <button class="btn-primary" onclick="goTo('page-menu')">Back to Menu</button>
+     </div>
+    </div>
+   </div>
+  </div>
+  <script>
+// =================== CONFIG & SDK ===================
+const defaultConfig = {
+  app_title: 'Procedure Text',
+  teacher_name: 'English Learning App',
+  background_color: '#ff6b35',
+  surface_color: '#ffffff',
+  text_color: '#333333',
+  primary_action_color: '#ff6b35',
+  secondary_action_color: '#2ec4b6',
+  font_family: 'Nunito',
+  font_size: 16
+};
+
+function applyConfig(config) {
+  const t = config.app_title || defaultConfig.app_title;
+  const d = config.teacher_name || defaultConfig.teacher_name;
+  const el1 = document.getElementById('cover-title');
+  const el2 = document.getElementById('menu-title');
+  const el3 = document.getElementById('dev-name');
+  const el4 = document.getElementById('cover-dev');
+  if(el1) el1.textContent = t;
+  if(el2) el2.textContent = 'Main Menu';
+  if(el3) el3.textContent = d;
+  if(el4) el4.textContent = 'Developed by ' + d;
+
+  const bg = config.background_color || defaultConfig.background_color;
+  const surface = config.surface_color || defaultConfig.surface_color;
+  const txt = config.text_color || defaultConfig.text_color;
+  const pri = config.primary_action_color || defaultConfig.primary_action_color;
+  const sec = config.secondary_action_color || defaultConfig.secondary_action_color;
+  const font = config.font_family || defaultConfig.font_family;
+  const fs = config.font_size || defaultConfig.font_size;
+
+  document.body.style.fontFamily = font + ', Nunito, sans-serif';
+  document.body.style.fontSize = fs + 'px';
+  document.body.style.color = txt;
+
+  document.querySelectorAll('.btn-primary').forEach(b => { b.style.background = pri; });
+  document.querySelectorAll('.btn-secondary').forEach(b => { b.style.background = sec; });
+}
+
+if(window.elementSdk){
+  window.elementSdk.init({
+    defaultConfig,
+    onConfigChange: async(config) => applyConfig(config),
+    mapToCapabilities: (config) => ({
+      recolorables: [
+        {get:()=>config.background_color||defaultConfig.background_color, set:(v)=>{config.background_color=v;window.elementSdk.setConfig({background_color:v})}},
+        {get:()=>config.surface_color||defaultConfig.surface_color, set:(v)=>{config.surface_color=v;window.elementSdk.setConfig({surface_color:v})}},
+        {get:()=>config.text_color||defaultConfig.text_color, set:(v)=>{config.text_color=v;window.elementSdk.setConfig({text_color:v})}},
+        {get:()=>config.primary_action_color||defaultConfig.primary_action_color, set:(v)=>{config.primary_action_color=v;window.elementSdk.setConfig({primary_action_color:v})}},
+        {get:()=>config.secondary_action_color||defaultConfig.secondary_action_color, set:(v)=>{config.secondary_action_color=v;window.elementSdk.setConfig({secondary_action_color:v})}}
+      ],
+      borderables: [],
+      fontEditable: {get:()=>config.font_family||defaultConfig.font_family, set:(v)=>{config.font_family=v;window.elementSdk.setConfig({font_family:v})}},
+      fontSizeable: {get:()=>config.font_size||defaultConfig.font_size, set:(v)=>{config.font_size=v;window.elementSdk.setConfig({font_size:v})}}
+    }),
+    mapToEditPanelValues: (config) => new Map([
+      ['app_title', config.app_title || defaultConfig.app_title],
+      ['teacher_name', config.teacher_name || defaultConfig.teacher_name]
+    ])
+  });
+}
+
+// =================== NAVIGATION ===================
+function goTo(pageId) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const target = document.getElementById(pageId);
+  if(target) { target.classList.add('active'); }
+  document.getElementById('app').scrollTop = 0;
+  lucide.createIcons();
+}
+
+// =================== TTS ===================
+function speak(text) {
+  if('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'en-US'; u.rate = 0.85;
+    window.speechSynthesis.speak(u);
+  }
+}
+
+// =================== TOAST ===================
+function showToast(msg, type) {
+  const t = document.createElement('div');
+  t.className = 'toast toast-' + type;
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2000);
+}
+
+// =================== Q&A ===================
+const qaFried = [
+  {q:'What do you need to make fried rice?',a:'You need cooked rice, eggs, garlic, cooking oil, soy sauce, salt, pepper, and spring onions.'},
+  {q:'What is the first step?',a:'First, heat the cooking oil in a frying pan.'},
+  {q:'When do you add the soy sauce?',a:'You add the soy sauce after adding the rice.'},
+  {q:'What is the last step?',a:'Finally, add the spring onions and serve on a plate.'}
+];
+const qaNoodle = [
+  {q:'How much water do you need?',a:'You need 400 ml of water.'},
+  {q:'How long do you cook the noodles?',a:'You cook them for about 3 minutes.'},
+  {q:'When do you add the seasoning?',a:'You add the seasoning after cooking the noodles for 3 minutes.'},
+  {q:'What can you add to the noodles?',a:'You can add an egg and vegetables like cabbage and carrot.'}
+];
+
+function buildQA() {
+  const c1 = document.getElementById('qa-fried');
+  const c2 = document.getElementById('qa-noodle');
+  if(!c1) return;
+  qaFried.forEach(item => {
+    const d = document.createElement('div');
+    d.style.cssText = 'background:#f7f7f7;border-radius:12px;padding:14px';
+    d.innerHTML = `<strong style="color:#ff6b35">Q: ${item.q}</strong><div style="margin-top:6px;font-size:.9rem;color:#555;display:none" class="qa-ans"><strong>A:</strong> ${item.a}</div><button class="btn-outline" style="margin-top:8px;font-size:.8rem;padding:6px 14px" onclick="this.previousElementSibling.style.display='block';this.style.display='none'">Show Answer</button>`;
+    c1.appendChild(d);
+  });
+  qaNoodle.forEach(item => {
+    const d = document.createElement('div');
+    d.style.cssText = 'background:#f7f7f7;border-radius:12px;padding:14px';
+    d.innerHTML = `<strong style="color:#2ec4b6">Q: ${item.q}</strong><div style="margin-top:6px;font-size:.9rem;color:#555;display:none" class="qa-ans"><strong>A:</strong> ${item.a}</div><button class="btn-outline" style="margin-top:8px;font-size:.8rem;padding:6px 14px" onclick="this.previousElementSibling.style.display='block';this.style.display='none'">Show Answer</button>`;
+    c2.appendChild(d);
+  });
+}
+
+// =================== VOCABULARY ===================
+const verbs = [{w:'Cut',e:'🔪'},{w:'Boil',e:'♨️'},{w:'Fry',e:'🍳'},{w:'Stir',e:'🥄'},{w:'Pour',e:'🫗'},{w:'Add',e:'➕'},{w:'Mix',e:'🔄'},{w:'Slice',e:'🗡️'},{w:'Chop',e:'🪓'},{w:'Peel',e:'🍌'},{w:'Serve',e:'🍽️'},{w:'Crack',e:'🥚'}];
+const ingredients = [{w:'Rice',e:'🍚'},{w:'Egg',e:'🥚'},{w:'Garlic',e:'🧄'},{w:'Onion',e:'🧅'},{w:'Salt',e:'🧂'},{w:'Oil',e:'🫒'},{w:'Noodles',e:'🍜'},{w:'Pepper',e:'🌶️'},{w:'Soy sauce',e:'🥫'}];
+const utensils = [{w:'Frying pan',e:'🍳'},{w:'Pot',e:'🫕'},{w:'Spoon',e:'🥄'},{w:'Knife',e:'🔪'},{w:'Bowl',e:'🥣'},{w:'Plate',e:'🍽️'},{w:'Blender',e:'🫙'},{w:'Spatula',e:'🥄'},{w:'Cup',e:'☕'}];
+
+function buildVocab() {
+  [['vocab-verbs',verbs],['vocab-ingredients',ingredients],['vocab-utensils',utensils]].forEach(([id,arr])=>{
+    const c=document.getElementById(id); if(!c) return;
+    arr.forEach(v=>{
+      const d=document.createElement('div');
+      d.className='vocab-card';
+      d.innerHTML=`<div style="font-size:1.8rem">${v.e}</div><div style="font-size:.85rem;font-weight:700;margin-top:4px">${v.w}</div><div style="font-size:.7rem;color:#999;margin-top:2px">🔊 Tap</div>`;
+      d.onclick=()=>speak(v.w);
+      c.appendChild(d);
+    });
+  });
+}
+
+// =================== MATCHING GAME ===================
+const matchPairs = [
+  {emoji:'🔪',word:'Cut'},{emoji:'🍳',word:'Fry'},{emoji:'🥄',word:'Stir'},{emoji:'🧄',word:'Garlic'},{emoji:'🥚',word:'Egg'},{emoji:'🍚',word:'Rice'}
+];
+let matchSelected = null, matchCount = 0;
+
+function buildMatching() {
+  const c = document.getElementById('match-game'); if(!c) return;
+  matchCount = 0;
+  const emojis = matchPairs.map((p,i)=>({type:'emoji',val:p.emoji,idx:i}));
+  const words = matchPairs.map((p,i)=>({type:'word',val:p.word,idx:i}));
+  const shuffledW = words.sort(()=>Math.random()-.5);
+  c.innerHTML = '';
+  const grid = document.createElement('div');
+  grid.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:10px';
+  emojis.forEach((item,i)=>{
+    const left = document.createElement('div');
+    left.className = 'match-item';
+    left.innerHTML = `<span style="font-size:2rem">${item.val}</span>`;
+    left.dataset.idx = item.idx; left.dataset.type = 'emoji';
+    left.onclick = () => selectMatch(left);
+
+    const right = document.createElement('div');
+    right.className = 'match-item';
+    right.textContent = shuffledW[i].val;
+    right.dataset.idx = shuffledW[i].idx; right.dataset.type = 'word';
+    right.onclick = () => selectMatch(right);
+
+    grid.appendChild(left); grid.appendChild(right);
+  });
+  c.appendChild(grid);
+}
+
+function selectMatch(el) {
+  if(el.classList.contains('matched')) return;
+  if(!matchSelected) {
+    matchSelected = el;
+    el.classList.add('selected');
+  } else {
+    if(matchSelected === el) { el.classList.remove('selected'); matchSelected = null; return; }
+    if(matchSelected.dataset.type === el.dataset.type) { matchSelected.classList.remove('selected'); matchSelected = el; el.classList.add('selected'); return; }
+    if(matchSelected.dataset.idx === el.dataset.idx) {
+      matchSelected.classList.remove('selected'); matchSelected.classList.add('matched'); el.classList.add('matched');
+      matchCount++;
+      if(matchCount === matchPairs.length) { document.getElementById('match-result').innerHTML = '<div style="color:#2ec4b6;font-weight:800;font-size:1.1rem;margin-top:8px">🎉 All matched! Great job!</div>'; }
+    } else {
+      matchSelected.classList.remove('selected'); el.classList.add('selected');
+      el.style.borderColor = '#e74c3c';
+      setTimeout(()=>{ el.classList.remove('selected'); el.style.borderColor = '#e0e0e0'; }, 500);
+    }
+    matchSelected = null;
+  }
+}
+
+// =================== TRUE/FALSE ===================
+const tfData = [
+  {s:'Rina asks Budi how to make instant noodles.', a:false},
+  {s:'The first step is to heat the oil.', a:true},
+  {s:'You add garlic after the rice.', a:false},
+  {s:'Soy sauce is added to the fried rice.', a:true},
+  {s:'The last step is to add spring onions and serve.', a:true}
+];
+let tfAnswered = 0;
+
+function buildTF() {
+  const c = document.getElementById('tf-quiz'); if(!c) return;
+  tfData.forEach((item, i) => {
+    const d = document.createElement('div');
+    d.innerHTML = `<p style="font-size:.95rem;margin:0 0 8px;font-weight:600">${i+1}. ${item.s}</p><div style="display:flex;gap:10px"><button class="tf-btn tf-true" onclick="checkTF(this,${i},true)">True</button><button class="tf-btn tf-false" onclick="checkTF(this,${i},false)">False</button></div><div id="tf-fb-${i}" style="font-size:.85rem;margin-top:6px"></div>`;
+    c.appendChild(d);
+  });
+}
+
+function checkTF(btn, idx, ans) {
+  const btns = btn.parentElement.querySelectorAll('.tf-btn');
+  btns.forEach(b => b.disabled = true);
+  const fb = document.getElementById('tf-fb-' + idx);
+  if(ans === tfData[idx].a) {
+    btn.classList.add('active');
+    fb.innerHTML = '<span style="color:#2ec4b6">✅ Correct!</span>';
+  } else {
+    btn.style.opacity = '.5';
+    fb.innerHTML = '<span style="color:#e74c3c">❌ Incorrect. The answer is ' + (tfData[idx].a ? 'True' : 'False') + '.</span>';
+  }
+  tfAnswered++;
+  if(tfAnswered === tfData.length) {
+    document.getElementById('tf-result').innerHTML = '<div style="margin-top:8px;font-weight:700;color:#2ec4b6">Quiz Complete! 🎉</div>';
+  }
+}
+
+// =================== DIALOG SCENARIOS ===================
+const dialogScenarios = [
+  {title:'Making Instant Noodles', persons:['Lia','Tom'],
+    lines:[
+      ['L','Tom, can you help me make instant noodles?'],
+      ['R','Sure! First, boil some water in a pot.'],
+      ['L','How much water do I need?'],
+      ['R','About 400 ml. Then, put the noodles in the boiling water.'],
+      ['L','How long do I cook them?'],
+      ['R','Cook for 3 minutes. After that, add the seasoning and stir well.'],
+      ['L','That\'s easy! Thanks, Tom!'],
+      ['R','You\'re welcome! Finally, pour it into a bowl and enjoy!']
+    ],
+    quiz:{q:'What is the first step?',opts:['Add seasoning','Boil water','Pour into bowl','Cook noodles'],ans:1}
+  },
+  {title:'Making Scrambled Eggs', persons:['Dina','Rafa'],
+    lines:[
+      ['L','Rafa, how do you make scrambled eggs?'],
+      ['R','It\'s simple! First, crack two eggs into a bowl.'],
+      ['L','Do I add anything?'],
+      ['R','Yes, add a pinch of salt and stir with a fork.'],
+      ['L','What\'s next?'],
+      ['R','Then, heat butter in a pan. After that, pour the eggs and stir slowly.'],
+      ['L','When are they ready?'],
+      ['R','Finally, when they look soft and fluffy, serve them on a plate!']
+    ],
+    quiz:{q:'What do you add to the eggs?',opts:['Sugar','Soy sauce','Salt','Pepper'],ans:2}
+  },
+  {title:'Making Chocolate Milk', persons:['Siti','Andi'],
+    lines:[
+      ['L','Andi, do you know how to make chocolate milk?'],
+      ['R','Of course! First, pour a glass of cold milk.'],
+      ['L','What kind of chocolate do I use?'],
+      ['R','Use two tablespoons of chocolate powder. Then, put it in the milk.'],
+      ['L','Do I stir it?'],
+      ['R','Yes! Next, stir well with a spoon. After that, add sugar if you like.'],
+      ['L','Sounds delicious!'],
+      ['R','Finally, add some ice cubes and enjoy!']
+    ],
+    quiz:{q:'What do you add last?',opts:['Milk','Chocolate','Sugar','Ice cubes'],ans:3}
+  },
+  {title:'Making a Sandwich', persons:['Budi','Rina'],
+    lines:[
+      ['L','Budi, can you teach me how to make a sandwich?'],
+      ['R','Sure! First, prepare two slices of bread.'],
+      ['L','What ingredients do I need?'],
+      ['R','You need butter, lettuce, cheese, and tomato slices.'],
+      ['L','What do I do first?'],
+      ['R','Then, spread butter on the bread. Next, put lettuce and cheese on top.'],
+      ['L','And then?'],
+      ['R','After that, add tomato slices. Finally, put the other bread on top and cut in half!']
+    ],
+    quiz:{q:'What do you spread on the bread?',opts:['Cheese','Butter','Jam','Mayonnaise'],ans:1}
+  }
+];
+
+function showDialogScenario(idx) {
+  document.querySelectorAll('.dialog-tab').forEach((t,i) => {
+    t.className = i===idx ? 'btn-secondary dialog-tab active-tab' : 'btn-outline dialog-tab';
+  });
+  const s = dialogScenarios[idx];
+  const c = document.getElementById('dialog-scenario-content');
+  let html = `<div class="card"><h3 style="color:#6c5ce7;margin:0 0 12px">🗣️ ${s.title}</h3><div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px">`;
+  s.lines.forEach(l => {
+    const isLeft = l[0]==='L';
+    const name = isLeft ? s.persons[0] : s.persons[1];
+    html += `<div class="dialog-bubble ${isLeft?'dialog-left':'dialog-right'}"><strong>${name}:</strong> ${l[1]}</div>`;
+  });
+  html += `</div><div style="border-top:1px solid #eee;padding-top:14px"><h4 style="margin:0 0 10px;color:#ff6b35">Mini Practice:</h4><p style="font-size:.95rem;font-weight:600;margin:0 0 10px">${s.quiz.q}</p><div style="display:flex;flex-direction:column;gap:8px">`;
+  s.quiz.opts.forEach((o,i) => {
+    html += `<button class="quiz-option" onclick="checkDialogQuiz(this,${i},${s.quiz.ans})">${o}</button>`;
+  });
+  html += `</div></div></div>`;
+  c.innerHTML = html;
+}
+
+function checkDialogQuiz(btn, idx, correct) {
+  const opts = btn.parentElement.querySelectorAll('.quiz-option');
+  opts.forEach((o,i) => {
+    o.disabled = true;
+    if(i===correct) o.classList.add('correct');
+    else if(i===idx) o.classList.add('wrong');
+  });
+}
+
+// =================== READING QUIZ ===================
+const readingQs = [
+  {q:'What is the text about?',opts:['How to make fried rice','How to make a banana smoothie','How to make tea','How to make noodles'],ans:1},
+  {q:'How many bananas do you need?',opts:['1','3','2','4'],ans:2},
+  {q:'What do you put in the blender?',opts:['Only bananas','Bananas, milk, honey, and ice','Only milk and honey','Water and bananas'],ans:1},
+  {q:'What does "blend" mean?',opts:['To cut','To boil','To mix in a blender','To fry'],ans:2},
+  {q:'What is the last step?',opts:['Add ice cubes','Peel the bananas','Blend everything','Pour into a glass and enjoy'],ans:3}
+];
+
+function buildReadingQuiz() {
+  const c = document.getElementById('reading-quiz'); if(!c) return;
+  readingQs.forEach((item,i) => {
+    const d = document.createElement('div');
+    d.innerHTML = `<p style="font-weight:700;margin:0 0 8px">${i+1}. ${item.q}</p><div style="display:flex;flex-direction:column;gap:8px">${item.opts.map((o,j)=>`<button class="quiz-option" onclick="checkReadingQ(this,${j},${item.ans},${i})">${String.fromCharCode(65+j)}. ${o}</button>`).join('')}</div><div id="rq-fb-${i}" style="font-size:.85rem;margin-top:6px"></div>`;
+    c.appendChild(d);
+  });
+}
+
+function checkReadingQ(btn, idx, correct, qIdx) {
+  const opts = btn.parentElement.querySelectorAll('.quiz-option');
+  opts.forEach((o,i) => { o.disabled = true; if(i===correct) o.classList.add('correct'); else if(i===idx) o.classList.add('wrong'); });
+  document.getElementById('rq-fb-'+qIdx).innerHTML = idx===correct ? '<span style="color:#2ec4b6">✅ Correct!</span>' : '<span style="color:#e74c3c">❌ The correct answer is ' + String.fromCharCode(65+correct) + '.</span>';
+}
+
+// =================== ORDERING ===================
+const correctOrder = [
+  'First, wash the oranges.',
+  'Then, cut the oranges in half.',
+  'Next, squeeze the oranges using a juicer.',
+  'After that, pour the juice into a glass.',
+  'Then, add sugar and stir well.',
+  'Finally, add ice cubes and serve.'
+];
+let orderItems = [];
+
+function buildOrdering() {
+  const c = document.getElementById('ordering-container'); if(!c) return;
+  orderItems = [...correctOrder].sort(() => Math.random() - .5);
+  renderOrdering();
+}
+
+function renderOrdering() {
+  const c = document.getElementById('ordering-container');
+  c.innerHTML = '';
+  orderItems.forEach((text, i) => {
+    const d = document.createElement('div');
+    d.className = 'drag-item';
+    d.textContent = text;
+    d.draggable = true;
+    d.dataset.idx = i;
+    d.ondragstart = e => e.dataTransfer.setData('text/plain', i);
+    d.ondragover = e => e.preventDefault();
+    d.ondrop = e => { e.preventDefault(); const from = parseInt(e.dataTransfer.getData('text/plain')); const to = i; const item = orderItems.splice(from, 1)[0]; orderItems.splice(to, 0, item); renderOrdering(); };
+    // Touch support
+    d.ontouchstart = function(e) { this.style.opacity = '.7'; this._startY = e.touches[0].clientY; this._startIdx = i; };
+    d.ontouchmove = function(e) { e.preventDefault(); };
+    d.ontouchend = function(e) {
+      this.style.opacity = '1';
+      const endY = e.changedTouches[0].clientY;
+      const diff = endY - this._startY;
+      const steps = Math.round(diff / 50);
+      if(steps !== 0) {
+        const from = this._startIdx;
+        let to = from + steps;
+        to = Math.max(0, Math.min(orderItems.length - 1, to));
+        const item = orderItems.splice(from, 1)[0];
+        orderItems.splice(to, 0, item);
+        renderOrdering();
+      }
+    };
+    c.appendChild(d);
+  });
+}
+
+function checkOrdering() {
+  const items = document.querySelectorAll('#ordering-container .drag-item');
+  let score = 0;
+  items.forEach((el, i) => {
+    if(orderItems[i] === correctOrder[i]) { el.classList.add('correct-pos'); el.classList.remove('wrong-pos'); score++; }
+    else { el.classList.add('wrong-pos'); el.classList.remove('correct-pos'); }
+  });
+  document.getElementById('ordering-result').innerHTML = score === correctOrder.length
+    ? '<div style="color:#2ec4b6;font-weight:800;font-size:1.1rem">🎉 Perfect! All steps in correct order!</div>'
+    : `<div style="color:#ff6b35;font-weight:700">${score}/${correctOrder.length} correct. Try again!</div>`;
+}
+
+// =================== QUIZ ENGINE ===================
+function createQuiz(containerId, progressId, barId, resultId, questions, nextPage) {
+  let current = 0, score = 0;
+
+  function render() {
+    const c = document.getElementById(containerId); if(!c) return;
+    const q = questions[current];
+    document.getElementById(progressId).textContent = `Question ${current+1}/${questions.length}`;
+    document.getElementById(barId).style.width = ((current+1)/questions.length*100)+'%';
+    c.innerHTML = `<p style="font-weight:700;font-size:1.05rem;margin:0 0 14px">${q.q}</p><div style="display:flex;flex-direction:column;gap:10px">${q.opts.map((o,i)=>`<button class="quiz-option" onclick="window._quizCheck_${containerId}(this,${i})">${String.fromCharCode(65+i)}. ${o}</button>`).join('')}</div><div id="${containerId}-fb" style="margin-top:10px"></div>`;
+  }
+
+  window['_quizCheck_'+containerId] = function(btn, idx) {
+    const q = questions[current];
+    const opts = btn.parentElement.querySelectorAll('.quiz-option');
+    opts.forEach((o,i) => { o.disabled = true; if(i===q.ans) o.classList.add('correct'); else if(i===idx) o.classList.add('wrong'); });
+    if(idx===q.ans) score++;
+    const fb = document.getElementById(containerId+'-fb');
+    fb.innerHTML = idx===q.ans ? '<span style="color:#2ec4b6;font-weight:600">✅ Correct!</span>' : '<span style="color:#e74c3c;font-weight:600">❌ Incorrect</span>';
+    setTimeout(() => {
+      current++;
+      if(current < questions.length) render();
+      else {
+        const pct = Math.round(score/questions.length*100);
+        const color = pct>=80?'#2ec4b6':pct>=60?'#f39c12':'#e74c3c';
+        document.getElementById(containerId).innerHTML = '';
+        document.getElementById(resultId).innerHTML = `<div class="score-circle" style="background:${color}20;color:${color}">${score}/${questions.length}<span style="font-size:.8rem;font-weight:600">${pct}%</span></div><p style="font-weight:700;margin-top:12px;color:${color}">${pct>=80?'Excellent! 🎉':pct>=60?'Good job! 👍':'Keep practicing! 💪'}</p>${nextPage?`<button class="btn-primary" onclick="goTo('${nextPage}')" style="margin-top:12px">Next Quiz <i data-lucide="arrow-right" style="width:18px;height:18px"></i></button>`:'<button class="btn-primary" onclick="goTo(\'page-menu\')" style="margin-top:12px">Back to Menu</button>'}`;
+        lucide.createIcons();
+      }
+    }, 1200);
+  };
+
+  render();
+}
+
+// Quiz data
+const quiz1Qs = [
+  {q:'What is the English word for "menggoreng"?',opts:['Boil','Fry','Cut','Stir'],ans:1},
+  {q:'Which action verb means "to heat liquid until it bubbles"?',opts:['Stir','Pour','Boil','Crack'],ans:2},
+  {q:'"Add the garlic to the pan." What does "add" mean?',opts:['Remove','Put in','Mix','Take out'],ans:1},
+  {q:'What is the correct action verb: "_____ the eggs in a bowl"?',opts:['Crack','Cut','Fry','Boil'],ans:0},
+  {q:'Which is a cooking utensil, not an ingredient?',opts:['Salt','Egg','Frying pan','Rice'],ans:2}
+];
+let quiz1State = {current:0, score:0};
+function initQuiz1() {
+  quiz1State = {current:0, score:0};
+  renderQuiz1();
+}
+function renderQuiz1() {
+  const c = document.getElementById('quiz1-content'); if(!c) return;
+  const q = quiz1Qs[quiz1State.current];
+  document.getElementById('q1-progress').textContent = `Question ${quiz1State.current+1}/${quiz1Qs.length}`;
+  document.getElementById('q1-bar').style.width = ((quiz1State.current+1)/quiz1Qs.length*100)+'%';
+  c.innerHTML = `<p style="font-weight:700;font-size:1.05rem;margin:0 0 14px">${q.q}</p><div style="display:flex;flex-direction:column;gap:10px">${q.opts.map((o,i)=>`<button class="quiz-option" onclick="checkQuiz1Answer(${i})">${String.fromCharCode(65+i)}. ${o}</button>`).join('')}</div><div id="quiz1-fb" style="margin-top:10px"></div>`;
+}
+function checkQuiz1Answer(idx) {
+  const q = quiz1Qs[quiz1State.current];
+  const opts = document.querySelectorAll('#quiz1-content .quiz-option');
+  opts.forEach((o,i) => { o.disabled = true; if(i===q.ans) o.classList.add('correct'); else if(i===idx) o.classList.add('wrong'); });
+  if(idx===q.ans) quiz1State.score++;
+  const fb = document.getElementById('quiz1-fb');
+  fb.innerHTML = idx===q.ans ? '<span style="color:#2ec4b6;font-weight:600">✅ Correct!</span>' : '<span style="color:#e74c3c;font-weight:600">❌ Incorrect. The correct answer is '+String.fromCharCode(65+q.ans)+'.</span>';
+  setTimeout(() => {
+    quiz1State.current++;
+    if(quiz1State.current < quiz1Qs.length) renderQuiz1();
+    else showQuiz1Results();
+  }, 1200);
+}
+function showQuiz1Results() {
+  const pct = Math.round(quiz1State.score/quiz1Qs.length*100);
+  const color = pct>=80?'#2ec4b6':pct>=60?'#f39c12':'#e74c3c';
+  document.getElementById('quiz1-content').innerHTML = '';
+  document.getElementById('quiz1-result').innerHTML = `<div class="score-circle" style="background:${color}20;color:${color}">${quiz1State.score}/${quiz1Qs.length}<span style="font-size:.8rem;font-weight:600">${pct}%</span></div><p style="font-weight:700;margin-top:12px;color:${color}">${pct>=80?'Excellent! 🎉':pct>=60?'Good job! 👍':'Keep practicing! 💪'}</p><button class="btn-primary" onclick="goTo('page-quiz2')" style="margin-top:12px">Next Quiz <i data-lucide="arrow-right" style="width:18px;height:18px"></i></button>`;
+  lucide.createIcons();
+}
+
+const quiz2Qs = [
+  {q:'Which is an imperative sentence?',opts:['I like cooking.','She boils water.','Boil the water.','He is cooking.'],ans:2},
+  {q:'What is the correct sequence? ___, add the seasoning.',opts:['Finally','First','After that','Then'],ans:2},
+  {q:'Complete: ___, heat the oil in a pan.',opts:['Finally','After that','Next','First'],ans:3},
+  {q:'"Don\'t ___ to wash your hands." Choose:',opts:['forget','forgetting','forgot','forgets'],ans:0},
+  {q:'Which is a sequence connective?',opts:['Because','However','After that','Although'],ans:2}
+];
+let quiz2State = {current:0, score:0};
+function initQuiz2() {
+  quiz2State = {current:0, score:0};
+  renderQuiz2();
+}
+function renderQuiz2() {
+  const c = document.getElementById('quiz2-content'); if(!c) return;
+  const q = quiz2Qs[quiz2State.current];
+  document.getElementById('q2-progress').textContent = `Question ${quiz2State.current+1}/${quiz2Qs.length}`;
+  document.getElementById('q2-bar').style.width = ((quiz2State.current+1)/quiz2Qs.length*100)+'%';
+  c.innerHTML = `<p style="font-weight:700;font-size:1.05rem;margin:0 0 14px">${q.q}</p><div style="display:flex;flex-direction:column;gap:10px">${q.opts.map((o,i)=>`<button class="quiz-option" onclick="checkQuiz2Answer(${i})">${String.fromCharCode(65+i)}. ${o}</button>`).join('')}</div><div id="quiz2-fb" style="margin-top:10px"></div>`;
+}
+function checkQuiz2Answer(idx) {
+  const q = quiz2Qs[quiz2State.current];
+  const opts = document.querySelectorAll('#quiz2-content .quiz-option');
+  opts.forEach((o,i) => { o.disabled = true; if(i===q.ans) o.classList.add('correct'); else if(i===idx) o.classList.add('wrong'); });
+  if(idx===q.ans) quiz2State.score++;
+  const fb = document.getElementById('quiz2-fb');
+  fb.innerHTML = idx===q.ans ? '<span style="color:#2ec4b6;font-weight:600">✅ Correct!</span>' : '<span style="color:#e74c3c;font-weight:600">❌ Incorrect. The correct answer is '+String.fromCharCode(65+q.ans)+'.</span>';
+  setTimeout(() => {
+    quiz2State.current++;
+    if(quiz2State.current < quiz2Qs.length) renderQuiz2();
+    else showQuiz2Results();
+  }, 1200);
+}
+function showQuiz2Results() {
+  const pct = Math.round(quiz2State.score/quiz2Qs.length*100);
+  const color = pct>=80?'#2ec4b6':pct>=60?'#f39c12':'#e74c3c';
+  document.getElementById('quiz2-content').innerHTML = '';
+  document.getElementById('quiz2-result').innerHTML = `<div class="score-circle" style="background:${color}20;color:${color}">${quiz2State.score}/${quiz2Qs.length}<span style="font-size:.8rem;font-weight:600">${pct}%</span></div><p style="font-weight:700;margin-top:12px;color:${color}">${pct>=80?'Excellent! 🎉':pct>=60?'Good job! 👍':'Keep practicing! 💪'}</p><button class="btn-primary" onclick="goTo('page-quiz3')" style="margin-top:12px">Next Quiz <i data-lucide="arrow-right" style="width:18px;height:18px"></i></button>`;
+  lucide.createIcons();
+}
+
+const quiz3Qs = [
+  {q:'What is the goal of the lemon tea text?',opts:['To describe tea','To explain how to make lemon tea','To tell a story about tea','To advertise tea'],ans:1},
+  {q:'What do you do after putting the tea bag?',opts:['Add honey','Squeeze lemon','Pour hot water','Wait 3 minutes'],ans:2},
+  {q:'How long do you wait?',opts:['1 minute','5 minutes','3 minutes','10 minutes'],ans:2},
+  {q:'When do you squeeze the lemon?',opts:['First','After waiting 3 minutes','Before boiling water','Finally'],ans:1},
+  {q:'What is the last step?',opts:['Boil water','Squeeze lemon','Put tea bag','Add honey and stir'],ans:3}
+];
+let quiz3State = {current:0, score:0};
+function initQuiz3() {
+  quiz3State = {current:0, score:0};
+  renderQuiz3();
+}
+function renderQuiz3() {
+  const c = document.getElementById('quiz3-content'); if(!c) return;
+  const q = quiz3Qs[quiz3State.current];
+  document.getElementById('q3-progress').textContent = `Question ${quiz3State.current+1}/${quiz3Qs.length}`;
+  document.getElementById('q3-bar').style.width = ((quiz3State.current+1)/quiz3Qs.length*100)+'%';
+  c.innerHTML = `<p style="font-weight:700;font-size:1.05rem;margin:0 0 14px">${q.q}</p><div style="display:flex;flex-direction:column;gap:10px">${q.opts.map((o,i)=>`<button class="quiz-option" onclick="checkQuiz3Answer(${i})">${String.fromCharCode(65+i)}. ${o}</button>`).join('')}</div><div id="quiz3-fb" style="margin-top:10px"></div>`;
+}
+function checkQuiz3Answer(idx) {
+  const q = quiz3Qs[quiz3State.current];
+  const opts = document.querySelectorAll('#quiz3-content .quiz-option');
+  opts.forEach((o,i) => { o.disabled = true; if(i===q.ans) o.classList.add('correct'); else if(i===idx) o.classList.add('wrong'); });
+  if(idx===q.ans) quiz3State.score++;
+  const fb = document.getElementById('quiz3-fb');
+  fb.innerHTML = idx===q.ans ? '<span style="color:#2ec4b6;font-weight:600">✅ Correct!</span>' : '<span style="color:#e74c3c;font-weight:600">❌ Incorrect. The correct answer is '+String.fromCharCode(65+q.ans)+'.</span>';
+  setTimeout(() => {
+    quiz3State.current++;
+    if(quiz3State.current < quiz3Qs.length) renderQuiz3();
+    else showQuiz3Results();
+  }, 1200);
+}
+function showQuiz3Results() {
+  const pct = Math.round(quiz3State.score/quiz3Qs.length*100);
+  const color = pct>=80?'#2ec4b6':pct>=60?'#f39c12':'#e74c3c';
+  document.getElementById('quiz3-content').innerHTML = '';
+  document.getElementById('quiz3-result').innerHTML = `<div class="score-circle" style="background:${color}20;color:${color}">${quiz3State.score}/${quiz3Qs.length}<span style="font-size:.8rem;font-weight:600">${pct}%</span></div><p style="font-weight:700;margin-top:12px;color:${color}">${pct>=80?'Excellent! 🎉':pct>=60?'Good job! 👍':'Keep practicing! 💪'}</p><button class="btn-primary" onclick="goTo('page-voice')" style="margin-top:12px">Next: Voice Quiz <i data-lucide="arrow-right" style="width:18px;height:18px"></i></button>`;
+  lucide.createIcons();
+}
+
+// =================== VOICE RECOGNITION ===================
+const voicePrompts = [
+  'First, heat the cooking oil.',
+  'Then, crack the eggs.',
+  'Next, add the garlic.',
+  'Pour the soy sauce.',
+  'Finally, serve on a plate.',
+  'Boil the water in a pot.',
+  'Stir the noodles well.',
+  'Cut the onion into pieces.'
+];
+let voiceIdx = 0, voiceCorrect = 0, voiceTotal = 0;
+
+function initVoice() {
+  document.getElementById('voice-prompt').textContent = voicePrompts[voiceIdx];
+}
+
+function nextVoicePrompt() {
+  voiceIdx = (voiceIdx + 1) % voicePrompts.length;
+  document.getElementById('voice-prompt').textContent = voicePrompts[voiceIdx];
+  document.getElementById('voice-result').innerHTML = '';
+  document.getElementById('voice-status').textContent = 'Tap to start speaking';
+}
+
+function startVoice() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR) {
+    document.getElementById('voice-status').textContent = 'Sorry, your browser does not support speech recognition.';
+    return;
+  }
+  const recognition = new SR();
+  recognition.lang = 'en-US';
+  recognition.interimResults = false;
+  const btn = document.getElementById('voice-btn');
+  btn.classList.add('recording');
+  btn.style.background = 'linear-gradient(135deg,#e74c3c,#c0392b)';
+  document.getElementById('voice-status').textContent = 'Listening... Speak now!';
+  document.getElementById('voice-result').innerHTML = '';
+
+  recognition.onresult = function(e) {
+    const spoken = e.results[0][0].transcript.toLowerCase().trim().replace(/[.,!?]/g,'');
+    const expected = voicePrompts[voiceIdx].toLowerCase().trim().replace(/[.,!?]/g,'');
+    voiceTotal++;
+
+    // Simple word matching
+    const spokenWords = spoken.split(/\s+/);
+    const expectedWords = expected.split(/\s+/);
+    let matched = 0;
+    expectedWords.forEach(w => { if(spokenWords.includes(w)) matched++; });
+    const accuracy = Math.round(matched / expectedWords.length * 100);
+
+    if(accuracy >= 70) {
+      voiceCorrect++;
+      document.getElementById('voice-result').innerHTML = `<div style="background:#e6faf8;border-radius:12px;padding:14px"><div style="color:#2ec4b6;font-weight:800;font-size:1.1rem">🎉 Great! ${accuracy}% match</div><div style="font-size:.85rem;color:#666;margin-top:4px">You said: "${e.results[0][0].transcript}"</div></div>`;
+    } else {
+      document.getElementById('voice-result').innerHTML = `<div style="background:#fde8e8;border-radius:12px;padding:14px"><div style="color:#e74c3c;font-weight:800;font-size:1.1rem">Try again! ${accuracy}% match</div><div style="font-size:.85rem;color:#666;margin-top:4px">You said: "${e.results[0][0].transcript}"</div></div>`;
+    }
+    document.getElementById('voice-score').textContent = `Score: ${voiceCorrect}/${voiceTotal}`;
+    btn.classList.remove('recording');
+    btn.style.background = 'linear-gradient(135deg,#9b59b6,#8e44ad)';
+    document.getElementById('voice-status').textContent = 'Tap to try again';
+  };
+
+  recognition.onerror = function(e) {
+    btn.classList.remove('recording');
+    btn.style.background = 'linear-gradient(135deg,#9b59b6,#8e44ad)';
+    document.getElementById('voice-status').textContent = 'Could not hear you. Please try again.';
+  };
+
+  recognition.onend = function() {
+    btn.classList.remove('recording');
+    btn.style.background = 'linear-gradient(135deg,#9b59b6,#8e44ad)';
+  };
+
+  recognition.start();
+}
+
+// =================== REFLECTION ===================
+const reflectionItems = [
+  'I can identify the structure of a procedure text (goal, materials, steps).',
+  'I can use action verbs related to cooking.',
+  'I can use imperative sentences to give instructions.',
+  'I can use sequence connectives (first, then, next, after that, finally).',
+  'I can ask and give information about how to make food.',
+  'I can read and understand a simple recipe in English.'
+];
+
+function buildReflection() {
+  const c = document.getElementById('reflection-items'); if(!c) return;
+  reflectionItems.forEach((item, i) => {
+    const d = document.createElement('div');
+    d.style.cssText = 'background:#f7f7f7;border-radius:12px;padding:14px';
+    d.innerHTML = `<p style="margin:0 0 8px;font-size:.9rem;font-weight:600">${item}</p><div style="display:flex;gap:6px">${['😟','🙁','😐','🙂','😄'].map((e,j) => `<button style="font-size:1.5rem;background:none;border:2px solid transparent;border-radius:8px;cursor:pointer;padding:4px 8px;transition:all .2s" onclick="this.parentElement.querySelectorAll('button').forEach(b=>b.style.borderColor='transparent');this.style.borderColor='#ff6b35'">${e}</button>`).join('')}</div>`;
+    c.appendChild(d);
+  });
+}
+
+// =================== INIT ===================
+document.addEventListener('DOMContentLoaded', () => {
+  buildQA();
+  buildVocab();
+  buildMatching();
+  buildTF();
+  showDialogScenario(0);
+  buildReadingQuiz();
+  buildOrdering();
+  initQuiz1();
+  initQuiz2();
+  initQuiz3();
+  initVoice();
+  buildReflection();
+  lucide.createIcons();
+});
+</script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9f3947675632a8fa',t:'MTc3NzQxMjk4OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
