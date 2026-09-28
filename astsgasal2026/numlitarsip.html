@@ -52,6 +52,16 @@
       <h2 id="r-nama" class="text-lg font-700 text-white"></h2>
       <p id="r-nis" class="text-xs font-500" style="color:#6366f1;"></p>
      </div>
+     <div class="grid grid-cols-2 gap-3 mb-4">
+      <div class="rounded-2xl p-5 text-center fade-up-d2" style="background:#1e293b;border:1px solid #334155;">
+       <p class="text-xs font-500 mb-2" style="color:#94a3b8;">Nilai Literasi</p>
+       <p id="r-literasi" class="text-3xl font-800" style="color:#34d399;"></p>
+      </div>
+      <div class="rounded-2xl p-5 text-center fade-up-d2" style="background:#1e293b;border:1px solid #334155;">
+       <p class="text-xs font-500 mb-2" style="color:#94a3b8;">Nilai Numerasi</p>
+       <p id="r-numerasi" class="text-3xl font-800" style="color:#60a5fa;"></p>
+      </div>
+     </div>
      <div class="rounded-2xl p-6 text-center fade-up-d3" style="background: linear-gradient(135deg, #4f46e5, #7c3aed); border:1px solid #6366f1;">
       <p class="text-xs font-600 mb-1" style="color:rgba(255,255,255,0.7);">Total Nilai</p>
       <p id="r-total" class="text-5xl font-800 text-white my-2"></p>
@@ -59,7 +69,7 @@
        (60% Literasi + 40% Numerasi)
       </div>
      </div>
-     <p class="text-center text-xs mt-4 fade-up-d4" style="color:#64748b;"><i data-lucide="info" style="width:12px;height:12px;display:inline;vertical-align:-2px;"></i> All right reserved.</p>
+     <p class="text-center text-xs mt-4 fade-up-d4" style="color:#64748b;"><i data-lucide="info" style="width:12px;height:12px;display:inline;vertical-align:-2px;"></i> Total nilai diambil dari 60% nilai literasi dan 40% nilai numerasi</p>
     </div>
    </div>
   </div>
@@ -149,7 +159,7 @@
       const nisVal = getField(student, 'nis') || nis;
       const literasi = parseFloat(getField(student, 'literasi')) || 0;
       const numerasi = parseFloat(getField(student, 'numerasi')) || 0;
-      const total = (literasi * 0.5) + (numerasi * 0.5);
+      const total = (literasi * 0.6) + (numerasi * 0.4);
 
       document.getElementById('r-nama').textContent = nama;
       document.getElementById('r-nis').textContent = 'NIS: ' + nisVal;
