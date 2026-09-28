@@ -159,7 +159,7 @@
       const nisVal = getField(student, 'nis') || nis;
       const literasi = parseFloat(getField(student, 'literasi')) || 0;
       const numerasi = parseFloat(getField(student, 'numerasi')) || 0;
-      const total = (literasi * 0.6) + (numerasi * 0.4);
+      const total = (literasi * 0.5) + (numerasi * 0.5);
 
       document.getElementById('r-nama').textContent = nama;
       document.getElementById('r-nis').textContent = 'NIS: ' + nisVal;
