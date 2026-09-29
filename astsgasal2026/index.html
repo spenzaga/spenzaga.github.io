@@ -147,15 +147,9 @@
 
       const nama = getField(student, 'nama') || getField(student, 'name') || '-';
       const nisVal = getField(student, 'nis') || nis;
-      const literasi = parseFloat(getField(student, 'literasi')) || 0;
-      const numerasi = parseFloat(getField(student, 'numerasi')) || 0;
-      const total = (literasi * 0.5) + (numerasi * 0.5);
 
       document.getElementById('r-nama').textContent = nama;
       document.getElementById('r-nis').textContent = 'NIS: ' + nisVal;
-      document.getElementById('r-literasi').textContent = literasi.toFixed(1);
-      document.getElementById('r-numerasi').textContent = numerasi.toFixed(1);
-      document.getElementById('r-total').textContent = total.toFixed(1);
 
       loginScreen.classList.add('hidden');
       resultScreen.classList.remove('hidden');
