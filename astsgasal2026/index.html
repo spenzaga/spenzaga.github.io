@@ -56,11 +56,11 @@
      <div class="grid grid-cols-2 gap-3 mb-4">
       <div class="rounded-2xl p-5 text-center fade-up-d2" style="background:#1e293b;border:1px solid #334155;">
        <p class="text-xs font-500 mb-2" style="color:#94a3b8;">Nilai Literasi</p>
-       <p id="r-literasi" class="text-3xl font-800" style="color:#34d399;"></p>
+       <p id="r-literasi" class="text-3xl font-800" style="color:#334155;"></p>
       </div>
       <div class="rounded-2xl p-5 text-center fade-up-d2" style="background:#1e293b;border:1px solid #334155;">
        <p class="text-xs font-500 mb-2" style="color:#94a3b8;">Nilai Numerasi</p>
-       <p id="r-numerasi" class="text-3xl font-800" style="color:#60a5fa;"></p>
+       <p id="r-numerasi" class="text-3xl font-800" style="color:#334155;"></p>
       </div>
      </div>
      
@@ -72,7 +72,7 @@
       </div>
      </div>
      
-     <p class="text-center text-xs mt-4 fade-up-d4" style="color:#64748b;"><i data-lucide="info" style="width:12px;height:12px;display:inline;vertical-align:-2px;"></i> Total nilai diambil dari 60% nilai literasi dan 40% nilai numerasi</p>
+     <p class="text-center text-xs mt-4 fade-up-d4" style="color:#64748b;"><i data-lucide="info" style="width:12px;height:12px;display:inline;vertical-align:-2px;"></i> Allrights reserved. </p>
 
     </div>
    </div>
@@ -143,7 +143,7 @@
     e.preventDefault();
     hideError();
     const nis = nisInput.value.trim();
-    if (!nis) { showError('Masukkan NIS terlebih dahulu'); return; }
+    if (!nis) { showError('Masukkan kode login terlebih dahulu'); return; }
 
     btnText.textContent = 'Mencari...';
     btnSpinner.classList.remove('hidden');
@@ -157,7 +157,7 @@
       btnSpinner.classList.add('hidden');
       loginBtn.disabled = false;
 
-      if (!student) { showError('NIS tidak ditemukan. Pastikan NIS yang dimasukkan benar.'); return; }
+      if (!student) { showError('Kode login tidak ditemukan. Pastikan kode login yang dimasukkan benar.'); return; }
 
       const nama = getField(student, 'nama') || getField(student, 'name') || '-';
       const nisVal = getField(student, 'nis') || nis;
@@ -166,7 +166,7 @@
       const total = (literasi * 0.5) + (numerasi * 0.5);
 
       document.getElementById('r-nama').textContent = nama;
-      document.getElementById('r-nis').textContent = 'NIS: ' + nisVal;
+      document.getElementById('r-nis').textContent = 'Kode Login: ' + nisVal;
       document.getElementById('r-literasi').textContent = literasi.toFixed(1);
       document.getElementById('r-numerasi').textContent = numerasi.toFixed(1);
       document.getElementById('r-total').textContent = total.toFixed(1);
@@ -188,7 +188,7 @@
   // Element SDK
   const defaultConfig = {
     app_title: 'Cek Nilai Siswa',
-    login_subtitle: 'Masukkan NIS untuk melihat nilai',
+    login_subtitle: 'Masukkan kode login untuk melihat nilai',
     background_color: '#0f172a',
     surface_color: '#1e293b',
     text_color: '#ffffff',
